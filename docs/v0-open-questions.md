@@ -172,20 +172,46 @@ Answer these next so implementation can start without wandering into the swamp w
 ## Splunk deployment and inference
 
 1. What model format should be the first deployment target?
-   - ONNX
-   - Splunk `.mlmodel`
-   - both
+   - Resolved for the working-model path: no-ML-app logistic-regression scoring artifact first, not ONNX or Splunk `.mlmodel` yet.
+   - The first deployable artifact should be a small, CPU-safe bundle containing feature order, intercept, coefficients, threshold, model version, and metadata.
+   - ONNX remains a later compatibility/research target after the working pipeline proves extraction, training, deployment, scoring, and validation.
 2. How will the model be uploaded into Splunk?
+   - Hermes should operate deployment so Ryan does not manually upload anything.
+   - Preferred v0 write path: a narrow AI TamperGuard artifact-deploy capability scoped to the `ai_tamperguard` app, because generic `outputlookup` is currently blocked by MCP safeguards.
+   - Acceptable fallback: Hermes writes the artifact through Splunk REST or app filesystem packaging, then validates through Splunk MCP.
+   - Public repo should contain deployment templates/scripts only; private trained artifacts stay local unless reviewed.
 3. What exact SPL will run inference against held-out windows?
+   - The scoring SPL should load held-out behavior-window rows, apply the exported feature order/coefficient artifact, calculate a linear score and probability, threshold the result, and emit `score`, `probability`, `prediction`, `model_version`, and `scored_at`.
+   - The concrete SPL should be generated from the training artifact or checked in as a parameterized template so feature order cannot drift.
+   - For v0, exact SPL is an implementation artifact, but it should follow this shape:
+
+```spl
+| inputlookup tamperguard_windows_holdout.csv
+| eval score = <intercept> + (<coef_1> * feature_1) + ... + (<coef_n> * feature_n)
+| eval probability = 1 / (1 + exp(-score))
+| eval prediction = if(probability >= <threshold>, 1, 0)
+| eval model_version = "<model_version>", scored_at = now()
+| table window_id score probability prediction model_version scored_at
+```
+
 4. Should held-out windows be loaded with `inputlookup` for v0?
+   - Yes. Use `inputlookup` for held-out window fixtures in v0. That keeps the inference surface small and avoids requiring live search scheduling before the model path is proven.
+   - Later versions can run against live or scheduled feature-generation searches.
 5. Where should inference results go?
-   - lookup
-   - summary index
-   - dashboard
-   - local report only
+   - First sink: local validation report plus a Splunk lookup or equivalent MCP-readable result artifact.
+   - Defer summary indexes and dashboards until the scoring path works.
+   - The output schema should include `window_id`, optional private actor surrogate, `score`, `probability`, `prediction`, `model_version`, and `scored_at`.
 6. How do we verify Splunk-side predictions match local expectations?
+   - Generate a small held-out fixture with local Python expected scores/predictions.
+   - Run the same fixture through Splunk-side scoring.
+   - Compare probabilities within a small numeric tolerance and require exact prediction-label agreement for the fixture.
+   - Treat this as the real v0 inference pass/fail check, more important than model quality metrics.
 7. Do we need a Splunk dashboard for v0, or is an SPL transcript/report enough?
+   - No dashboard for v0. An SPL transcript, saved query/template, and local comparison report are enough.
+   - A dashboard can wait until the model is useful enough to monitor repeatedly.
 8. What does rollback/removal of the test model look like?
+   - Remove or overwrite the AI TamperGuard lookup/artifact files, saved searches, and generated result lookups under the `ai_tamperguard` namespace.
+   - Keep rollback simple and scriptable: list deployed v0 artifacts, remove them, then validate that `inputlookup`/saved-search references no longer resolve except for intentionally retained templates.
 
 ## Public safety and repo hygiene
 
@@ -209,12 +235,12 @@ Answer these next so implementation can start without wandering into the swamp w
 Unless we decide otherwise, use these defaults:
 
 ```text
-Deployment path: no Splunk ML app is installed yet; decide between installing AI Toolkit/MLTK vs no-ML-app lookup/scripted scoring
+Deployment path: working-model smoke test using no-ML-app logistic-regression artifact scoring; ONNX later after the pipeline works
 Deployment operator: Hermes via Splunk MCP; Ryan should not need to manually upload model artifacts
 Current MCP blocker: generic `outputlookup` is blocked, so add/enable a narrow AI TamperGuard artifact-deploy write path before full deployment
 Hardware split: train on GPU rig; deploy/infer on CPU-only Splunk thin client
 Splunk app namespace: AI TamperGuard app (`ai_tamperguard`)
-Capabilities: local/admin context should have lookup upload/update capability; recheck ONNX-specific capability only if AI Toolkit is installed later
+Capabilities: local/admin context should have lookup/artifact upload/update capability; recheck ONNX-specific capability only if AI Toolkit is installed later
 Data source: private `_audit`/`audittrail` plus `_configtracker`/`splunk_configuration_change` Splunk control-plane logs
 Window size: actor_60m for first pass
 Positive label: working_model_positive_proxy / needs_review proxy, not malicious ground truth
@@ -222,14 +248,13 @@ Feature posture: boring numeric/boolean behavior-window features first; defer cl
 Public examples: synthetic-only rows matching the private schema
 Model artifacts: do not commit private-trained models until reviewed
 First model: logistic regression, then random forest
-First result sink: local report plus Splunk lookup output
+First result sink: local comparison report plus Splunk lookup/equivalent MCP-readable output
 ```
 
 ## Next-question order
 
 If we want to resolve this efficiently, answer in this order:
 
-1. Decide Splunk deployment prerequisite: install AI Toolkit/MLTK, or start with no-ML-app lookup/scripted scoring.
-2. Pick the first window size.
-3. Decide public sample data policy.
-4. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
+1. Pick the first window size.
+2. Decide public sample data policy.
+3. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
