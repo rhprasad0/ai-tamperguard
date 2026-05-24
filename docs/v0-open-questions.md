@@ -25,14 +25,13 @@ These answers are now fixed for v0 unless we explicitly revise them later.
 Answer these next so implementation can start without wandering into the swamp wearing flip-flops.
 
 1. **Deployment path:** With no AI Toolkit or MLTK installed, should v0 install a Splunk ML app, or should the first pass use no-ML-app scoring such as lookup-based coefficients / scripted inference?
-2. **Data source:** Which private Splunk indexes and sourcetypes are safe to use for v0 extraction?
-3. **Positive label meaning:** What should `label_binary = 1` mean in v0?
+2. **Positive label meaning:** What should `label_binary = 1` mean in v0?
    - `needs_review_unusual_activity`
    - `admin_or_config_activity`
    - `detection_control_activity`
    - manually reviewed activity
-4. **Window size:** Should the first pass use `actor_60m`, `actor_15m`, session windows, or multiple window types?
-5. **Public sample data:** Should public examples be fully synthetic rows matching the private schema, even if private training uses legitimate local logs?
+3. **Window size:** Should the first pass use `actor_60m`, `actor_15m`, session windows, or multiple window types?
+4. **Public sample data:** Should public examples be fully synthetic rows matching the private schema, even if private training uses legitimate local logs?
 
 ## Splunk environment
 
@@ -56,19 +55,34 @@ Answer these next so implementation can start without wandering into the swamp w
 ## Data access and export
 
 1. Which indexes and sourcetypes are safe to query for v0?
+   - Resolved first-pass private source set, discovered through Splunk MCP metadata/stats searches:
+     - `index=_audit sourcetype=audittrail` for auth/session, search, saved-search, role/capability, token, index/input, and REST/control-plane activity.
+     - `index=_configtracker sourcetype=splunk_configuration_change` for config/admin/knowledge-object change activity.
+   - Optional private context sources, not first-pass training defaults:
+     - `index=_internal` for Splunk/MCP operational health and troubleshooting only.
+     - `index=agentops` and `index=openclaw_tamper_lab` for synthetic/experiment validation only, not legitimate private baseline training unless explicitly separated.
+   - Do not use endpoint/router/general LAN telemetry as v0 training input unless a later question explicitly expands scope beyond Splunk control-plane behavior.
 2. Which logs contain useful control-plane activity?
    - audit events
    - search activity
    - saved search activity
    - knowledge object changes
    - app/config/admin activity
-   - internal operational events
+   - internal operational events for troubleshooting/context only
 3. Which fields identify actor/user, action, object, interface, status, and request/session IDs?
+   - Resolved first pass: use normalized fields derived from `_audit` and `_configtracker`, not raw private values.
+   - Candidate private evidence fields include user/actor, action, info/status, object, search text presence, REST/control endpoint, config action, changed property names, app context, and time.
+   - Training features should be aggregated counts/booleans/categories per window, not raw usernames, raw SPL, URLs, object paths, hostnames, tokens, or session IDs.
 4. Can we export enough legitimate activity to create at least a few hundred behavior windows?
+   - Likely yes for a smoke test: MCP inventory found tens of thousands of `_audit` events and hundreds of `_configtracker` events in the current lab window. Final sufficiency should be verified after the exact actor/time-window aggregation is implemented.
 5. What time range should v0 use?
+   - Resolved default: start with the last 30 days available in the lab, then narrow if volume or private-review burden is too high.
 6. Which raw fields must never leave the private machine?
+   - Raw `_raw`, usernames, hostnames, IPs, Splunk URLs, REST paths containing local object names, raw SPL/search strings, saved-search names, object paths, session IDs, tokens, credential names/values, internal file paths, and private app/index/source details.
 7. Should raw private exports live under `data/private/`, outside the repo entirely, or both with `.gitignore` protection?
+   - Resolved default: keep raw private exports outside the public repo when possible. If local project-relative staging is needed, use ignored private paths such as `data/private/` and never commit them.
 8. Do we need a repeatable SPL export query checked into the repo with sensitive values parameterized?
+   - Yes. Check in parameterized SPL templates and feature-schema scripts only. Keep private concrete queries, raw exports, and reviewed evidence rows out of the public repo unless explicitly sanitized.
 
 ## Labeling
 
@@ -168,7 +182,7 @@ Current MCP blocker: generic `outputlookup` is blocked, so add/enable a narrow A
 Hardware split: train on GPU rig; deploy/infer on CPU-only Splunk thin client
 Splunk app namespace: AI TamperGuard app (`ai_tamperguard`)
 Capabilities: local/admin context should have lookup upload/update capability; recheck ONNX-specific capability only if AI Toolkit is installed later
-Data source: private legitimate Splunk audit/control-plane logs
+Data source: private `_audit`/`audittrail` plus `_configtracker`/`splunk_configuration_change` Splunk control-plane logs
 Window size: actor_60m for first pass
 Positive label: needs_review_unusual_or_admin_control_activity, not malicious
 Public examples: synthetic-only rows matching the private schema
@@ -182,8 +196,7 @@ First result sink: local report plus Splunk lookup output
 If we want to resolve this efficiently, answer in this order:
 
 1. Decide Splunk deployment prerequisite: install AI Toolkit/MLTK, or start with no-ML-app lookup/scripted scoring.
-2. Identify safe source indexes/sourcetypes.
-3. Define `label_binary = 1` for v0.
-4. Pick the first window size.
-5. Decide public sample data policy.
-6. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
+2. Define `label_binary = 1` for v0.
+3. Pick the first window size.
+4. Decide public sample data policy.
+5. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
