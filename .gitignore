@@ -20,3 +20,9 @@ __pycache__/
 /data/windows/*.csv
 /models/*.onnx
 /models/*.mlmodel
+
+# Private/generated v0 artifacts (never commit)
+data/private/
+models/private/
+reports/private/
+splunk/private/
