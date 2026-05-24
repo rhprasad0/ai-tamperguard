@@ -62,13 +62,17 @@ Answer these next so implementation can start without wandering into the swamp w
      - `index=_internal` for Splunk/MCP operational health and troubleshooting only.
      - `index=agentops` and `index=openclaw_tamper_lab` for synthetic/experiment validation only, not legitimate private baseline training unless explicitly separated.
    - Do not use endpoint/router/general LAN telemetry as v0 training input unless a later question explicitly expands scope beyond Splunk control-plane behavior.
-2. Which logs contain useful control-plane activity?
-   - audit events
-   - search activity
-   - saved search activity
-   - knowledge object changes
-   - app/config/admin activity
-   - internal operational events for troubleshooting/context only
+2. What do we need to grab to train a working model?
+   - Resolved reframing: v0 does not need to prove that specific log-event categories are inherently useful. The goal is a working end-to-end model pipeline, so the export should grab the minimum fields needed to build behavior-window rows.
+   - Minimum required ingredients:
+     - stable timestamp for windowing
+     - actor or actor surrogate for grouping
+     - action/status/category fields that can become counts or booleans
+     - object/app/interface fields only after normalization into low-cardinality categories
+     - enough activity volume to create train/holdout windows
+     - a weak/manual label source or heuristic label proxy
+   - Treat raw log events as private evidence, not as the modeling artifact. The modeling artifact is the window table.
+   - Internal operational events remain troubleshooting/context only unless needed to prove pipeline health.
 3. Which fields identify actor/user, action, object, interface, status, and request/session IDs?
    - Resolved first pass: use normalized fields derived from `_audit` and `_configtracker`, not raw private values.
    - Candidate private evidence fields include user/actor, action, info/status, object, search text presence, REST/control endpoint, config action, changed property names, app context, and time.
