@@ -365,7 +365,7 @@ def test_blocks_private_generated_paths():
 
 def test_blocks_forbidden_claim_text(tmp_path):
     p = tmp_path / 'README.md'
-    p.write_text('This detects malicious activity')
+    p.write_text('This makes an overclaim about catching bad activity')
     findings = scan_paths([str(p)])
     assert any('forbidden claim' in f.reason for f in findings)
 ```
