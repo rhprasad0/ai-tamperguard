@@ -13,9 +13,11 @@ These answers are now fixed for v0 unless we explicitly revise them later.
 3. **Inference constraint:** Splunk-side inference must be CPU-safe and lightweight. Do not require GPU inference inside Splunk.
 4. **Splunk version:** The current thin-client Splunk install is Splunk Enterprise `10.2.3`, build `4d61cf8a5c0c`, on Linux `x86_64`. License state was verified as `OK` during v0 planning.
 5. **No Splunk ML app installed yet:** The current Splunk instance does not have Splunk AI Toolkit or MLTK installed. MCP app inventory confirmed no matching ML/AI/ONNX apps are present.
-6. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
-7. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. Because no Splunk ML app is installed yet, true Splunk-side model execution requires either installing AI Toolkit/MLTK or using a simpler no-ML-app bridge such as lookup-based scoring or scripted packaging.
-8. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
+6. **Capabilities posture:** The local/admin Splunk context should have the capabilities needed for the chosen deployment path, including lookup upload/update for no-ML-app scoring and, if AI Toolkit is installed later, ONNX upload permissions. Recheck exact capabilities after the deployment app path is chosen.
+7. **Splunk app namespace:** Model artifacts, lookups, saved searches, and v0 searches should live under the AI TamperGuard app namespace, using a Splunk-safe app id such as `ai_tamperguard`.
+8. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
+9. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. Because no Splunk ML app is installed yet, true Splunk-side model execution requires either installing AI Toolkit/MLTK or using a simpler no-ML-app bridge such as lookup-based scoring or scripted packaging.
+10. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
 
 ## Highest-priority decisions
 
@@ -40,13 +42,11 @@ Answer these next so implementation can start without wandering into the swamp w
 3. Is ONNX upload available and enabled?
    - Resolved for current thin-client lab: no. ONNX upload is not available until an appropriate Splunk AI/ML app is installed and enabled.
 4. Does the local user/app context have the capabilities required for ONNX upload and inference?
-   - Open. This should be rechecked only after choosing and installing the deployment app path.
+   - Resolved directionally: the local/admin context should have the required capabilities for the chosen path. For no-ML-app scoring, confirm lookup upload/update permissions. If AI Toolkit is installed later, confirm ONNX-specific upload permissions such as `upload_onnx_model_file` in addition to lookup upload capability.
 5. If ONNX is unavailable, is classic MLTK `fit` / `apply` available?
    - Resolved for current thin-client lab: no. Classic MLTK commands are unavailable until MLTK is installed.
 6. Which app namespace should own the model?
-   - new `ai_tamperguard` app
-   - Search app
-   - another existing local app
+   - Resolved: use the AI TamperGuard app namespace, with a Splunk-safe app id such as `ai_tamperguard`.
 7. Is model deployment expected to happen through the Splunk UI, app filesystem packaging, REST API, or search commands?
 
 ## Data access and export
@@ -160,6 +160,8 @@ Unless we decide otherwise, use these defaults:
 ```text
 Deployment path: no Splunk ML app is installed yet; decide between installing AI Toolkit/MLTK vs no-ML-app lookup/scripted scoring
 Hardware split: train on GPU rig; deploy/infer on CPU-only Splunk thin client
+Splunk app namespace: AI TamperGuard app (`ai_tamperguard`)
+Capabilities: local/admin context should have lookup upload/update capability; recheck ONNX-specific capability only if AI Toolkit is installed later
 Data source: private legitimate Splunk audit/control-plane logs
 Window size: actor_60m for first pass
 Positive label: needs_review_unusual_or_admin_control_activity, not malicious
@@ -178,5 +180,4 @@ If we want to resolve this efficiently, answer in this order:
 3. Define `label_binary = 1` for v0.
 4. Pick the first window size.
 5. Decide public sample data policy.
-6. Pick the model app namespace in Splunk.
-7. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
+6. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
