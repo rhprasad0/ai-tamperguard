@@ -18,6 +18,7 @@ These answers are now fixed for v0 unless we explicitly revise them later.
 8. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
 9. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. Because no Splunk ML app is installed yet, true Splunk-side model execution requires either installing AI Toolkit/MLTK or using a simpler no-ML-app bridge such as lookup-based scoring or scripted packaging.
 10. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
+11. **Deployment operation model:** Hermes should operate model deployment through the Splunk MCP server so Ryan does not need to manually upload artifacts through the Splunk UI. Current MCP read/search is working, but an `outputlookup` deployment probe was blocked by the MCP server's command safeguards, so v0 needs either a narrow MCP deployment capability or a deliberately allowed lookup-write path before artifact deployment is fully hands-off.
 
 ## Highest-priority decisions
 
@@ -48,6 +49,9 @@ Answer these next so implementation can start without wandering into the swamp w
 6. Which app namespace should own the model?
    - Resolved: use the AI TamperGuard app namespace, with a Splunk-safe app id such as `ai_tamperguard`.
 7. Is model deployment expected to happen through the Splunk UI, app filesystem packaging, REST API, or search commands?
+   - Resolved directionally: Hermes should drive deployment using the Splunk MCP server, not manual Splunk UI handling by Ryan.
+   - Current implementation note: the existing MCP toolset can inspect/query Splunk, but a harmless `outputlookup` deployment probe was blocked as a forbidden command. Before full hands-off deployment, add or enable a narrow MCP-safe write path for AI TamperGuard artifacts, such as a constrained lookup/model-artifact deployment tool scoped to the `ai_tamperguard` app.
+   - Fallback if needed: Hermes may use Splunk REST or app filesystem packaging for the actual write while still using Splunk MCP for validation, but the preferred v0 operator interface remains Hermes + Splunk MCP.
 
 ## Data access and export
 
@@ -159,6 +163,8 @@ Unless we decide otherwise, use these defaults:
 
 ```text
 Deployment path: no Splunk ML app is installed yet; decide between installing AI Toolkit/MLTK vs no-ML-app lookup/scripted scoring
+Deployment operator: Hermes via Splunk MCP; Ryan should not need to manually upload model artifacts
+Current MCP blocker: generic `outputlookup` is blocked, so add/enable a narrow AI TamperGuard artifact-deploy write path before full deployment
 Hardware split: train on GPU rig; deploy/infer on CPU-only Splunk thin client
 Splunk app namespace: AI TamperGuard app (`ai_tamperguard`)
 Capabilities: local/admin context should have lookup upload/update capability; recheck ONNX-specific capability only if AI Toolkit is installed later
