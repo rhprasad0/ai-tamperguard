@@ -238,7 +238,7 @@ Answer these next so implementation can start without wandering into the swamp w
    - Yes. Exclude generated model artifacts from git for this run. Commit artifact-generation code and metadata schemas, not the produced artifacts.
 6. What README language keeps the claim honest: v0 proves training/deployment plumbing, not malicious tamper detection?
    - Say that v0 is a lab smoke test proving a local-training to Splunk-scoring pipeline using non-production lab telemetry and weak working-model labels.
-   - Do not claim production tamper detection, malicious-activity detection, or validated SOC efficacy.
+   - Do not claim production tamper detection, malicious-activity detection, or SOC effectiveness validation.
 7. Do we need a `PUBLIC_SAFETY.md` or is a section in the v0 spec enough for now?
    - A section in the v0 spec/open-questions doc is enough for now. Add a separate `PUBLIC_SAFETY.md` only if public sample datasets or model artifacts are introduced later.
 

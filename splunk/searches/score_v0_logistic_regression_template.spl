@@ -1,0 +1,7 @@
+| inputlookup {{ lookup_name }}
+| eval {{ feature_tonumber_assignments }}
+| eval score = {{ score_expression }}
+| eval probability = 1 / (1 + exp(-score))
+| eval prediction = if(probability >= {{ threshold }}, 1, 0)
+| eval model_version = "{{ model_version }}", scored_at = now()
+| table window_id score probability prediction model_version scored_at
