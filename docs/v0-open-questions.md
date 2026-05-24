@@ -216,7 +216,12 @@ Answer these next so implementation can start without wandering into the swamp w
 ## Public safety and repo hygiene
 
 1. What is the public/private artifact split?
+   - Resolved for this test run: the lab data is not treated as sensitive production data because this is an authorized laboratory environment.
+   - Even so, do not commit test-run data for v0. Keep generated rows, raw exports, model artifacts, and reports local unless we explicitly create a public-safe synthetic fixture later.
+   - Commit code, docs, schemas, parameterized SPL/templates, and reproducible scripts only.
 2. Should public sample data be fully synthetic instead of redacted local examples?
+   - Not needed for this test run because we are not committing data.
+   - If we later want public sample rows for demos/tests, generate intentionally synthetic rows rather than redacting lab output.
 3. What scan prevents these from entering the public repo?
    - raw Splunk URLs
    - hostnames
@@ -225,10 +230,17 @@ Answer these next so implementation can start without wandering into the swamp w
    - tokens
    - internal paths
    - raw SPL containing sensitive environment details
+   - Keep a lightweight pre-commit/public-safety scan anyway. The reason is repo hygiene and accidental-noise prevention, not because the lab data is production-sensitive.
+   - The scan should primarily catch accidental committed runtime artifacts, tokens, local paths, environment URLs, and data files.
 4. Should `data/private/`, `models/private/`, and `reports/private/` be ignored by default?
+   - Yes. For this test run, generated data/model/report paths should be ignored by default because data is not being committed.
 5. Should model artifacts be excluded from git unless explicitly reviewed?
+   - Yes. Exclude generated model artifacts from git for this run. Commit artifact-generation code and metadata schemas, not the produced artifacts.
 6. What README language keeps the claim honest: v0 proves training/deployment plumbing, not malicious tamper detection?
+   - Say that v0 is a lab smoke test proving a local-training to Splunk-scoring pipeline using non-production lab telemetry and weak working-model labels.
+   - Do not claim production tamper detection, malicious-activity detection, or validated SOC efficacy.
 7. Do we need a `PUBLIC_SAFETY.md` or is a section in the v0 spec enough for now?
+   - A section in the v0 spec/open-questions doc is enough for now. Add a separate `PUBLIC_SAFETY.md` only if public sample datasets or model artifacts are introduced later.
 
 ## Recommended defaults
 
@@ -245,8 +257,8 @@ Data source: private `_audit`/`audittrail` plus `_configtracker`/`splunk_configu
 Window size: actor_60m for first pass
 Positive label: working_model_positive_proxy / needs_review proxy, not malicious ground truth
 Feature posture: boring numeric/boolean behavior-window features first; defer clever categories until the pipeline works
-Public examples: synthetic-only rows matching the private schema
-Model artifacts: do not commit private-trained models until reviewed
+Public examples: none for this test run; if needed later, use synthetic-only rows matching the schema
+Data/artifact policy: do not commit generated data, trained model artifacts, or reports for this test run
 First model: logistic regression, then random forest
 First result sink: local comparison report plus Splunk lookup/equivalent MCP-readable output
 ```
@@ -256,5 +268,4 @@ First result sink: local comparison report plus Splunk lookup/equivalent MCP-rea
 If we want to resolve this efficiently, answer in this order:
 
 1. Pick the first window size.
-2. Decide public sample data policy.
-3. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
+2. Implement the first reproducible extraction/training/scoring path without committing generated data.
