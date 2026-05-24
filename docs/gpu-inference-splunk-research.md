@@ -41,25 +41,38 @@ Key constraints:
 - Runs inference inside Splunk’s ML command path, not directly on this RTX 3090 unless Splunk/AI Toolkit runtime is actually connected to a GPU-capable environment.
 - Good future path for compact models; not available in the current installed Splunk app set.
 
-### 3. DSDL / MLTKContainer → Docker/Kubernetes/OpenShift GPU containers
+### 3. DSDL / MLTKContainer → Docker/Kubernetes/OpenShift containers, optionally GPU-backed
 
-Splunk App for Data Science and Deep Learning (DSDL) is the official Splunk path for offloading heavier ML/DL work to external containers. Splunk docs describe DSDL connecting Splunk to Docker, Kubernetes, or OpenShift containers, with endpoint URLs for bidirectional data transfer between Splunk and container algorithms.
+Splunk App for Data Science and Deep Learning (DSDL) is the official Splunk app for connecting Splunk ML workflows to external containerized data-science runtimes. Current docs say DSDL extends Splunk with external containers for TensorFlow, PyTorch, NLP, and classical ML, and supports building, training, and operationalizing models with or without GPU acceleration.
+
+Important nuance: the docs do **not** appear to say “Splunk alerts run GPU inference” as a single direct product claim. The support is a chain:
+
+1. DSDL exposes ML-SPL workflows through familiar `fit`, `apply`, and `summary` commands.
+2. `apply` generates predictions and can be used in scheduled searches, dashboards, and alerts.
+3. DSDL containers can be development or production containers; production containers run the Python processes required for training and inference.
+4. DSDL container runtimes can be configured for NVIDIA Docker or Kubernetes/OpenShift GPU resources.
+
+So the defensible claim is: **DSDL can operationalize models from Splunk searches, including alert-producing searches, while using external containers that may be GPU-enabled if the container environment and model code are configured for GPU use.** That is different from claiming Splunk Enterprise itself natively performs GPU inference for alerts.
 
 Docs:
 
-- Architecture: https://help.splunk.com/en/splunk-enterprise/apply-machine-learning/use-splunk-app-for-data-science-and-deep-learning/5.2.0/about-the-splunk-app-for-data-science-and-deep-learning/splunk-app-for-data-science-and-deep-learning-architecture
+- Overview: https://docs.splunk.com/Documentation/DSDL/5.2.2/User/IntroDSDL
+- Commands: https://docs.splunk.com/Documentation/DSDL/5.2.2/User/DSDLCommands
+- Model workflow: https://docs.splunk.com/Documentation/DSDL/5.2.2/User/ModelWorkflow
 - Container management/scaling: https://docs.splunk.com/Documentation/DSDL/5.2.2/User/ContainerManagement
-- GPU support: https://help.splunk.com/en/splunk-cloud-platform/apply-machine-learning/use-splunk-app-for-data-science-and-deep-learning/5.1.0/deploy-the-splunk-app-for-data-science-and-deep-learning/using-multi-gpu-computing-for-heavily-parallelled-processing
+- GPU support: https://docs.splunk.com/Documentation/DSDL/5.2.2/User/MultiGPU
+- Splunkbase currently lists DSDL 5.2.3 as latest: https://splunkbase.splunk.com/app/4607
 
 Key constraints:
 
-- Requires MLTK + PSC + DSDL app installation/configuration.
-- Docker is mostly dev/test and commonly same-host as the search head; Kubernetes/OpenShift is the scalable/production pattern.
-- GPU containers need NVIDIA runtime/GPU scheduling.
+- Requires AI Toolkit/MLTK-compatible dependencies + PSC + DSDL app installation/configuration.
+- The DSDL 5.2.3 release notes say MLTK has been renamed to AI Toolkit; some DSDL docs still use the former MLTK naming.
+- Docker is commonly a smaller/dev-style deployment; Kubernetes/OpenShift is the scalable/production pattern.
+- GPU containers need NVIDIA runtime/GPU scheduling, and the model code/framework must actually use the GPU.
 - For this lab, Splunk is on a thin client and the GPU is on `gpu-host`, so “official DSDL to GPU” likely means either:
-  - run DSDL container environment remotely on `gpu-host`/Kubernetes and let Splunk reach it over LAN; or
+  - run the DSDL container environment remotely on `gpu-host` or on a Kubernetes/OpenShift cluster with GPU scheduling, and let Splunk reach it over LAN; or
   - move Splunk/search head to the GPU host, which we previously decided not to do for v0.
-- This is valid, but probably too much moving machinery for v0.
+- This is valid as a Splunk-managed ML path, but it is probably too much moving machinery for v0 and not necessary to prove AI TamperGuard’s first pipeline.
 
 ### 4. Custom search command / scripted external lookup → local LAN GPU inference service
 
@@ -171,7 +184,7 @@ This is more Splunk-native, but it adds app/runtime dependency risk. Treat it as
 
 Splunk can interface with the GPU on this machine in three viable ways:
 
-1. **Official but heavier:** AI Toolkit/DSDL manages GPU-backed external containers.
+1. **Official but heavier:** DSDL can run Splunk ML `fit`/`apply` workflows against external containers that may be GPU-backed. This supports alert-producing scheduled searches indirectly through `apply`, but it is not a simple “Splunk alert runs on GPU” native feature.
 2. **Official-ish LLM path:** AI Toolkit `ai` command calls LAN-local Ollama/vLLM on the RTX 3090.
 3. **Pragmatic V1 bridge:** a GPU-host inference microservice or poller exchanges feature rows/results with Splunk via REST/HEC/custom command.
 
