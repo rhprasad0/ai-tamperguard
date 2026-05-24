@@ -68,7 +68,9 @@ schemas/
 
 ## Status
 
-Early scaffold. The current v0 target is a smoke test of the downstream training/deployment loop using legitimate logs from an authorized Splunk install: local feature extraction, local model training, and Splunk-side inference. See [`docs/v0-model-pipeline-spec.md`](docs/v0-model-pipeline-spec.md).
+v0 is now organized as a self-contained milestone under [`v0/`](v0/). It proves the downstream training/deployment loop using authorized Splunk lab data: local feature extraction, deterministic splitting, local baseline training, SPL scoring artifact rendering, Splunk-side holdout scoring, local-vs-Splunk equivalence verification, and public-safety checks.
+
+Start with [`v0/README.md`](v0/README.md), then see [`v0/docs/v0-model-pipeline-spec.md`](v0/docs/v0-model-pipeline-spec.md).
 
 ## Safety note
 

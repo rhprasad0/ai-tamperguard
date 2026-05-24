@@ -26,3 +26,7 @@ data/private/
 models/private/
 reports/private/
 splunk/private/
+v0/data/private/
+v0/models/private/
+v0/reports/private/
+v0/splunk/private/

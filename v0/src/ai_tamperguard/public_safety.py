@@ -85,13 +85,17 @@ def _scan_existing_file(path: Path, normalized: str) -> list[Finding]:
 
 def _scan_path_metadata(normalized: str) -> list[Finding]:
     findings: list[Finding] = []
-    if any(normalized == prefix.rstrip("/") or normalized.startswith(prefix) for prefix in PRIVATE_GENERATED_PREFIXES):
-        findings.append(Finding(normalized, "private generated path must not be tracked"))
+    normalized_parts = normalized.split("/")
+    for prefix in PRIVATE_GENERATED_PREFIXES:
+        prefix_parts = prefix.rstrip("/").split("/")
+        if normalized_parts[: len(prefix_parts)] == prefix_parts or normalized_parts[-len(prefix_parts) :] == prefix_parts:
+            findings.append(Finding(normalized, "private generated path must not be tracked"))
+            break
 
     if Path(normalized).suffix.lower() in FORBIDDEN_ARTIFACT_SUFFIXES:
         findings.append(Finding(normalized, "forbidden generated artifact extension"))
-
     return findings
+
 
 
 def _scan_text(path: Path, normalized: str) -> list[Finding]:
