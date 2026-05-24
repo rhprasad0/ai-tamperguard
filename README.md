@@ -68,7 +68,7 @@ schemas/
 
 ## Status
 
-Early scaffold. The next step is to define the public schema contract and generate a small seed dataset before scaling.
+Early scaffold. The current v0 target is a smoke test of the downstream training/deployment loop using legitimate logs from an authorized Splunk install: local feature extraction, local model training, and Splunk-side inference. See [`docs/v0-dataset-spec.md`](docs/v0-dataset-spec.md).
 
 ## Safety note
 
