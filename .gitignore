@@ -1,0 +1,22 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python/local development
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Secrets/local config
+.env
+.env.*
+!.env.example
+
+# Generated artifacts
+/data/raw_events/*.jsonl
+/data/windows/*.csv
+/models/*.onnx
+/models/*.mlmodel
