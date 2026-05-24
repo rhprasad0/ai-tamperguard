@@ -38,9 +38,13 @@ def normalize_event(raw: Mapping[str, Any], *, salt: str) -> dict[str, Any]:
     """Normalize a Splunk control-plane event into safe categorical flags."""
     timestamp = _parse_timestamp(raw.get("_time") or raw.get("time") or raw.get("timestamp"))
     source_type = _normalize_text(_first_text(raw, ("sourcetype", "source_type"), default="unknown"))
-    action_text = _normalize_text(_first_text(raw, ("action", "operation", "command", "eventtype"), default="unknown"))
+    action_text = _normalize_text(_first_text(raw, ("action", "operation", "command", "eventtype", "data.action"), default="unknown"))
     object_text = _normalize_text(
-        _first_text(raw, ("object_category", "object_type", "object", "stanza", "component"), default="")
+        _first_text(
+            raw,
+            ("object_category", "object_type", "object", "stanza", "component", "data.changes{}.stanza", "data.path"),
+            default="",
+        )
     )
     status = _normalize_status(_first_text(raw, ("status", "result", "info"), default="unknown"))
     is_config = int(source_type in _CONFIG_SOURCETYPES or "config" in source_type)
@@ -71,16 +75,31 @@ def build_actor_60m_windows(
     source_dataset: str,
 ) -> list[dict[str, Any]]:
     """Aggregate normalized Splunk control-plane events into actor_60m windows."""
+    return build_actor_windows(events, salt=salt, source_dataset=source_dataset, window_minutes=60)
+
+
+def build_actor_windows(
+    events: Iterable[Mapping[str, Any]],
+    *,
+    salt: str,
+    source_dataset: str,
+    window_minutes: int,
+) -> list[dict[str, Any]]:
+    """Aggregate normalized Splunk control-plane events into actor windows."""
+    if window_minutes not in {15, 60}:
+        raise ValueError("window_minutes must be 15 or 60")
     groups: dict[tuple[str, datetime], list[dict[str, Any]]] = defaultdict(list)
     for raw in events:
         normalized = normalize_event(raw, salt=salt)
         timestamp = datetime.fromisoformat(normalized["timestamp"])
-        window_start = timestamp.replace(minute=0, second=0, microsecond=0)
+        bucket_minute = (timestamp.minute // window_minutes) * window_minutes
+        window_start = timestamp.replace(minute=bucket_minute, second=0, microsecond=0)
         groups[(normalized["actor_surrogate_private"], window_start)].append(normalized)
 
+    window_type = f"actor_{window_minutes}m"
     windows: list[dict[str, Any]] = []
     for (actor, window_start), rows in sorted(groups.items(), key=lambda item: (item[0][1], item[0][0])):
-        window_end = window_start + timedelta(hours=1)
+        window_end = window_start + timedelta(minutes=window_minutes)
         action_categories = {str(row["action_category"]) for row in rows}
         features = {
             "feature_event_count": len(rows),
@@ -97,8 +116,8 @@ def build_actor_60m_windows(
             "feature_distinct_action_category_count": len(action_categories),
         }
         window = {
-            "window_id": f"actor_60m:{_format_z(window_start)}:{actor}",
-            "window_type": "actor_60m",
+            "window_id": f"{window_type}:{_format_z(window_start)}:{actor}",
+            "window_type": window_type,
             "window_start": _format_z(window_start),
             "window_end": _format_z(window_end),
             "source_dataset": source_dataset,

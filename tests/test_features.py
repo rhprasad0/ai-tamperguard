@@ -8,6 +8,7 @@ from ai_tamperguard.features import (
     FEATURE_COLUMNS,
     actor_surrogate,
     build_actor_60m_windows,
+    build_actor_windows,
     normalize_event,
 )
 from ai_tamperguard.schema import validate_behavior_window
@@ -62,6 +63,27 @@ def test_normalize_configtracker_event_marks_config_and_admin_action():
     assert row["is_config_action"] == 1
     assert row["is_index_or_input_action"] == 1
     assert "config-owner" not in json.dumps(row)
+
+
+def test_normalize_configtracker_dotted_fields_for_action_and_object_context():
+    row = normalize_event(
+        {
+            "_time": "2026-05-24T12:05:00Z",
+            "sourcetype": "splunk_configuration_change",
+            "user": "config-owner",
+            "data.action": "update",
+            "data.changes{}.stanza": "indexes",
+            "data.path": "system/local/indexes.conf",
+        },
+        salt="synthetic-salt",
+    )
+
+    assert row["action_category"] == "index_or_input"
+    assert row["is_admin_action"] == 1
+    assert row["is_config_action"] == 1
+    assert row["is_index_or_input_action"] == 1
+    assert "config-owner" not in json.dumps(row)
+    assert "indexes.conf" not in json.dumps(row)
 
 
 def test_normalize_missing_fields_defaults_unknown_or_zero_without_nulls():
@@ -162,6 +184,21 @@ def test_actor_60m_windows_validate_against_public_behavior_schema():
     validate_behavior_window(public_window, public=True)
 
 
+def test_actor_15m_windows_group_by_actor_and_quarter_hour_with_schema():
+    events = [
+        {"_time": "2026-05-24T12:05:00Z", "sourcetype": "audittrail", "user": "alice", "action": "search"},
+        {"_time": "2026-05-24T12:16:00Z", "sourcetype": "audittrail", "user": "alice", "action": "search"},
+    ]
+
+    windows = build_actor_windows(events, salt="synthetic-salt", source_dataset="synthetic-unit", window_minutes=15)
+
+    assert [row["window_type"] for row in windows] == ["actor_15m", "actor_15m"]
+    assert [row["window_start"] for row in windows] == ["2026-05-24T12:00:00Z", "2026-05-24T12:15:00Z"]
+    assert [row["window_end"] for row in windows] == ["2026-05-24T12:15:00Z", "2026-05-24T12:30:00Z"]
+    public_window = {key: value for key, value in windows[0].items() if not key.endswith("_private")}
+    validate_behavior_window(public_window, public=True)
+
+
 def test_extract_windows_cli_writes_private_csv_without_raw_columns_or_nulls(tmp_path):
     input_path = tmp_path / "raw_events.jsonl"
     output_path = tmp_path / "windows.csv"
@@ -185,6 +222,8 @@ def test_extract_windows_cli_writes_private_csv_without_raw_columns_or_nulls(tmp
             str(salt_path),
             "--source-dataset",
             "synthetic-cli",
+            "--window-minutes",
+            "15",
         ],
         check=True,
         cwd=".",
@@ -192,7 +231,7 @@ def test_extract_windows_cli_writes_private_csv_without_raw_columns_or_nulls(tmp
         capture_output=True,
     )
 
-    assert "wrote 1 actor_60m windows" in result.stdout
+    assert "wrote 2 actor_15m windows" in result.stdout
     frame = pd.read_csv(output_path)
     assert not frame.isnull().any().any()
     assert "actor_surrogate_private" in frame.columns

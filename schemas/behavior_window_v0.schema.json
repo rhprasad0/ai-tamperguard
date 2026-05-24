@@ -13,7 +13,7 @@
   ],
   "properties": {
     "window_id": {"type": "string", "minLength": 1},
-    "window_type": {"const": "actor_60m"},
+    "window_type": {"enum": ["actor_60m", "actor_15m"]},
     "window_start": {"type": "string", "minLength": 1},
     "window_end": {"type": "string", "minLength": 1},
     "label": {"type": "integer", "enum": [0, 1]},
