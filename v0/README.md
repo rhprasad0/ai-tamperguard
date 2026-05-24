@@ -44,6 +44,24 @@ The v0 implementation added a reproducible local pipeline for behavior-window mo
    - Adds a scanner for private generated paths, generated model/data extensions, and overclaim phrases.
    - Keeps private exports, model artifacts, reports, Splunk deployment material, and real lookup rows out of tracked public files.
 
+## Blocker and workaround
+
+The main blocker was Splunk-side deployment surface area, not local training.
+
+The first imagined path was to hand Splunk a normal ML artifact and run it through an AI Toolkit / MLTK-style flow. That was too much moving surface for v0: ONNX / MLTK availability and permissions were unresolved, and the Splunk MCP safety guard correctly blocked generic `outputlookup` writes. That block is a feature, not a bug; relaxing it would have proven that the lab could bypass its own guardrails, which is exactly the kind of foot-gun this project is trying not to hand to the lobster.
+
+The workaround was to shrink v0 to a narrower, auditable path:
+
+1. Train the baseline model locally.
+2. Export a public-safe JSON model artifact shape privately.
+3. Render plain SPL that computes the logistic-regression score with explicit coefficient math.
+4. Deploy only scoped private lookup/search artifacts into the `ai_tamperguard` app context.
+5. Run Splunk-side scoring against held-out rows.
+6. Export the scored result and verify it against the local expected scores.
+7. Roll the app artifacts back and verify removal.
+
+So v0 does **not** depend on Splunk AI Toolkit, MLTK, ONNX import, custom Python search commands, or broad MCP write permissions. The important proof is narrower: Splunk can reproduce the locally trained model's scoring math on held-out rows, and the deployment/rollback path can be audited.
+
 ## What v0 does not claim
 
 v0 is **not** a production security model.
