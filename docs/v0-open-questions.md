@@ -19,19 +19,15 @@ These answers are now fixed for v0 unless we explicitly revise them later.
 9. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. Because no Splunk ML app is installed yet, true Splunk-side model execution requires either installing AI Toolkit/MLTK or using a simpler no-ML-app bridge such as lookup-based scoring or scripted packaging.
 10. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
 11. **Deployment operation model:** Hermes should operate model deployment through the Splunk MCP server so Ryan does not need to manually upload artifacts through the Splunk UI. Current MCP read/search is working, but an `outputlookup` deployment probe was blocked by the MCP server's command safeguards, so v0 needs either a narrow MCP deployment capability or a deliberately allowed lookup-write path before artifact deployment is fully hands-off.
+12. **Modeling goal:** v0 is only trying to produce a working end-to-end model pipeline, not prove that the labels or features represent a production-quality tamper detector. Labels and features may be weak, synthetic, or heuristic as long as they exercise extraction, training, deployment, scoring, and validation.
 
 ## Highest-priority decisions
 
 Answer these next so implementation can start without wandering into the swamp wearing flip-flops.
 
 1. **Deployment path:** With no AI Toolkit or MLTK installed, should v0 install a Splunk ML app, or should the first pass use no-ML-app scoring such as lookup-based coefficients / scripted inference?
-2. **Positive label meaning:** What should `label_binary = 1` mean in v0?
-   - `needs_review_unusual_activity`
-   - `admin_or_config_activity`
-   - `detection_control_activity`
-   - manually reviewed activity
-3. **Window size:** Should the first pass use `actor_60m`, `actor_15m`, session windows, or multiple window types?
-4. **Public sample data:** Should public examples be fully synthetic rows matching the private schema, even if private training uses legitimate local logs?
+2. **Window size:** Should the first pass use `actor_60m`, `actor_15m`, session windows, or multiple window types?
+3. **Public sample data:** Should public examples be fully synthetic rows matching the private schema, even if private training uses legitimate local logs?
 
 ## Splunk environment
 
@@ -91,30 +87,56 @@ Answer these next so implementation can start without wandering into the swamp w
 ## Labeling
 
 1. Should v0 use weak heuristic labels, manual labels, or both?
+   - Resolved for the working-model pass: use weak heuristic labels first, with optional manual spot-checks only to sanity-check the pipeline. Do not block v0 on a defensible detection label taxonomy.
 2. What is the first v0 definition of `label_binary = 1`?
+   - Resolved for the working-model pass: `1` means `working_model_positive_proxy`, not confirmed malicious behavior.
+   - A valid proxy can be any deterministic rule that creates separable classes from the private window table, such as admin/config-heavy windows, unusual action/status concentration, or synthetic/held-out positive examples.
+   - The label exists to prove that the model can learn, score, deploy, and round-trip through Splunk. It is not a claim that the event was bad.
 3. Should the public label language use `needs_review` everywhere to avoid implying malicious activity?
+   - Yes. Public-facing language should use `needs_review` or `positive_proxy`, not `malicious`, `attack`, or `tamper` as ground truth.
 4. Do we need separate labels for:
    - normal activity
    - admin/config activity
    - detection/search tuning
    - unusual activity
+   - Not for v0. Keep one binary label plus optional private evidence fields. Additional label classes can wait until the pipeline works.
 5. Who or what performs manual review for the first labeled sample?
+   - Optional Hermes/Ryan spot-check only. Manual review should catch obvious nonsense, not become a required annotation workflow.
 6. How do we mark uncertain labels?
+   - Use a simple `label_confidence` or `label_source` field if needed, but the first model can proceed with a deterministic weak label.
 7. Should labels be stored directly in the window CSV or in a separate annotation file?
+   - For v0, store `label_binary`, `label_source`, and optional `label_confidence` directly in the private window table so training stays boring and reproducible. Separate annotation files can wait.
 
 ## Feature engineering
 
 1. Which feature columns can be computed reliably from the available logs?
+   - Resolved for the working-model pass: pick only fields that can be reliably computed into a stable behavior-window table. Prefer boring, always-present counts/booleans over clever features.
+   - Minimum first-pass feature families:
+     - event/action counts per actor window
+     - distinct action/category count
+     - failed/denied/status counts
+     - search activity count or boolean
+     - admin/config activity count or boolean
+     - token/RBAC/capability/index/input related activity count or boolean when present
+     - normalized low-cardinality app/interface/object category counts when present
+     - off-hours/weekend or time-bucket booleans if easy
 2. Which fields are too high-cardinality and need normalization or exclusion?
+   - Exclude raw usernames, raw object names, saved-search names, raw SPL, URLs, session IDs, hostnames, paths, tokens, and other unique identifiers from model features.
+   - Keep them only as private evidence fields when needed for debugging or manual spot-checking.
 3. Should the first model use only numeric/boolean features?
+   - Yes. Numeric/boolean-only is the safest v0 default because it supports logistic-regression scoring in plain SPL and avoids categorical preprocessing drama.
 4. Should controlled categorical fields be included in v0 with one-hot encoding?
+   - Only if they are already low-cardinality and stable. Otherwise defer. The first model should not depend on one-hot expansion to work.
 5. How should missing fields be handled?
    - count fields default to `0`
    - boolean fields default to `0`
    - categorical fields default to `unknown`
 6. Should raw usernames, object names, saved search names, raw SPL, URLs, and session IDs be excluded from model features and kept only in private evidence fields?
+   - Yes. This is both a modeling simplification and a public-safety guardrail.
 7. What minimum feature set is required for the first smoke test?
+   - A compact numeric table is enough: `window_id`, private actor surrogate, window start/end, 8-20 `feature_*` count/boolean columns, `label_binary`, `label_source`, and optional evidence/debug columns kept private.
 8. Should multiple window granularities be generated now, or only one?
+   - Only one for the first working model. Use `actor_60m` unless a quick volume check shows it produces too few rows.
 
 ## Local training
 
@@ -188,7 +210,8 @@ Splunk app namespace: AI TamperGuard app (`ai_tamperguard`)
 Capabilities: local/admin context should have lookup upload/update capability; recheck ONNX-specific capability only if AI Toolkit is installed later
 Data source: private `_audit`/`audittrail` plus `_configtracker`/`splunk_configuration_change` Splunk control-plane logs
 Window size: actor_60m for first pass
-Positive label: needs_review_unusual_or_admin_control_activity, not malicious
+Positive label: working_model_positive_proxy / needs_review proxy, not malicious ground truth
+Feature posture: boring numeric/boolean behavior-window features first; defer clever categories until the pipeline works
 Public examples: synthetic-only rows matching the private schema
 Model artifacts: do not commit private-trained models until reviewed
 First model: logistic regression, then random forest
@@ -200,7 +223,6 @@ First result sink: local report plus Splunk lookup output
 If we want to resolve this efficiently, answer in this order:
 
 1. Decide Splunk deployment prerequisite: install AI Toolkit/MLTK, or start with no-ML-app lookup/scripted scoring.
-2. Define `label_binary = 1` for v0.
-3. Pick the first window size.
-4. Decide public sample data policy.
-5. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
+2. Pick the first window size.
+3. Decide public sample data policy.
+4. Decide whether to commit only scripts/specs or also reviewed synthetic sample rows.
