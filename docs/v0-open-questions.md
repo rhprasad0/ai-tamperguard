@@ -9,10 +9,12 @@ v0 is deliberately modest: use legitimate logs from an authorized existing Splun
 These answers are now fixed for v0 unless we explicitly revise them later.
 
 1. **Hardware split:** Training runs on the GPU rig. Splunk runs on a thin client without a GPU.
-2. **Inference constraint:** Splunk-side inference must be CPU-safe and lightweight. Do not require GPU inference inside Splunk.
-3. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
-4. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. ONNX is still a good first target only if Splunk AI Toolkit can run the exported model on CPU.
-5. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
+2. **Keep Splunk on the thin client for v0:** Do not migrate Splunk to the GPU rig unless the thin client becomes an empirical blocker. The thin client is useful because it proves the deployed model can run in a realistic CPU-only Splunk environment.
+3. **Inference constraint:** Splunk-side inference must be CPU-safe and lightweight. Do not require GPU inference inside Splunk.
+4. **Splunk version:** The current thin-client Splunk install is Splunk Enterprise `10.2.3`, build `4d61cf8a5c0c`, on Linux `x86_64`. License state was verified as `OK` during v0 planning.
+5. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
+6. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. ONNX is still a good first target only if Splunk AI Toolkit can run the exported model on CPU.
+7. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
 
 ## Highest-priority decisions
 
@@ -31,6 +33,7 @@ Answer these next so implementation can start without wandering into the swamp w
 ## Splunk environment
 
 1. Which Splunk version is installed?
+   - Resolved for current thin-client lab: Splunk Enterprise `10.2.3`, build `4d61cf8a5c0c`, Linux `x86_64`, license state `OK`.
 2. Which Splunk AI Toolkit / MLTK version is installed?
 3. Is ONNX upload available and enabled?
 4. Does the local user/app context have the capabilities required for ONNX upload and inference?
