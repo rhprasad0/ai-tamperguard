@@ -13,7 +13,8 @@
 ## Current context / assumptions
 
 - Working repo: `/home/ryan/projects/ai-tamperguard`.
-- Current branch: `main`, currently one local docs commit ahead of `origin/main`.
+- Implementation worktree: `/home/ryan/projects/ai-tamperguard/.worktrees/ai-tamperguard-v0-pipeline` on branch `feat/tamperguard-v0-pipeline`.
+- Current branch state at K0 preflight: clean `feat/tamperguard-v0-pipeline`; latest commits include `f5ac440 docs: add kanban execution mode to tamperguard plan`, `8fba5ba docs: add tamperguard v0 implementation plan`, and `d8cea08 docs: align tamperguard v0 spec`.
 - Specs already committed locally in `d8cea08`:
   - `docs/v0-model-pipeline-spec.md`
   - `docs/v0-model-pipeline-spec-adversarial.md`
@@ -33,7 +34,7 @@
   - `reports/private/`
   - `splunk/private/`
 - Context7 doc checks already confirmed key primitives: Splunk documents `exp()`, `tonumber()`, `inputlookup`, `outputlookup`, saved-search config, and `/servicesNS/{user}/{app}/...` namespace endpoints. Re-check before final SPL/deploy code.
-- Splunk MCP is expected to be available for live read/search validation, but current `hermes mcp list` in this session only showed `context7`; first execution step must resolve this discrepancy before live Splunk work.
+- K0 preflight resolved the live-tool discrepancy: `hermes mcp list` shows `context7` and `splunk-mcp-server` enabled, `hermes mcp test splunk-mcp-server` discovers 10 tools, Splunk `get_info` reports Enterprise 10.2.3 with green health, and a synthetic `makeresults` search returns `readiness=ok`. Continue to avoid private data output in live probes.
 
 ---
 
