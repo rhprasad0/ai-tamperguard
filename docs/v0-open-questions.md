@@ -4,11 +4,21 @@ These are the decisions we need to answer before implementing the v0 smoke test.
 
 v0 is deliberately modest: use legitimate logs from an authorized existing Splunk install, train locally, and deploy/infer inside Splunk. No uncensored agent is required for this phase.
 
+## Resolved decisions
+
+These answers are now fixed for v0 unless we explicitly revise them later.
+
+1. **Hardware split:** Training runs on the GPU rig. Splunk runs on a thin client without a GPU.
+2. **Inference constraint:** Splunk-side inference must be CPU-safe and lightweight. Do not require GPU inference inside Splunk.
+3. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
+4. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. ONNX is still a good first target only if Splunk AI Toolkit can run the exported model on CPU.
+5. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
+
 ## Highest-priority decisions
 
-Answer these first so implementation can start without wandering into the swamp wearing flip-flops.
+Answer these next so implementation can start without wandering into the swamp wearing flip-flops.
 
-1. **Deployment path:** Should v0 target ONNX first, with MLTK `fit` / `apply` as fallback?
+1. **Deployment path:** Should v0 target CPU-compatible ONNX first, with MLTK `fit` / `apply` as fallback?
 2. **Data source:** Which private Splunk indexes and sourcetypes are safe to use for v0 extraction?
 3. **Positive label meaning:** What should `label_binary = 1` mean in v0?
    - `needs_review_unusual_activity`
@@ -140,7 +150,8 @@ Answer these first so implementation can start without wandering into the swamp 
 Unless we decide otherwise, use these defaults:
 
 ```text
-Deployment path: ONNX first, MLTK fallback
+Deployment path: CPU-compatible ONNX first, MLTK fallback
+Hardware split: train on GPU rig; deploy/infer on CPU-only Splunk thin client
 Data source: private legitimate Splunk audit/control-plane logs
 Window size: actor_60m for first pass
 Positive label: needs_review_unusual_or_admin_control_activity, not malicious
@@ -154,7 +165,7 @@ First result sink: local report plus Splunk lookup output
 
 If we want to resolve this efficiently, answer in this order:
 
-1. Confirm ONNX-first or MLTK-only.
+1. Confirm CPU-compatible ONNX-first or MLTK-only.
 2. Identify safe source indexes/sourcetypes.
 3. Define `label_binary = 1` for v0.
 4. Pick the first window size.
