@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-tamperguard/schemas/holdout_fixture_v0.schema.json",
+  "title": "AI TamperGuard v0 holdout fixture row",
+  "type": "object",
+  "required": ["window_id"],
+  "properties": {
+    "window_id": {"type": "string", "minLength": 1},
+    "score_local": {"type": "number"},
+    "probability_local": {"type": "number", "minimum": 0, "maximum": 1},
+    "prediction_local": {"type": "integer", "enum": [0, 1]}
+  },
+  "patternProperties": {
+    "^feature_[A-Za-z0-9_]+$": {
+      "anyOf": [
+        {"type": "number"},
+        {"type": "boolean"}
+      ]
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-tamperguard/schemas/behavior_window_v0.schema.json",
+  "title": "AI TamperGuard v0 behavior window",
+  "type": "object",
+  "required": [
+    "window_id",
+    "window_type",
+    "window_start",
+    "window_end",
+    "label",
+    "label_value_description"
+  ],
+  "properties": {
+    "window_id": {"type": "string", "minLength": 1},
+    "window_type": {"const": "actor_60m"},
+    "window_start": {"type": "string", "minLength": 1},
+    "window_end": {"type": "string", "minLength": 1},
+    "label": {"type": "integer", "enum": [0, 1]},
+    "label_value_description": {
+      "type": "string",
+      "enum": ["working_model_positive_proxy", "needs_review"]
+    }
+  },
+  "patternProperties": {
+    "^feature_[A-Za-z0-9_]+$": {
+      "anyOf": [
+        {"type": "number"},
+        {"type": "boolean"}
+      ]
+    }
+  },
+  "additionalProperties": true
+}
