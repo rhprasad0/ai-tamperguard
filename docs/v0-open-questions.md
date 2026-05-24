@@ -141,16 +141,19 @@ Answer these next so implementation can start without wandering into the swamp w
 ## Local training
 
 1. Which local Python environment should own training dependencies?
+   - Resolved directionally: use a local project Python environment on the training machine. The exact environment name/path can be implementation detail as long as the training script is reproducible.
 2. Are these dependencies enough for v0?
    - `pandas`
    - `scikit-learn`
    - `onnx`
    - `skl2onnx`
    - `onnxruntime`
+   - Resolved: yes, these are enough for the v0 working-model smoke test. Keep the dependency set small unless implementation proves another package is necessary.
 3. Which baseline model should be first?
    - logistic regression
    - random forest
    - gradient boosting
+   - Resolved default: logistic regression first because it is easiest to train, explain, export, and score with lookup/SPL coefficients. Random forest can follow only after the linear path works.
 4. What metrics count as a passed smoke test?
    - accuracy
    - precision
@@ -158,9 +161,13 @@ Answer these next so implementation can start without wandering into the swamp w
    - f1
    - confusion matrix
    - classification report
+   - Resolved framing: metrics are smoke-test diagnostics for a working model, not proof of detection quality. A pass means the training script runs, produces non-degenerate predictions, emits a metrics report, and can compare local predictions against Splunk-side scoring.
 5. Should metrics be treated only as plumbing diagnostics because labels are weak?
+   - Yes. Treat metrics as plumbing diagnostics until labels and features are upgraded beyond the weak working-model proxy.
 6. Should private-trained model artifacts be committed, stored locally only, or regenerated on demand?
+   - Store private-trained artifacts locally only by default. Prefer regenerating on demand from scripts and private data. Do not commit private-trained artifacts unless they are explicitly reviewed and declared public-safe.
 7. Do we need a reproducible training script before any manual notebook work?
+   - Yes. The first deliverable should be a reproducible script or CLI path. Notebooks are optional scratch space, not the source of truth for v0.
 
 ## Splunk deployment and inference
 
