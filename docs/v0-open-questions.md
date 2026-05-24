@@ -12,15 +12,16 @@ These answers are now fixed for v0 unless we explicitly revise them later.
 2. **Keep Splunk on the thin client for v0:** Do not migrate Splunk to the GPU rig unless the thin client becomes an empirical blocker. The thin client is useful because it proves the deployed model can run in a realistic CPU-only Splunk environment.
 3. **Inference constraint:** Splunk-side inference must be CPU-safe and lightweight. Do not require GPU inference inside Splunk.
 4. **Splunk version:** The current thin-client Splunk install is Splunk Enterprise `10.2.3`, build `4d61cf8a5c0c`, on Linux `x86_64`. License state was verified as `OK` during v0 planning.
-5. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
-6. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. ONNX is still a good first target only if Splunk AI Toolkit can run the exported model on CPU.
-7. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
+5. **No Splunk ML app installed yet:** The current Splunk instance does not have Splunk AI Toolkit or MLTK installed. MCP app inventory confirmed no matching ML/AI/ONNX apps are present.
+6. **v0 model shape:** Prefer small tabular models that can run cheaply on CPU, such as logistic regression or random forest. Avoid any model that needs GPU serving for v0.
+7. **Deployment implication:** Local training may use the GPU rig, but the exported/deployed model must be practical for the Splunk thin client. Because no Splunk ML app is installed yet, true Splunk-side model execution requires either installing AI Toolkit/MLTK or using a simpler no-ML-app bridge such as lookup-based scoring or scripted packaging.
+8. **Scope:** v0 remains a smoke test of training locally and deploying/inferencing in Splunk using legitimate logs. The uncensored-agent harness is out of scope for v0.
 
 ## Highest-priority decisions
 
 Answer these next so implementation can start without wandering into the swamp wearing flip-flops.
 
-1. **Deployment path:** Should v0 target CPU-compatible ONNX first, with MLTK `fit` / `apply` as fallback?
+1. **Deployment path:** With no AI Toolkit or MLTK installed, should v0 install a Splunk ML app, or should the first pass use no-ML-app scoring such as lookup-based coefficients / scripted inference?
 2. **Data source:** Which private Splunk indexes and sourcetypes are safe to use for v0 extraction?
 3. **Positive label meaning:** What should `label_binary = 1` mean in v0?
    - `needs_review_unusual_activity`
@@ -35,9 +36,13 @@ Answer these next so implementation can start without wandering into the swamp w
 1. Which Splunk version is installed?
    - Resolved for current thin-client lab: Splunk Enterprise `10.2.3`, build `4d61cf8a5c0c`, Linux `x86_64`, license state `OK`.
 2. Which Splunk AI Toolkit / MLTK version is installed?
+   - Resolved for current thin-client lab: neither Splunk AI Toolkit nor MLTK is installed.
 3. Is ONNX upload available and enabled?
+   - Resolved for current thin-client lab: no. ONNX upload is not available until an appropriate Splunk AI/ML app is installed and enabled.
 4. Does the local user/app context have the capabilities required for ONNX upload and inference?
+   - Open. This should be rechecked only after choosing and installing the deployment app path.
 5. If ONNX is unavailable, is classic MLTK `fit` / `apply` available?
+   - Resolved for current thin-client lab: no. Classic MLTK commands are unavailable until MLTK is installed.
 6. Which app namespace should own the model?
    - new `ai_tamperguard` app
    - Search app
@@ -153,7 +158,7 @@ Answer these next so implementation can start without wandering into the swamp w
 Unless we decide otherwise, use these defaults:
 
 ```text
-Deployment path: CPU-compatible ONNX first, MLTK fallback
+Deployment path: no Splunk ML app is installed yet; decide between installing AI Toolkit/MLTK vs no-ML-app lookup/scripted scoring
 Hardware split: train on GPU rig; deploy/infer on CPU-only Splunk thin client
 Data source: private legitimate Splunk audit/control-plane logs
 Window size: actor_60m for first pass
@@ -168,7 +173,7 @@ First result sink: local report plus Splunk lookup output
 
 If we want to resolve this efficiently, answer in this order:
 
-1. Confirm CPU-compatible ONNX-first or MLTK-only.
+1. Decide Splunk deployment prerequisite: install AI Toolkit/MLTK, or start with no-ML-app lookup/scripted scoring.
 2. Identify safe source indexes/sourcetypes.
 3. Define `label_binary = 1` for v0.
 4. Pick the first window size.
