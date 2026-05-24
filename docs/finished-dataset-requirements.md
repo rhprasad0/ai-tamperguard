@@ -679,9 +679,37 @@ Schema requirements:
 - versioning;
 - compatibility notes for derived artifacts.
 
-## 8. Dataset size and coverage targets
+## 8. Dataset size, split, and collection targets
 
-These are finished-product targets, not v0 requirements.
+These are finished-product targets, not v0 model-pipeline requirements. They are informed by two different cybersecurity dataset traditions:
+
+1. **Enterprise telemetry corpora** such as CERT, LANL, and DARPA OpTC preserve realistic base rates, where known red-team or insider-threat events are tiny overlays on massive background telemetry.
+2. **Cyber-range and ML benchmark corpora** such as UNSW-NB15, CICIDS2017/2018, NSL-KDD, ADFA-LD, and EMBER intentionally oversample attack or positive classes so that models and evaluation harnesses have enough positive examples to learn from.
+
+AI TamperGuard should be explicit that its public finished corpus is closer to the second pattern: a scenario-grounded research and evaluation corpus that intentionally oversamples tamper-congruent and gray-zone behavior. It should not be framed as a production-prevalence mirror.
+
+Recommended public wording:
+
+> AI TamperGuard intentionally oversamples scenario-grounded positive and gray-zone behavior so model pipelines, analyst workflows, and evaluation splits can be exercised reproducibly. Corpus-level metrics do not represent expected production prevalence or proof of real-world compromise detection.
+
+### v0 and private-run scale targets
+
+The first runnable data collection should optimize for a non-degenerate, inspectable end-to-end pipeline rather than finished-dataset completeness.
+
+```text
+v0 smoke minimum:
+  200+ behavior windows
+  >=20 normal/negative windows
+  >=20 positive-proxy windows
+
+v0 preferred:
+  1,000-5,000 behavior windows
+  70-85% normal / benign
+  5-15% gray-zone / suspicious / hard-negative
+  5-15% tamper-congruent positive proxy
+```
+
+The v0 labels should remain conservative: `working_model_positive_proxy`, `needs_review`, or `synthetic_positive`, not malicious ground truth.
 
 ### Minimum credible research corpus
 
@@ -693,6 +721,15 @@ paired controls for major positive families
 3+ tamper-congruent behavior families
 hard-negative set
 scenario-family holdout split
+```
+
+Recommended finished minimum split:
+
+```text
+10,000 behavior windows total
+8,000 normal / benign / background windows        # 80%
+1,000 gray-zone / suspicious / hard-negative      # 10%
+1,000 tamper-congruent positive windows           # 10%
 ```
 
 ### Stronger hackathon/judge-impressive target
@@ -708,6 +745,64 @@ multiple paired-control sets
 separate public synthetic fixtures
 scenario-family and actor/object holdouts
 ```
+
+Recommended stronger split:
+
+```text
+50,000 behavior windows total
+40,000 normal / benign / background windows       # 80%
+5,000 gray-zone / suspicious / hard-negative      # 10%
+5,000 tamper-congruent positive windows           # 10%
+```
+
+### Single-GPU lab collection estimate
+
+A single RTX 3090 running an uncensored agent against a bounded sacrificial Splunk lab for a few days should be treated as enough for v0 and likely enough for the 10,000-window minimum target if the harness is already stable.
+
+The GPU is unlikely to be the only bottleneck. Collection speed depends more on:
+
+- scenario reset time;
+- Splunk ingest and indexing delay;
+- agent deliberation/tool-loop duration;
+- post-run verification;
+- how many derived windows are generated per run.
+
+Do not count only wall-clock hourly windows. One 20-30 minute scenario run should produce multiple analytical units:
+
+```text
+normalized events
+1 episode
+actor-object graph edges
+5-minute sliding windows
+15-minute sliding windows
+optional 60-minute/session/action-burst windows
+```
+
+Practical planning estimate:
+
+```text
+v0 pipeline dataset:
+  same day to 2 days
+
+10,000-window minimum credible corpus:
+  about 3-7 days with a stable automated harness
+
+50,000-window stronger corpus:
+  about 2-6 weeks unless generation is heavily automated or supplemented with synthetic/background fixtures
+```
+
+Suggested first sustained collection target:
+
+```text
+72-hour bounded lab run
+200-400 total scenario/control runs
+50-100 tamper-congruent positive runs
+50-100 paired benign controls
+50-100 gray-zone or suspicious-recon runs
+background benign/admin generation for the remainder
+```
+
+The completion gate should be coverage-aware, not just row-count-aware. Stop extending the run only after the corpus has enough scenario families, paired controls, hard negatives, answer-key traceability, and split integrity.
 
 Coverage should matter more than raw row count. A smaller dataset with clear scenario design, paired controls, answer keys, and leakage-resistant splits is stronger than a huge flat table with vague labels.
 
@@ -878,6 +973,8 @@ This requirements document was informed by public dataset structures and methodo
 - LANL Comprehensive Multi-Source Cyber-Security Events dataset.
 - DARPA Operationally Transparent Cyber / OpTC and eCAR-style object/action telemetry.
 - UNSW-NB15 cyber-range dataset structure.
+- CICIDS2017 and CSE-CIC-IDS2018 flow-dataset class-balance patterns.
+- NSL-KDD, ADFA-LD, EMBER, and BoT-IoT as examples of benchmark datasets that intentionally depart from production base rates.
 - Provenance/security datasets that use paired benign/adversarial scenario runs.
 
-These sources are used as structural references only. AI TamperGuard's scope is narrower: Splunk observability/control-plane behavior and synthetic lab-bounded tamper-congruent scenarios.
+These sources are used as structural and sizing references only. AI TamperGuard's scope is narrower: Splunk observability/control-plane behavior and synthetic lab-bounded tamper-congruent scenarios.
