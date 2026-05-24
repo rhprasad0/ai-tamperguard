@@ -1,6 +1,6 @@
 # AI TamperGuard v0 Model Pipeline Implementation Plan
 
-> **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task. Enforce test-driven-development for behavior-bearing code: RED → GREEN → REFACTOR. Do not commit private Splunk data, generated model artifacts, rendered coefficient SPL, or generated reports.
+> **For Hermes:** Execute this plan through Hermes Kanban as the durable orchestration layer. Use a serialized parent-chain of Kanban cards for cumulative code work, with `subagent-driven-development` only as an optional per-card local review pattern. Enforce test-driven-development for behavior-bearing code: RED → GREEN → REFACTOR. Do not commit private Splunk data, generated model artifacts, rendered coefficient SPL, or generated reports.
 
 **Goal:** Build the v0 smoke-test pipeline from authorized Splunk control-plane logs to local behavior-window extraction, local logistic-regression training, rendered no-ML-app SPL scoring, Splunk-side held-out fixture scoring, local-vs-Splunk equivalence verification, private report generation, and rollback.
 
@@ -44,6 +44,87 @@
 3. **Private run third.** Extract private windows, split holdout, train logistic regression, render private scoring artifacts, verify non-degeneracy locally.
 4. **Deploy last.** Use exactly one approved write path. Default decision point: if no narrow MCP write tool exists, use app filesystem packaging / Splunk REST with scoped credentials and validate read-back through Splunk MCP.
 5. **Rollback is part of pass.** A run is incomplete until the deployed artifacts are removable and MCP confirms removal.
+
+---
+
+## Hermes Kanban execution mode
+
+Use Hermes Kanban for execution instead of running the full implementation as one long chat or one unconstrained background agent. The board is the durable audit trail for phase status, blocked decisions, validation evidence, and final handoff.
+
+### Board contract
+
+- **Board slug:** `ai-tamperguard-v0-pipeline`.
+- **Implementation branch:** `feat/tamperguard-v0-pipeline`. Create this branch from the current `main` after resolving whether to push the two local docs/plan commits.
+- **Shared workspace/worktree:** use one cumulative implementation workspace for all code-producing cards, for example `.worktrees/ai-tamperguard-v0-pipeline` or the board workspace chosen by Hermes Kanban. Do not let serial code cards start from independent stale `main` worktrees unless the controller explicitly merges each predecessor forward.
+- **Available profile baseline:** `hermes profile list` currently shows only `default`. Assign initial cards to `default` unless Ryan creates specialist profiles before execution. Do not invent assignees such as `researcher`, `implementer`, or `reviewer`; unknown assignees can leave cards stuck in `ready`.
+- **Controller role:** the active Hermes session acts as controller. It creates cards, checks blocked decisions, reruns critical validation in the shared workspace, and only merges to `main` after final validation is green.
+
+### Card graph
+
+Create the graph with real Kanban parent links, not just prose. Independent documentation/tool-readiness checks can run before coding, but code-producing cards should be serialized so the package, tests, schemas, and scripts accumulate in one workspace.
+
+| Card | Plan scope | Parents | Notes |
+|---|---|---|---|
+| K0 | Phase 0 — preflight, Context7, Splunk MCP readiness | none | May block for Splunk MCP/config clarification. No code changes except plan notes if needed. |
+| K1 | Phase 1 — packaging scaffold and public-safety scanner skeleton | K0 | First code card; create branch/workspace here. |
+| K2 | Phase 2 — schema contracts | K1 | Add JSON schemas and schema loader tests. |
+| K3 | Phase 3 — feature extraction and weak labels | K2 | RED/GREEN tests for normalization, windows, labels, extraction CLI. |
+| K4 | Phase 4 — deterministic holdout split | K3 | Deterministic split module and CLI. |
+| K5 | Phase 5 — local logistic regression training | K4 | Artifact creation and local diagnostics. |
+| K6 | Phase 6 — SPL scoring renderer | K5 | Re-check Context7 docs before final SPL syntax. |
+| K7 | Phase 7 — local-vs-Splunk verification harness | K6 | Offline synthetic equivalence first. |
+| K8 | Phase 8 — live Splunk read-only probes | K7 | Read-only only; write reports under `reports/private/`. |
+| K9 | Phase 9 — private run sequence | K8 | Private/generated outputs only; do not commit. |
+| K10 | Phase 10 — deployment path and Splunk scoring | K9 | Must block for human/controller approval before any Splunk write/deploy path. |
+| K11 | Phase 11 — equivalence, report, rollback | K10 | Rollback is required before completion. |
+| K12 | Phase 12 — final public commit(s) and optional push | K11 | Commit only public-safe artifacts; push only if Ryan approves or already requested. |
+
+### Suggested card creation template
+
+Use the native Kanban UI/CLI available in this Hermes install. The exact command surface may vary by build, but each card body must include the shared workspace, branch, parent dependency, required skills, safety constraints, and validation commands. If using the CLI, first inspect current syntax with:
+
+```bash
+hermes kanban --help
+hermes kanban boards --help
+```
+
+Card body template:
+
+```markdown
+Plan: .hermes/plans/2026-05-24_120450-ai-tamperguard-v0-implementation.md
+Board: ai-tamperguard-v0-pipeline
+Branch: feat/tamperguard-v0-pipeline
+Workspace: <shared cumulative workspace path>
+Scope: <exact phase/task range>
+Required skills: writing-plans, test-driven-development, requesting-code-review where applicable; hermes-agent/kanban-worker for Kanban mechanics.
+
+Rules:
+- Implement only this card's plan scope.
+- Read parent card handoff before editing.
+- Use TDD for behavior-bearing code: write failing test, run failing test, implement, run passing test.
+- Use synthetic/public fixtures for tests. Do not inspect, print, copy, or commit private Splunk data.
+- Keep generated/private artifacts under ignored private paths.
+- If a Splunk write/deploy decision is required, stop and block with `review-required:` plus the exact options and risk.
+- Before completing, run the card-specific tests and report exact commands/results.
+```
+
+### Controller checkpoints
+
+After each card completes:
+
+1. Inspect the card summary and `git status --short --untracked-files=all` in the shared workspace.
+2. Rerun the card-specific test command locally. For K6 onward, also run the cheapest full regression command available, usually `python -m pytest -q`.
+3. Check for private/generated files outside ignored paths.
+4. Commit the card's public-safe changes on `feat/tamperguard-v0-pipeline` with a small commit message, or record why the card intentionally produced no commit.
+5. Only then allow the next child card to proceed.
+
+Final merge checklist:
+
+1. Run full tests, public-safety scan, and repo hygiene checks from the implementation branch.
+2. Verify no private Splunk URLs, hostnames, IPs, usernames, tokens, raw SPL exports, private model artifacts, or generated reports are staged.
+3. Merge or fast-forward to `main`.
+4. Rerun root validation on `main`.
+5. Push only after Ryan explicitly approves or asks for push.
 
 ---
 
@@ -1124,4 +1205,4 @@ Recommended defaults:
 
 ## Execution handoff
 
-Plan complete. When Ryan says to proceed, execute in small commits using strict TDD for code tasks. Start with Phase 0 preflight, then Phase 1 scaffold. Do not touch private Splunk extraction/deployment until unit tests, schema contracts, public-safety scan, Context7 doc checks, and Splunk MCP read-only readiness are green.
+Plan complete. When Ryan says to proceed, create the `ai-tamperguard-v0-pipeline` Hermes Kanban board and execute K0→K12 with real parent links in one shared cumulative workspace. Keep the active Hermes session as controller: rerun validations after each card, commit only public-safe changes, and do not touch private Splunk extraction/deployment until unit tests, schema contracts, public-safety scan, Context7 doc checks, and Splunk MCP read-only readiness are green.
