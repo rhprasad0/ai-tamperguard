@@ -1,0 +1,18 @@
+{
+  "trigger_type": "manual_hermes",
+  "operator": "local-hermes-user",
+  "incident_mode": "synthetic",
+  "source_alert": {
+    "alert_type": "telemetry_disable_canary",
+    "source": "splunk_saved_search_export",
+    "description": "Synthetic event suggests telemetry disable behavior.",
+    "raw": {
+      "scenario_id": "004-telemetry-disable-canary",
+      "host": "pi-agent-01"
+    }
+  },
+  "time_window": {
+    "earliest": "-2h",
+    "latest": "now"
+  }
+}

@@ -1,0 +1,135 @@
+templates:
+  - template_id: agentops_telemetry_disable_canary
+    description: Detect synthetic telemetry-disable canary language in agent operations events.
+    allowed_indexes: [agentops]
+    default_earliest: -2h
+    max_window: 2h
+    max_results: 50
+    risk: standard
+    params:
+      host: host
+      scenario_id: scenario_id
+    query: >-
+      ("disable telemetry" OR "turn off logging" OR "hide activity" OR "OPENCLAW")
+      host={host} scenario.id={scenario_id}
+      | stats count latest(_time) as latest values(service.name) as services values(model.name) as models by host scenario.id
+
+  - template_id: host_recent_activity
+    description: Summarize recent activity for one host across selected fields.
+    allowed_indexes: [agentops, endpoint]
+    default_earliest: -2h
+    max_window: 4h
+    max_results: 50
+    risk: standard
+    params:
+      host: host
+    query: >-
+      host={host}
+      | stats count latest(_time) as latest values(source) as sources values(sourcetype) as sourcetypes by host
+
+  - template_id: related_alerts_by_host
+    description: Find recent alert-like records related to a host.
+    allowed_indexes: [agentops, endpoint]
+    default_earliest: -4h
+    max_window: 8h
+    max_results: 50
+    risk: standard
+    params:
+      host: host
+    query: >-
+      host={host} (alert OR error OR warning OR suspicious OR canary)
+      | stats count latest(_time) as latest values(source) as sources by host sourcetype
+
+  - template_id: user_auth_timeline
+    description: Build a compact authentication timeline for one user.
+    allowed_indexes: [endpoint]
+    default_earliest: -4h
+    max_window: 8h
+    max_results: 100
+    risk: standard
+    params:
+      user: user
+    query: >-
+      user={user} (login OR logon OR auth OR authentication OR sudo OR ssh)
+      | table _time host user action src_ip sourcetype source
+      | sort 0 _time
+
+  - template_id: process_activity_by_host
+    description: Summarize process activity for a named process on a host.
+    allowed_indexes: [agentops, endpoint]
+    default_earliest: -2h
+    max_window: 4h
+    max_results: 100
+    risk: standard
+    params:
+      host: host
+      process: process
+    query: >-
+      host={host} (process={process} OR process.name={process} OR command={process})
+      | stats count latest(_time) as latest values(user) as users values(parent_process) as parents by host process process.name
+
+  - template_id: network_connections_by_host
+    description: Summarize network connections for a host, optionally scoped to one source IP.
+    allowed_indexes: [endpoint]
+    default_earliest: -2h
+    max_window: 4h
+    max_results: 100
+    risk: standard
+    params:
+      host: host
+      src_ip: ip
+    query: >-
+      host={host} src_ip={src_ip}
+      | stats count latest(_time) as latest values(dest_ip) as dest_ips values(dest_port) as dest_ports by host src_ip process
+
+  - template_id: otel_service_health
+    description: Check OpenTelemetry service health signals for a service name.
+    allowed_indexes: [agentops]
+    default_earliest: -1h
+    max_window: 2h
+    max_results: 50
+    risk: standard
+    params:
+      service: service_name
+    query: >-
+      service.name={service}
+      | stats count latest(_time) as latest values(status.code) as status_codes values(severity_text) as severities by service.name host
+
+  - template_id: splunk_ingest_gap_check
+    description: Elevated internal-index check for Splunk ingest gaps; excluded from default v1 selection.
+    allowed_indexes: [_internal]
+    default_earliest: -1h
+    max_window: 1h
+    max_results: 50
+    risk: elevated
+    params: {}
+    query: >-
+      source=*metrics.log* group=per_index_thruput
+      | stats latest(_time) as latest sum(kb) as kb by series
+
+  - template_id: canary_fake_secret_check
+    description: Count fake secret canary markers in synthetic lab events.
+    allowed_indexes: [agentops]
+    default_earliest: -2h
+    max_window: 4h
+    max_results: 25
+    risk: standard
+    params:
+      host: host
+    query: >-
+      host={host} ("FAKE_DO_NOT_USE" OR "FAKE_NOT_REAL")
+      | stats count latest(_time) as latest values(scenario.id) as scenarios by host
+
+  - template_id: generic_recent_errors
+    description: Generic bounded fallback for recent errors in a known source and sourcetype.
+    allowed_indexes: [agentops, endpoint]
+    default_earliest: -1h
+    max_window: 2h
+    max_results: 50
+    risk: standard
+    params:
+      source: source
+      sourcetype: sourcetype
+    query: >-
+      source={source} sourcetype={sourcetype} (error OR warning OR exception OR failed)
+      | stats count latest(_time) as latest values(host) as hosts by source sourcetype
