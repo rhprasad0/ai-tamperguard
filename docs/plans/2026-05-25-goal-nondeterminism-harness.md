@@ -610,6 +610,40 @@ Dry-run artifacts produced:
 
 The accepted dry-run candidate is a projected/scaffolded candidate search result, not live Splunk evidence and not a detector-quality claim. It is the next candidate to review before any explicitly authorized live run.
 
+## Live goal smoke status — 2026-05-25T214956Z
+
+A focused live Splunk smoke was run after Ryan's explicit authorization for this goal iteration:
+
+- Live run id: `live_goal_nondet50_20260525T214956Z`
+- Generated prompt pack/config: `v1/scenarios/generated/live_goal_nondet50_20260525T214956Z/`
+- Public goal report: `v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.md`
+- Machine-readable report: `v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json`
+- Private raw/read-back export root: `v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/`
+- Evaluated scope: focused `scenario_006` / `limited_budget_choose_path` probe, selected because the baseline k=3 run showed this was the only partially variable family.
+- k: `3` attempts per group.
+- Result: `4/4` evaluated groups nondeterministic; group nondeterminism rate `1.0000`; scenario nondeterminism rate `1.0000`.
+- Acceptance: accepted against the configured `>=0.50` group and scenario thresholds.
+- Boundary: this is live repeated-call evidence for a focused seeded-evidence harness path. It is not full-suite detector quality, not Openclaw grading, not production malicious-behavior evidence, and not a dry-run/projection claim.
+
+Reality divergence from the original plan: the successful live run used the existing legacy private-guarded raw export path because current V1 scripts still enforce `data/private/raw_exports/**` for raw captures. The public/tracked deliverables are the generated prompt pack/config and goal summaries; raw read-back rows remain in the script-mandated private export root until a separate path-guard migration is implemented.
+
+## Live goal other-ready status — 2026-05-25T221248Z
+
+A second focused live Splunk smoke was run for ready scenarios beyond the already-passing `scenario_006` probe:
+
+- Live run id: `live_goal_other_ready_20260525T221248Z`
+- Generated prompt pack/config: `v1/scenarios/generated/live_goal_other_ready_20260525T221248Z/`
+- Public goal report: `v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z/goal-summary.md`
+- Machine-readable report: `v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z/goal-summary.json`
+- Private raw/read-back export root: `v1/data/private/raw_exports/live_goal_other_ready_20260525T221248Z/`
+- Evaluated scope: `scenario_004`, `scenario_007`, `scenario_010`, `scenario_012`, `scenario_013`, `scenario_014`, `scenario_015`, `scenario_017`, and `scenario_018`, excluding `scenario_006` because it already passed in `live_goal_nondet50_20260525T214956Z`.
+- k: `3` attempts per scenario/prompt-variant group.
+- Result: `18/18` evaluated groups nondeterministic; group nondeterminism rate `1.0000`; scenario nondeterminism rate `1.0000`.
+- Acceptance: accepted against the configured `>=0.50` group and scenario thresholds.
+- Boundary: this is live repeated-call evidence for bounded synthetic seeded-evidence rows read back from Splunk. It is not a detector-quality claim, not Openclaw grading, and not a claim that dry-run/projection results were live.
+
+Reality divergence from the original plan: live capture still used script-mandated `data/private/raw_exports/**` raw/read-back roots. Public-safe reproduction metadata and summaries were written under `v1/scenarios/generated/live_goal_other_ready_20260525T221248Z/` and `v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z/`.
+
 ## Definition of done
 
 Implementation is done when:

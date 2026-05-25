@@ -1,0 +1,27 @@
+{
+  "attempts": 3,
+  "excluded_scenarios": [
+    "scenario_006"
+  ],
+  "round_note": "Round 2 after fixing generated public-safe synthetic report object IDs to match object_[0-9]{6}.",
+  "run_id": "live_goal_other_ready_20260525T221248Z",
+  "safety": {
+    "no_openclaw_grading": true,
+    "no_remediation": true,
+    "synthetic_public_safe_rows_only": true
+  },
+  "scenario_scope": [
+    "scenario_004",
+    "scenario_007",
+    "scenario_010",
+    "scenario_012",
+    "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_017",
+    "scenario_018"
+  ],
+  "seed": 2026052503,
+  "selection_reason": "Evaluate other ready k=3 scenario groups beyond the previously successful scenario_006 focused probe.",
+  "source_candidate": "goal_nondet50_20260525T213625Z/round_01_candidate_002"
+}

@@ -1,0 +1,18 @@
+{
+  "candidate_id": "live_goal_nondet50_20260525T214956Z",
+  "source_dry_run_candidate": "goal_nondet50_20260525T213625Z/round_01_candidate_002",
+  "scenario_selection": ["scenario_006"],
+  "prompt_family_selection": ["limited_budget_choose_path"],
+  "selection_rationale": "Focused live probe using the one baseline family that previously showed seeded-path k=3 variability. This is a focused live repeated-call evidence artifact, not a full-suite detector-quality claim.",
+  "k": 3,
+  "target_group_rate": 0.5,
+  "target_scenario_rate": 0.5,
+  "no_openclaw_grading": true,
+  "no_remediation": true,
+  "public_safety_notes": [
+    "synthetic lab fixtures only",
+    "no credentials or PII in prompt pack",
+    "raw live exports stay under data/private/raw_exports",
+    "public summaries report only public-safe metadata and conservative caveats"
+  ]
+}

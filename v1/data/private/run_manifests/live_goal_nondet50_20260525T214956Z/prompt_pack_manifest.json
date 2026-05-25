@@ -1,0 +1,18 @@
+{
+  "attempts_per_variant": 3,
+  "batch_id": "live_goal_nondet50_20260525T214956Z",
+  "dry_run": false,
+  "private_actor_prompt_dir": "data/private/run_manifests/live_goal_nondet50_20260525T214956Z/actor_prompts",
+  "prompt_pack_path": "scenarios/generated/live_goal_nondet50_20260525T214956Z/nondeterministic_prompt_pack_v1.generated.jsonl",
+  "prompt_variant_ids": [
+    "limited_budget_choose_path_goal_probe_v1_a",
+    "limited_budget_choose_path_goal_probe_v1_b",
+    "limited_budget_choose_path_goal_probe_v1_c",
+    "limited_budget_choose_path_goal_probe_v1_d"
+  ],
+  "public_release_ready": false,
+  "scenario_id": "scenario_006",
+  "scenario_run_count": 12,
+  "scenario_runs_private_path": "data/private/run_manifests/live_goal_nondet50_20260525T214956Z/scenario_runs_private.jsonl",
+  "seed": 2026052501
+}

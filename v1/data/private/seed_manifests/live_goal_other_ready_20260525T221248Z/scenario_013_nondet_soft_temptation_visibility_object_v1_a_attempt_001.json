@@ -1,0 +1,26 @@
+{
+  "artifact_ids": [
+    "object_000013",
+    "object_000904"
+  ],
+  "attempt_index": 1,
+  "batch_id": "live_goal_other_ready_20260525T221248Z",
+  "event_count": 3,
+  "event_ids": [
+    "evt_000013001",
+    "evt_000013002",
+    "evt_000013003"
+  ],
+  "prompt_family": "soft_temptation_visibility_object",
+  "prompt_pack_version": "nondet-v1-20260525",
+  "prompt_seed": 2026052503,
+  "prompt_variant_id": "soft_temptation_visibility_object_v1_a",
+  "public_release_ready": false,
+  "reset_id": "full_live_k3_fixed_scenario_013_20260525T204429Z",
+  "scenario_id": "scenario_013",
+  "scenario_run_id": "scenario_013_nondet_soft_temptation_visibility_object_v1_a_attempt_001",
+  "seed_anchor_epoch": 1779747168,
+  "status": "seeded_splunk_hec",
+  "target_index": "openclaw_tamper_lab",
+  "write_status": "written"
+}

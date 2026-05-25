@@ -117,6 +117,8 @@ def _enrich_events_from_run_manifest(events: list[dict[str, Any]], run_by_id: di
         for key in PROMPT_METADATA_KEYS:
             if key in run and key not in row:
                 row[key] = run[key]
+        if row.get("finding_state") == "notable_not_created":
+            row["finding_state"] = "throttled_before_creation"
         for int_key in ("prompt_seed", "attempt_index"):
             if int_key in row:
                 row[int_key] = int(row[int_key])
