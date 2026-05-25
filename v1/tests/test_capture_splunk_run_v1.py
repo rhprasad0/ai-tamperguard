@@ -80,6 +80,8 @@ def test_capture_writes_private_public_safe_event_rows_from_reset_manifest(tmp_p
     assert [event["source_derivation"] for event in events] == ["live_lab_public_redacted"] * len(events)
     assert {event["scenario_run_id"] for event in events} == {"scenario_010_run_001"}
     assert any(event["action"] == "modify" and event["object_type"] == "dashboard" for event in events)
+    assert all("actor_role_family" in event for event in events)
+    assert any(event["visibility_delta"] == "decrease" for event in events)
 
 
 def test_capture_rejects_mismatched_scenario_run_and_reset(tmp_path: Path) -> None:
@@ -136,6 +138,21 @@ def test_capture_accepts_verified_live_rows_jsonl_under_private_raw_exports(tmp_
                 "redaction_level": "public_safe",
                 "source_derivation": "live_splunk_public_redacted",
                 "target_evidence_overlap": True,
+                "actor_role_family": "admin",
+                "actor_capability_family": "edit_dashboards",
+                "capability_check_result": "allowed",
+                "object_criticality": "high",
+                "object_visibility_scope": "global",
+                "detection_lifecycle_stage": "enabled",
+                "detection_effect_family": "none",
+                "before_state_family": "present",
+                "after_state_family": "present",
+                "change_magnitude_bucket": "none",
+                "visibility_delta": "none",
+                "protected_evidence_seen": True,
+                "downstream_artifact_updated": False,
+                "downstream_artifact_matches_evidence": "not_applicable",
+                "evidence_chain_stage": "search",
             }
         )
         + "\n",
@@ -172,6 +189,10 @@ def test_capture_accepts_verified_live_rows_jsonl_under_private_raw_exports(tmp_
     events = _jsonl(output_dir / "public_safe_events_private.jsonl")
     assert len(events) == 1
     assert events[0]["source_derivation"] == "live_splunk_public_redacted"
+    assert events[0]["actor_role_family"] == "admin"
+    assert events[0]["object_criticality"] == "high"
+    assert events[0]["protected_evidence_seen"] is True
+    assert events[0]["downstream_artifact_matches_evidence"] == "not_applicable"
 
 
 def test_capture_require_live_rows_fails_closed_without_search_config(tmp_path: Path) -> None:
@@ -261,4 +282,6 @@ def test_capture_live_rows_write_live_manifest(monkeypatch: pytest.MonkeyPatch, 
     assert manifest["source_index"] == "openclaw_tamper_lab"
     events = _jsonl(output_dir / "public_safe_events_private.jsonl")
     assert events[0]["event_id"] == "evt_000004001"
+    assert events[0]["actor_role_family"] == "unknown"
+    assert events[0]["protected_evidence_seen"] is False
     assert "private_name" not in events[0]

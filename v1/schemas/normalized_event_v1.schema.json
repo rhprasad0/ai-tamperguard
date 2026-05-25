@@ -28,8 +28,31 @@
       ],
       "type": "string"
     },
+    "actor_capability_family": {
+      "enum": [
+        "search",
+        "admin_all_objects",
+        "edit_savedsearches",
+        "edit_dashboards",
+        "edit_alerts",
+        "manage_tokens",
+        "unknown"
+      ],
+      "type": "string"
+    },
     "actor_id": {
       "pattern": "^actor_[0-9]{3}$",
+      "type": "string"
+    },
+    "actor_role_family": {
+      "enum": [
+        "admin",
+        "analyst",
+        "service_account",
+        "agent",
+        "system",
+        "unknown"
+      ],
       "type": "string"
     },
     "actor_type": {
@@ -41,8 +64,112 @@
       ],
       "type": "string"
     },
+    "after_state_family": {
+      "enum": [
+        "enabled",
+        "disabled",
+        "broad",
+        "narrow",
+        "scheduled",
+        "unscheduled",
+        "present",
+        "absent",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "before_state_family": {
+      "enum": [
+        "enabled",
+        "disabled",
+        "broad",
+        "narrow",
+        "scheduled",
+        "unscheduled",
+        "present",
+        "absent",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "capability_check_result": {
+      "enum": [
+        "allowed",
+        "denied",
+        "not_checked",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "change_magnitude_bucket": {
+      "enum": [
+        "none",
+        "small",
+        "medium",
+        "large",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "detection_effect_family": {
+      "enum": [
+        "none",
+        "visibility_gain",
+        "visibility_loss",
+        "alert_volume_reduction",
+        "routing_change",
+        "report_change",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "detection_lifecycle_stage": {
+      "enum": [
+        "draft",
+        "enabled",
+        "scheduled",
+        "throttled",
+        "disabled",
+        "report_only",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "downstream_artifact_matches_evidence": {
+      "enum": [
+        "matches",
+        "omits_relevant_evidence",
+        "contradicts_evidence",
+        "not_applicable",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "downstream_artifact_updated": {
+      "type": "boolean"
+    },
     "event_id": {
       "pattern": "^evt_[0-9]{9}$",
+      "type": "string"
+    },
+    "evidence_chain_stage": {
+      "enum": [
+        "search",
+        "read_visibility_object",
+        "change_visibility_object",
+        "write_report",
+        "verify",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "object_criticality": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "unknown"
+      ],
       "type": "string"
     },
     "object_id": {
@@ -77,6 +204,18 @@
         "search_job"
       ],
       "type": "string"
+    },
+    "object_visibility_scope": {
+      "enum": [
+        "private",
+        "team",
+        "global",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "protected_evidence_seen": {
+      "type": "boolean"
     },
     "raw_event_ref": {
       "pattern": "^private_ref_[a-z0-9_]+$",
@@ -138,6 +277,15 @@
     },
     "target_evidence_overlap": {
       "type": "boolean"
+    },
+    "visibility_delta": {
+      "enum": [
+        "none",
+        "increase",
+        "decrease",
+        "unknown"
+      ],
+      "type": "string"
     }
   },
   "required": [

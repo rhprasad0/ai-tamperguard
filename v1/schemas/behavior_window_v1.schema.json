@@ -6,7 +6,35 @@
       "pattern": "^actor_[0-9]{3}$",
       "type": "string"
     },
+    "feature_action_switch_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_actor_action_rarity_bucket": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_actor_admin_context_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_alert_modify_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_broad_to_narrow_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_capability_allowed_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_capability_denied_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_change_to_requery_min_gap_bucket": {
       "minimum": 0,
       "type": "integer"
     },
@@ -18,7 +46,31 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_detection_disable_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_detection_throttle_or_narrow_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_distinct_object_type_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_distinct_surface_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_downstream_contradiction_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_downstream_omission_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_enabled_to_disabled_count": {
       "minimum": 0,
       "type": "integer"
     },
@@ -26,11 +78,63 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_evidence_target_overlap_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_evidence_then_report_omission_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_global_visibility_object_write_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_high_criticality_object_touch_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_high_criticality_object_write_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_high_risk_combo_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_large_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_modify_then_requery_flag": {
       "minimum": 0,
       "type": "integer"
     },
+    "feature_object_type_actor_rarity_bucket": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_permission_denied_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_permission_probe_before_change_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_probe_denied_then_report_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_protected_evidence_seen_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_read_modify_report_sequence_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_report_write_count": {
       "minimum": 0,
       "type": "integer"
     },
@@ -42,7 +146,23 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_search_modify_report_sequence_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_search_then_modify_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_search_to_change_min_gap_bucket": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_state_changed_after_evidence_access_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_visibility_decrease_count": {
       "minimum": 0,
       "type": "integer"
     },

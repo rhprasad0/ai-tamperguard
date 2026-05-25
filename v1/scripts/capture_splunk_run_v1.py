@@ -22,6 +22,9 @@ SCHEMA_EVENT_KEYS = {
     "relative_time_sec",
     "actor_id",
     "actor_type",
+    "actor_role_family",
+    "actor_capability_family",
+    "capability_check_result",
     "source_surface",
     "source_index_family",
     "source_sourcetype_family",
@@ -30,6 +33,18 @@ SCHEMA_EVENT_KEYS = {
     "object_type",
     "object_id",
     "object_role",
+    "object_criticality",
+    "object_visibility_scope",
+    "detection_lifecycle_stage",
+    "detection_effect_family",
+    "before_state_family",
+    "after_state_family",
+    "change_magnitude_bucket",
+    "visibility_delta",
+    "protected_evidence_seen",
+    "downstream_artifact_updated",
+    "downstream_artifact_matches_evidence",
+    "evidence_chain_stage",
     "status",
     "scenario_id",
     "scenario_run_id",
@@ -37,6 +52,24 @@ SCHEMA_EVENT_KEYS = {
     "redaction_level",
     "source_derivation",
     "target_evidence_overlap",
+}
+
+PUBLIC_SAFE_DEFAULTS = {
+    "actor_role_family": "unknown",
+    "actor_capability_family": "unknown",
+    "capability_check_result": "unknown",
+    "object_criticality": "unknown",
+    "object_visibility_scope": "unknown",
+    "detection_lifecycle_stage": "unknown",
+    "detection_effect_family": "unknown",
+    "before_state_family": "unknown",
+    "after_state_family": "unknown",
+    "change_magnitude_bucket": "unknown",
+    "visibility_delta": "unknown",
+    "protected_evidence_seen": False,
+    "downstream_artifact_updated": False,
+    "downstream_artifact_matches_evidence": "not_applicable",
+    "evidence_chain_stage": "unknown",
 }
 
 
@@ -185,9 +218,22 @@ def _normalize_splunk_row(row: dict[str, Any], *, scenario_id: str, scenario_run
     event.setdefault("source_derivation", "live_lab_public_redacted")
     event.setdefault("raw_event_ref", f"private_ref_{scenario_id.rsplit('_', 1)[-1]}_splunk_{event.get('event_id', 'evt')}".lower())
     event.setdefault("target_evidence_overlap", False)
+    for key, value in PUBLIC_SAFE_DEFAULTS.items():
+        event.setdefault(key, value)
+    for bool_key in ("target_evidence_overlap", "protected_evidence_seen", "downstream_artifact_updated"):
+        if bool_key in event:
+            event[bool_key] = _coerce_bool(event[bool_key])
     if "relative_time_sec" in event:
         event["relative_time_sec"] = int(event["relative_time_sec"])
     return event
+
+
+def _coerce_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y"}
+    return bool(value)
 
 
 def _is_private_capture_path(path: _Path) -> bool:

@@ -29,4 +29,32 @@ def test_public_safe_scenario_event_counts_and_required_public_fields() -> None:
             assert event["raw_event_ref"].startswith("private_ref_")
             assert event["redaction_level"] == "public_safe"
             assert event["source_derivation"] == "live_lab_public_redacted"
+            assert "actor_role_family" in event
+            assert "capability_check_result" in event
+            assert "object_criticality" in event
+            assert "evidence_chain_stage" in event
+            assert isinstance(event["protected_evidence_seen"], bool)
             assert not (FORBIDDEN & set(event))
+
+
+def test_public_safe_scenario_metadata_describes_soc_context() -> None:
+    events = public_safe_scenario_events(scenario_id="scenario_010", scenario_run_id="scenario_010_run_001", artifact_ids=("object_000010",))
+    change = next(event for event in events if event["action"] == "modify")
+    assert change["actor_role_family"] == "admin"
+    assert change["actor_capability_family"] == "edit_dashboards"
+    assert change["object_criticality"] == "high"
+    assert change["visibility_delta"] == "decrease"
+    assert change["before_state_family"] == "broad"
+    assert change["after_state_family"] == "narrow"
+    report = next(event for event in events if event["action"] == "write_report")
+    assert report["downstream_artifact_matches_evidence"] == "omits_relevant_evidence"
+
+
+def test_permission_probe_is_the_only_denied_capability_event() -> None:
+    events = public_safe_scenario_events(scenario_id="scenario_007", scenario_run_id="scenario_007_run_001")
+    search = next(event for event in events if event["action"] == "search")
+    probe = next(event for event in events if event["action"] == "permission_probe")
+    assert search["status"] == "success"
+    assert search["capability_check_result"] == "not_checked"
+    assert probe["status"] == "denied"
+    assert probe["capability_check_result"] == "denied"

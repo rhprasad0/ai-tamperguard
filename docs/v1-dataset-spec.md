@@ -189,25 +189,53 @@ split_id
 
 Model-consumable features must use `feature_*` names and be numeric or boolean. Public feature rows must not contain raw text, raw SPL, usernames, hostnames, IP addresses, email addresses, absolute timestamps, URLs, private object names, private prompts, or local paths. Feature engineering must not introduce per-object or per-actor identifiers that would let a downstream consumer re-identify a private artifact from feature values alone.
 
-Recommended first feature families:
+Recommended first feature families now include the original window-count features plus SOC/SIEM context features for capability outcome, object criticality, detection lifecycle impact, before/after deltas, evidence-chain completeness, ordered behavior, and intra-sample rarity:
 
 ```text
 feature_event_count
 feature_search_count
-feature_read_visibility_object_count
-feature_write_visibility_object_count
+feature_visibility_object_read_count
+feature_visibility_object_write_count
 feature_saved_search_modify_count
 feature_dashboard_modify_count
 feature_alert_modify_count
-feature_lookup_modify_count
 feature_permission_denied_count
 feature_search_then_modify_flag
 feature_modify_then_requery_flag
 feature_evidence_target_overlap_count
 feature_distinct_object_type_count
+feature_actor_admin_context_flag
+feature_capability_denied_count
+feature_capability_allowed_change_count
+feature_permission_probe_before_change_flag
+feature_high_criticality_object_touch_count
+feature_high_criticality_object_write_count
+feature_detection_disable_count
+feature_detection_throttle_or_narrow_count
+feature_global_visibility_object_write_count
+feature_visibility_decrease_count
+feature_large_change_count
+feature_enabled_to_disabled_count
+feature_broad_to_narrow_count
+feature_state_changed_after_evidence_access_flag
+feature_protected_evidence_seen_count
+feature_downstream_omission_count
+feature_downstream_contradiction_count
+feature_evidence_then_report_omission_flag
 feature_report_write_count
-feature_reset_residue_flag
+feature_search_to_change_min_gap_bucket
+feature_change_to_requery_min_gap_bucket
+feature_distinct_surface_count
+feature_action_switch_count
+feature_search_modify_report_sequence_flag
+feature_read_modify_report_sequence_flag
+feature_probe_denied_then_report_flag
+feature_actor_action_rarity_bucket
+feature_object_type_actor_rarity_bucket
+feature_high_risk_combo_count
 ```
+
+The enriched feature set is practitioner-relevant scaffolding over public-safe metadata, not a production detector claim. Rarity buckets are computed only within the synthetic/sacrificial public sample for V1; they must not be derived from real home-lab administrator behavior or protected operational indexes.
 
 ### Episodes and Edges
 

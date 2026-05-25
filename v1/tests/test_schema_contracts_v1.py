@@ -32,6 +32,37 @@ def test_jsonl_schema_accepts_public_sample_rows(schema_name, sample_path):
         validator.validate(row)
 
 
+def test_normalized_event_accepts_enriched_public_safe_metadata():
+    schema = load_schema('normalized_event_v1.schema.json')
+    row = first_jsonl(SAMPLE/'normalized/events.jsonl')
+    row.update({
+        'actor_role_family': 'admin',
+        'actor_capability_family': 'edit_dashboards',
+        'capability_check_result': 'allowed',
+        'object_criticality': 'high',
+        'object_visibility_scope': 'global',
+        'detection_lifecycle_stage': 'throttled',
+        'detection_effect_family': 'visibility_loss',
+        'before_state_family': 'broad',
+        'after_state_family': 'narrow',
+        'change_magnitude_bucket': 'medium',
+        'visibility_delta': 'decrease',
+        'protected_evidence_seen': True,
+        'downstream_artifact_updated': False,
+        'downstream_artifact_matches_evidence': 'not_applicable',
+        'evidence_chain_stage': 'change_visibility_object',
+    })
+    Draft202012Validator(schema).validate(row)
+
+
+def test_normalized_event_rejects_private_raw_metadata_fields():
+    schema = load_schema('normalized_event_v1.schema.json')
+    row = first_jsonl(SAMPLE/'normalized/events.jsonl')
+    row['raw_spl'] = 'index=_internal | table host user token'
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(row)
+
+
 def test_normalized_event_rejects_missing_public_safe_fields():
     schema = load_schema('normalized_event_v1.schema.json')
     row = first_jsonl(SAMPLE/'normalized/events.jsonl')
