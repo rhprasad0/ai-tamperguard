@@ -55,6 +55,13 @@ def test_normalized_event_accepts_enriched_public_safe_metadata():
     Draft202012Validator(schema).validate(row)
 
 
+def test_normalized_event_accepts_live_splunk_public_redacted_source_derivation():
+    schema = load_schema('normalized_event_v1.schema.json')
+    row = first_jsonl(SAMPLE/'normalized/events.jsonl')
+    row['source_derivation'] = 'live_splunk_public_redacted'
+    Draft202012Validator(schema).validate(row)
+
+
 def test_normalized_event_rejects_private_raw_metadata_fields():
     schema = load_schema('normalized_event_v1.schema.json')
     row = first_jsonl(SAMPLE/'normalized/events.jsonl')

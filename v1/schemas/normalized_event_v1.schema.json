@@ -245,6 +245,7 @@
     "source_derivation": {
       "enum": [
         "live_lab_public_redacted",
+        "live_splunk_public_redacted",
         "synthetic_control_plane_fixture"
       ],
       "type": "string"

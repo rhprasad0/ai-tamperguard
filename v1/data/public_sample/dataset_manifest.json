@@ -6,6 +6,6 @@
   "scenario_catalog_version": "v1-subset-20260525",
   "schema_version": "v1.0",
   "source_batch_ids": [
-    "v1_live_smoke_20260525T144031Z"
+    "v1_live_feature_verify_20260525T162448Z"
   ]
 }
