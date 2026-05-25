@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
+from jsonschema import Draft202012Validator
+
 from ai_tamperguard_v1.scenario_events import public_safe_scenario_events, scenario_actor_id, scenario_id_from_run
 
 FORBIDDEN = {"private_name", "host", "user", "url", "token", "_raw"}
+SCHEMA = json.loads((Path(__file__).resolve().parents[1] / "schemas" / "normalized_event_v1.schema.json").read_text(encoding="utf-8"))
 
 
 def test_scenario_id_from_run_and_actor_defaults() -> None:
@@ -58,3 +64,52 @@ def test_permission_probe_is_the_only_denied_capability_event() -> None:
     assert search["capability_check_result"] == "not_checked"
     assert probe["status"] == "denied"
     assert probe["capability_check_result"] == "denied"
+
+
+def test_scenario_006_operator_handoff_adds_wandering_exploration_events() -> None:
+    events = public_safe_scenario_events(
+        scenario_id="scenario_006",
+        scenario_run_id="scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001",
+        artifact_ids=("object_000777",),
+        prompt_variant_id="operator_handoff_asset_map_v1_a",
+        prompt_family="operator_handoff_asset_map",
+        prompt_pack_version="nondet-v1-20260525",
+        prompt_seed=20260525,
+        attempt_index=1,
+    )
+
+    action_families = {event["action_family"] for event in events}
+    evidence_stages = {event["evidence_chain_stage"] for event in events}
+    assert "metadata_enumeration" in action_families
+    assert "knowledge_object_discovery" in action_families
+    assert "read_visibility_object" in evidence_stages
+    assert all(event["prompt_variant_id"] == "operator_handoff_asset_map_v1_a" for event in events)
+    assert all(event["prompt_family"] == "operator_handoff_asset_map" for event in events)
+    assert all(event["prompt_seed"] == 20260525 for event in events)
+    assert all(event["attempt_index"] == 1 for event in events)
+    assert not any(FORBIDDEN & set(event) for event in events)
+    validator = Draft202012Validator(SCHEMA)
+    for event in events:
+        validator.validate(event)
+
+
+def test_limited_budget_prompt_seed_changes_scenario_006_action_mix() -> None:
+    first = public_safe_scenario_events(
+        scenario_id="scenario_006",
+        scenario_run_id="scenario_006_nondet_limited_budget_choose_path_v1_a_attempt_001",
+        prompt_variant_id="limited_budget_choose_path_v1_a",
+        prompt_family="limited_budget_choose_path",
+        prompt_seed=101,
+        attempt_index=1,
+    )
+    second = public_safe_scenario_events(
+        scenario_id="scenario_006",
+        scenario_run_id="scenario_006_nondet_limited_budget_choose_path_v1_a_attempt_002",
+        prompt_variant_id="limited_budget_choose_path_v1_a",
+        prompt_family="limited_budget_choose_path",
+        prompt_seed=102,
+        attempt_index=2,
+    )
+
+    assert [event["action_family"] for event in first] != [event["action_family"] for event in second]
+    assert {event["scenario_id"] for event in first + second} == {"scenario_006"}

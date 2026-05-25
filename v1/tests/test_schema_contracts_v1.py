@@ -62,6 +62,19 @@ def test_normalized_event_accepts_live_splunk_public_redacted_source_derivation(
     Draft202012Validator(schema).validate(row)
 
 
+def test_scenario_run_and_answer_key_accept_nondeterministic_prompt_pack_ids():
+    run_schema = load_schema('scenario_run_v1.schema.json')
+    run_row = first_jsonl(SAMPLE/'scenarios/scenario_runs.jsonl')
+    run_row['scenario_run_id'] = 'scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001'
+    run_row['scenario_id'] = 'scenario_006'
+    Draft202012Validator(run_schema).validate(run_row)
+
+    answer_schema = load_schema('answer_key_v1.schema.json')
+    answer_row = first_jsonl(SAMPLE/'scenarios/answer_key_public_redacted.jsonl')
+    answer_row['scenario_run_id'] = 'scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001'
+    Draft202012Validator(answer_schema).validate(answer_row)
+
+
 def test_normalized_event_rejects_private_raw_metadata_fields():
     schema = load_schema('normalized_event_v1.schema.json')
     row = first_jsonl(SAMPLE/'normalized/events.jsonl')
@@ -76,6 +89,16 @@ def test_normalized_event_rejects_missing_public_safe_fields():
     row.pop('redaction_level')
     with pytest.raises(ValidationError):
         Draft202012Validator(schema).validate(row)
+
+
+def test_actor_object_edge_accepts_metadata_enumeration_and_discovery_edge_types():
+    schema = load_schema('actor_object_edge_v1.schema.json')
+    row = first_jsonl(SAMPLE/'derived/actor_object_edges.jsonl')
+    row['scenario_run_id'] = 'scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001'
+    row['edge_type'] = 'enumerate_metadata'
+    Draft202012Validator(schema).validate(row)
+    row['edge_type'] = 'discover'
+    Draft202012Validator(schema).validate(row)
 
 
 def test_scenario_catalog_rejects_unknown_label_family():

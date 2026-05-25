@@ -24,7 +24,9 @@
         "created",
         "deleted",
         "wrote",
-        "probed"
+        "probed",
+        "enumerate_metadata",
+        "discover"
       ],
       "type": "string"
     },

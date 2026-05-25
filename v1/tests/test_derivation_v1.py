@@ -92,6 +92,40 @@ def test_enriched_soc_features_are_derived_from_event_context():
     assert row['feature_search_modify_report_sequence_flag'] == 1
 
 
+def test_edges_preserve_metadata_enumeration_and_discovery_actions():
+    events = [
+        {
+            'event_id': 'evt_000000001',
+            'scenario_run_id': 'scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001',
+            'actor_id': 'actor_002',
+            'relative_time_sec': 60,
+            'action': 'enumerate_metadata',
+            'action_family': 'metadata_enumeration',
+            'object_type': 'sourcetype',
+            'object_role': 'evidence_source',
+            'object_id': 'object_000901',
+            'source_surface': 'splunk_metadata',
+            'status': 'success',
+            'target_evidence_overlap': False,
+        },
+        {
+            'event_id': 'evt_000000002',
+            'scenario_run_id': 'scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001',
+            'actor_id': 'actor_002',
+            'relative_time_sec': 120,
+            'action': 'discover',
+            'action_family': 'knowledge_object_discovery',
+            'object_type': 'saved_search',
+            'object_role': 'detection_or_visibility_artifact',
+            'object_id': 'object_000902',
+            'source_surface': 'splunk_knowledge_objects',
+            'status': 'success',
+            'target_evidence_overlap': False,
+        },
+    ]
+    assert [edge['edge_type'] for edge in derive_edges(events)] == ['enumerate_metadata', 'discover']
+
+
 def test_probe_denied_then_report_requires_denied_probe():
     base = {
         'scenario_run_id': 'scenario_007_run_001',

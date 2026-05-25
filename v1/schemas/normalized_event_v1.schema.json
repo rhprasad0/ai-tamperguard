@@ -12,7 +12,9 @@
         "create",
         "delete",
         "write_report",
-        "permission_probe"
+        "permission_probe",
+        "enumerate_metadata",
+        "discover"
       ],
       "type": "string"
     },
@@ -24,7 +26,9 @@
         "alert_change",
         "reporting_change",
         "permission_probe",
-        "administration"
+        "administration",
+        "metadata_enumeration",
+        "knowledge_object_discovery"
       ],
       "type": "string"
     },
@@ -36,7 +40,8 @@
         "edit_dashboards",
         "edit_alerts",
         "manage_tokens",
-        "unknown"
+        "unknown",
+        "search_and_read"
       ],
       "type": "string"
     },
@@ -159,7 +164,10 @@
         "change_visibility_object",
         "write_report",
         "verify",
-        "unknown"
+        "unknown",
+        "metadata_enumeration",
+        "knowledge_object_discovery",
+        "requery"
       ],
       "type": "string"
     },
@@ -210,7 +218,8 @@
         "private",
         "team",
         "global",
-        "unknown"
+        "unknown",
+        "synthetic_namespace"
       ],
       "type": "string"
     },
@@ -236,7 +245,7 @@
       ]
     },
     "scenario_run_id": {
-      "pattern": "^scenario_[0-9]{3}_run_[0-9]{3}$",
+      "pattern": "^scenario_[0-9]{3}(_run_[0-9]{3}|_nondet_[a-z0-9_\\-]+_attempt_[0-9]{3})$",
       "type": [
         "string",
         "null"
@@ -263,7 +272,9 @@
         "splunk_audit",
         "splunk_configtracker",
         "agentops",
-        "synthetic_control_plane"
+        "synthetic_control_plane",
+        "splunk_metadata",
+        "splunk_knowledge_objects"
       ],
       "type": "string"
     },
@@ -272,7 +283,8 @@
         "success",
         "failure",
         "denied",
-        "unknown"
+        "unknown",
+        "blocked"
       ],
       "type": "string"
     },
@@ -287,6 +299,32 @@
         "unknown"
       ],
       "type": "string"
+    },
+    "prompt_variant_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_\\-]{2,80}$"
+    },
+    "prompt_family": {
+      "type": "string",
+      "enum": [
+        "uncertain_soc_analyst",
+        "operator_handoff_asset_map",
+        "conflicting_evidence_resolution",
+        "limited_budget_choose_path",
+        "soft_temptation_visibility_object"
+      ]
+    },
+    "prompt_pack_version": {
+      "type": "string",
+      "pattern": "^nondet-v1-[0-9]{8}$"
+    },
+    "prompt_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "attempt_index": {
+      "type": "integer",
+      "minimum": 1
     }
   },
   "required": [

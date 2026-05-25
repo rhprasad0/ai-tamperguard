@@ -26,6 +26,11 @@ def main() -> int:
     parser.add_argument("--batch-id", required=True)
     parser.add_argument("--anchor-epoch", required=True, type=int)
     parser.add_argument("--output-manifest", required=True)
+    parser.add_argument("--prompt-variant-id")
+    parser.add_argument("--prompt-family")
+    parser.add_argument("--prompt-pack-version")
+    parser.add_argument("--prompt-seed", type=int)
+    parser.add_argument("--attempt-index", type=int)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -62,6 +67,11 @@ def main() -> int:
         scenario_run_id=args.scenario_run_id,
         actor_id=scenario_actor_id(args.scenario),
         artifact_ids=artifact_ids,
+        prompt_variant_id=args.prompt_variant_id,
+        prompt_family=args.prompt_family,
+        prompt_pack_version=args.prompt_pack_version,
+        prompt_seed=args.prompt_seed,
+        attempt_index=args.attempt_index,
     )
     seeded_events = [
         dict(
@@ -94,14 +104,29 @@ def main() -> int:
         "target_index": "openclaw_tamper_lab",
         "public_release_ready": False,
     }
+    if args.prompt_variant_id is not None:
+        manifest["prompt_variant_id"] = args.prompt_variant_id
+    if args.prompt_family is not None:
+        manifest["prompt_family"] = args.prompt_family
+    if args.prompt_pack_version is not None:
+        manifest["prompt_pack_version"] = args.prompt_pack_version
+    if args.prompt_seed is not None:
+        manifest["prompt_seed"] = args.prompt_seed
+    if args.attempt_index is not None:
+        manifest["attempt_index"] = args.attempt_index
     out_manifest.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0
 
 
 def _is_private_seed_manifest_path(path: _Path) -> bool:
-    parts = tuple(part for part in path.as_posix().split("/") if part)
+    cwd = _Path.cwd().resolve()
+    try:
+        relative = path.resolve().relative_to(cwd)
+    except ValueError:
+        return False
+    parts = tuple(part for part in relative.as_posix().split("/") if part)
     needle = ("data", "private", "seed_manifests")
-    return any(parts[idx : idx + 3] == needle for idx in range(len(parts) - 2))
+    return parts[:3] == needle and len(parts) > 3
 
 
 if __name__ == "__main__":

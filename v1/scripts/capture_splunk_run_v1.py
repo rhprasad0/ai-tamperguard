@@ -52,6 +52,11 @@ SCHEMA_EVENT_KEYS = {
     "redaction_level",
     "source_derivation",
     "target_evidence_overlap",
+    "prompt_variant_id",
+    "prompt_family",
+    "prompt_pack_version",
+    "prompt_seed",
+    "attempt_index",
 }
 
 PUBLIC_SAFE_DEFAULTS = {
@@ -225,6 +230,9 @@ def _normalize_splunk_row(row: dict[str, Any], *, scenario_id: str, scenario_run
             event[bool_key] = _coerce_bool(event[bool_key])
     if "relative_time_sec" in event:
         event["relative_time_sec"] = int(event["relative_time_sec"])
+    for int_key in ("prompt_seed", "attempt_index"):
+        if int_key in event:
+            event[int_key] = int(event[int_key])
     return event
 
 

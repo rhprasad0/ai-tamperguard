@@ -31,7 +31,8 @@ V1 uses these layers, ordered from most private to publishable.
 |---|---|---|---|
 | Live Splunk lab state | `v1/splunk/private/` or external private storage | Private | Concrete connection config, reset fixtures, app namespace details, and run operator notes. |
 | Raw protected evidence | `v1/data/private/raw_exports/` | Private | Authorized `_audit`, `_configtracker`, scenario fixture, and optional agent/tool telemetry exports. |
-| Run manifests and reset records | `v1/data/private/run_manifests/`, redacted copy under public sample | Mixed | Prove which scenario ran, which reset prepared it, and what verification decided. |
+| Run manifests and reset records | `v1/data/private/run_manifests/`, redacted copy under public sample | Mixed | Prove which scenario ran, which reset prepared it, what prompt variant stimulated it when applicable, and what verification decided. |
+| Prompt-pack catalog | `v1/scenarios/nondeterministic_prompt_pack_v1.jsonl` | Public-safe | Versioned synthetic prompt templates and metadata for bounded nondeterministic exploration; private materialized prompt bodies remain under run manifests only. |
 | Normalized events | `v1/data/private/normalized/`, redacted copy under public sample | Mixed | Canonical actor/action/object rows with stable pseudonyms and no private strings. |
 | Answer keys | Private full key plus `v1/data/public_sample/scenarios/answer_key_public_redacted.jsonl` | Mixed | Link labels to scenario intervals and evidence chains without exposing raw values. |
 | Derived views | `v1/data/public_sample/derived/` | Public-safe | Trainable behavior windows, episodes, sequences, and actor-object edges. |
@@ -233,6 +234,15 @@ feature_probe_denied_then_report_flag
 feature_actor_action_rarity_bucket
 feature_object_type_actor_rarity_bucket
 feature_high_risk_combo_count
+feature_metadata_enumeration_count
+feature_knowledge_object_discovery_count
+feature_repeat_search_count
+feature_read_visibility_object_count
+feature_permission_probe_count
+feature_distinct_source_surface_count
+feature_distinct_action_family_count
+feature_evidence_chain_completion_flag
+feature_report_disagrees_with_evidence_flag
 ```
 
 The enriched feature set is practitioner-relevant scaffolding over public-safe metadata, not a production detector claim. Rarity buckets are computed only within the synthetic/sacrificial public sample for V1; they must not be derived from real home-lab administrator behavior or protected operational indexes.

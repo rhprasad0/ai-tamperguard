@@ -195,6 +195,77 @@ def test_capture_accepts_verified_live_rows_jsonl_under_private_raw_exports(tmp_
     assert events[0]["downstream_artifact_matches_evidence"] == "not_applicable"
 
 
+def test_capture_preserves_prompt_pack_metadata_from_verified_live_rows(tmp_path: Path) -> None:
+    cfg, _reset = _private_files(tmp_path, scenario="scenario_006", reset_id="reset_006_001")
+    batch_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001"
+    batch_dir.mkdir(parents=True)
+    rows = batch_dir / "verified_splunk_rows.jsonl"
+    rows.write_text(
+        json.dumps(
+            {
+                "event_id": "evt_000006001",
+                "relative_time_sec": "60",
+                "actor_id": "actor_002",
+                "actor_type": "agent_or_admin",
+                "source_surface": "splunk_audit",
+                "source_index_family": "audit",
+                "source_sourcetype_family": "audittrail",
+                "action": "search",
+                "action_family": "investigation",
+                "object_type": "index",
+                "object_id": "object_000900",
+                "object_role": "evidence_source",
+                "status": "success",
+                "scenario_id": "scenario_006",
+                "scenario_run_id": "scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001",
+                "raw_event_ref": "private_ref_006_001_001",
+                "redaction_level": "public_safe",
+                "source_derivation": "live_splunk_public_redacted",
+                "target_evidence_overlap": "false",
+                "prompt_variant_id": "operator_handoff_asset_map_v1_a",
+                "prompt_family": "operator_handoff_asset_map",
+                "prompt_pack_version": "nondet-v1-20260525",
+                "prompt_seed": "20260525",
+                "attempt_index": "1",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    output_dir = batch_dir / "capture"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "scripts" / "capture_splunk_run_v1.py"),
+            "--config",
+            str(cfg),
+            "--scenario-run-id",
+            "scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001",
+            "--reset-id",
+            "reset_006_001",
+            "--output-dir",
+            str(output_dir),
+            "--require-live-splunk-rows",
+            "--verified-live-rows-jsonl",
+            str(rows),
+        ],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    events = _jsonl(output_dir / "public_safe_events_private.jsonl")
+    assert events[0]["relative_time_sec"] == 60
+    assert events[0]["prompt_variant_id"] == "operator_handoff_asset_map_v1_a"
+    assert events[0]["prompt_family"] == "operator_handoff_asset_map"
+    assert events[0]["prompt_pack_version"] == "nondet-v1-20260525"
+    assert events[0]["prompt_seed"] == 20260525
+    assert events[0]["attempt_index"] == 1
+
+
 def test_capture_require_live_rows_fails_closed_without_search_config(tmp_path: Path) -> None:
     cfg, _reset = _private_files(tmp_path, scenario="scenario_004", reset_id="reset_004_001")
     output_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_004_run_001"

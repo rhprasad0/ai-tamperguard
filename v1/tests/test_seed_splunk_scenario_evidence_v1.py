@@ -48,7 +48,17 @@ def _files(tmp_path: Path, *, hec_index: str = "openclaw_tamper_lab", scenario: 
     return cfg, inventory
 
 
-def _run(tmp_path: Path, cfg: Path, inventory: Path, *, scenario: str, scenario_run_id: str, reset_id: str, output: Path) -> subprocess.CompletedProcess[str]:
+def _run(
+    tmp_path: Path,
+    cfg: Path,
+    inventory: Path,
+    *,
+    scenario: str,
+    scenario_run_id: str,
+    reset_id: str,
+    output: Path,
+    extra_args: list[str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [
             sys.executable,
@@ -70,6 +80,7 @@ def _run(tmp_path: Path, cfg: Path, inventory: Path, *, scenario: str, scenario_
             "--output-manifest",
             str(output),
             "--dry-run",
+            *(extra_args or []),
         ],
         cwd=tmp_path,
         text=True,
@@ -89,6 +100,40 @@ def test_seed_dry_run_expected_counts_for_three_scenarios(tmp_path: Path) -> Non
         manifest = json.loads(output.read_text(encoding="utf-8"))
         assert manifest["event_count"] == count
         assert "private_name" not in output.read_text(encoding="utf-8")
+
+
+def test_seed_propagates_prompt_metadata_for_scenario_006(tmp_path: Path) -> None:
+    cfg, inventory = _files(tmp_path, scenario="scenario_006", reset_id="reset_006_001")
+    output = tmp_path / "data" / "private" / "seed_manifests" / "batch_001" / "scenario_006.json"
+    result = _run(
+        tmp_path,
+        cfg,
+        inventory,
+        scenario="scenario_006",
+        scenario_run_id="scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001",
+        reset_id="reset_006_001",
+        output=output,
+        extra_args=[
+            "--prompt-variant-id",
+            "operator_handoff_asset_map_v1_a",
+            "--prompt-family",
+            "operator_handoff_asset_map",
+            "--prompt-pack-version",
+            "nondet-v1-20260525",
+            "--prompt-seed",
+            "20260525",
+            "--attempt-index",
+            "1",
+        ],
+    )
+    assert result.returncode == 0, result.stderr
+    manifest = json.loads(output.read_text(encoding="utf-8"))
+    assert manifest["prompt_variant_id"] == "operator_handoff_asset_map_v1_a"
+    assert manifest["prompt_family"] == "operator_handoff_asset_map"
+    assert manifest["prompt_pack_version"] == "nondet-v1-20260525"
+    assert manifest["prompt_seed"] == 20260525
+    assert manifest["attempt_index"] == 1
+    assert manifest["event_count"] >= 5
 
 
 def test_seed_rejects_scenario_run_mismatch(tmp_path: Path) -> None:
@@ -111,6 +156,14 @@ def test_seed_rejects_missing_reset_manifest(tmp_path: Path) -> None:
 def test_seed_rejects_output_manifest_outside_private_seed_manifests(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path)
     output = tmp_path / "public" / "seed.json"
+    result = _run(tmp_path, cfg, inventory, scenario="scenario_004", scenario_run_id="scenario_004_run_001", reset_id="reset_004_001", output=output)
+    assert result.returncode == 2
+    assert "data/private/seed_manifests" in result.stderr
+
+
+def test_seed_rejects_traversal_out_of_private_seed_manifests(tmp_path: Path) -> None:
+    cfg, inventory = _files(tmp_path)
+    output = tmp_path / "data" / "private" / "seed_manifests" / ".." / ".." / "public" / "seed.json"
     result = _run(tmp_path, cfg, inventory, scenario="scenario_004", scenario_run_id="scenario_004_run_001", reset_id="reset_004_001", output=output)
     assert result.returncode == 2
     assert "data/private/seed_manifests" in result.stderr
