@@ -1,0 +1,17 @@
+{
+  "candidate": {
+    "candidate_id": "round_01_candidate_002",
+    "candidate_index": 2,
+    "conflict_intensity": "weak",
+    "distractor_count": 1,
+    "evidence_surface_order": "config_first",
+    "hint_density": "medium",
+    "max_tool_budget": 3,
+    "projected_nondet_groups": 13,
+    "prompt_pressure": "time_limited",
+    "prompt_seed_policy": "scenario_variant_attempt_hash",
+    "round_index": 1
+  },
+  "generated_by": "optimize_nondeterminism_goal_v1.py",
+  "note": "Candidate copy for dry-run scoring; promotion to base prompt pack requires review."
+}

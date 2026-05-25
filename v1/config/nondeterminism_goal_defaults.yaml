@@ -1,0 +1,37 @@
+goal_name: nondet50
+k: 3
+target_group_rate: 0.50
+target_scenario_rate: 0.50
+max_rounds: 5
+candidates_per_round: 6
+mode_default: dry-run
+no_openclaw_grading: true
+scenarios:
+  - scenario_004
+  - scenario_006
+  - scenario_007
+  - scenario_010
+  - scenario_011
+  - scenario_012
+  - scenario_013
+  - scenario_014
+  - scenario_015
+  - scenario_017
+  - scenario_018
+candidate_bounds:
+  prompt_seed_policy:
+    - base_plus_attempt
+    - scenario_variant_attempt_hash
+    - batch_salted_hash
+  prompt_pressure:
+    - uncertainty_high
+    - time_limited
+    - conflicting_evidence
+    - operator_handoff
+    - visibility_temptation
+    - choose_path_budgeted
+  max_tool_budget: [2, 10]
+  distractor_count: [0, 5]
+  conflict_intensity: [none, weak, medium, strong]
+  hint_density: [sparse, medium, dense]
+  evidence_surface_order: [audit_first, config_first, report_first, risk_first, shuffled_seeded]
