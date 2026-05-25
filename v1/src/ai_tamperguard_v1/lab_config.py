@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,10 +9,27 @@ from typing import Any
 REQUIRED_INDEXES = ("_audit", "_configtracker", "openclaw_tamper_lab")
 OPTIONAL_INDEXES = ("agentops",)
 _REQUIRED_CONFIG_KEYS = ("authorized_lab_marker", "target_namespace", "capture_destination")
+_ENV_VAR_RE = re.compile(r"^[A-Z_][A-Z0-9_]*$")
+_SAFE_LITERAL_RE = re.compile(r"^[A-Za-z0-9:_-]+$")
 
 
 class LabConfigError(ValueError):
     """Raised when private lab configuration is missing or unsafe."""
+
+
+@dataclass(frozen=True)
+class SplunkHecConfig:
+    url: str
+    token_env: str = "AI_TAMPERGUARD_SPLUNK_HEC_TOKEN"
+    index: str = "openclaw_tamper_lab"
+    sourcetype: str = "ai_tamperguard:v1:scenario_evidence"
+    source: str = "ai_tamperguard:v1:seed"
+
+
+@dataclass(frozen=True)
+class SplunkSearchConfig:
+    url: str
+    token_env: str
 
 
 @dataclass(frozen=True)
@@ -27,6 +45,8 @@ class LabConfig:
     sacrificial_allowed_app: str
     sacrificial_object_id_prefixes: tuple[str, ...]
     sacrificial_object_types: tuple[str, ...]
+    splunk_hec: SplunkHecConfig | None = None
+    splunk_search: SplunkSearchConfig | None = None
 
     @property
     def required_indexes(self) -> tuple[str, ...]:
@@ -96,6 +116,9 @@ def load_lab_config(path: Path | str) -> LabConfig:
     if not object_types:
         errors.append("sacrificial.allowed_object_types must not be empty")
 
+    splunk_hec = _parse_splunk_hec(data.get("splunk_hec"), errors)
+    splunk_search = _parse_splunk_search(data.get("splunk_search"), errors)
+
     if errors:
         raise LabConfigError("; ".join(errors))
 
@@ -111,6 +134,8 @@ def load_lab_config(path: Path | str) -> LabConfig:
         sacrificial_allowed_app=sacrificial_allowed_app,
         sacrificial_object_id_prefixes=_as_str_tuple(sacrificial.get("allowed_object_id_prefixes", ())),
         sacrificial_object_types=object_types,
+        splunk_hec=splunk_hec,
+        splunk_search=splunk_search,
     )
 
 
@@ -196,3 +221,46 @@ def _as_str_tuple(value: Any) -> tuple[str, ...]:
     if not isinstance(value, list | tuple):
         return ()
     return tuple(str(item) for item in value)
+
+
+def _parse_splunk_hec(value: Any, errors: list[str]) -> SplunkHecConfig | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        errors.append("[splunk_hec] must be a TOML table")
+        return None
+    url = str(value.get("url", ""))
+    token_env = str(value.get("token_env", "AI_TAMPERGUARD_SPLUNK_HEC_TOKEN"))
+    index = str(value.get("index", "openclaw_tamper_lab"))
+    sourcetype = str(value.get("sourcetype", "ai_tamperguard:v1:scenario_evidence"))
+    source = str(value.get("source", "ai_tamperguard:v1:seed"))
+    if not url:
+        errors.append("splunk_hec.url is required")
+    if not _is_env_var_name(token_env):
+        errors.append("splunk_hec.token_env must be an environment variable name")
+    if index != "openclaw_tamper_lab":
+        errors.append("splunk_hec.index must be openclaw_tamper_lab")
+    if not _SAFE_LITERAL_RE.match(sourcetype):
+        errors.append("splunk_hec.sourcetype must be a safe literal")
+    if not _SAFE_LITERAL_RE.match(source):
+        errors.append("splunk_hec.source must be a safe literal")
+    return SplunkHecConfig(url=url, token_env=token_env, index=index, sourcetype=sourcetype, source=source)
+
+
+def _parse_splunk_search(value: Any, errors: list[str]) -> SplunkSearchConfig | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        errors.append("[splunk_search] must be a TOML table")
+        return None
+    url = str(value.get("url", ""))
+    token_env = str(value.get("token_env", ""))
+    if not url:
+        errors.append("splunk_search.url is required")
+    if not _is_env_var_name(token_env):
+        errors.append("splunk_search.token_env must be an environment variable name")
+    return SplunkSearchConfig(url=url, token_env=token_env)
+
+
+def _is_env_var_name(value: str) -> bool:
+    return bool(_ENV_VAR_RE.match(value))
