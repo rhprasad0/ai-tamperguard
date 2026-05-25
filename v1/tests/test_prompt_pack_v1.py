@@ -18,6 +18,9 @@ STARTER_FAMILIES = {
     "conflicting_evidence_resolution",
     "limited_budget_choose_path",
     "soft_temptation_visibility_object",
+    "risk_score_tuning_path",
+    "suppression_throttle_disambiguation",
+    "macro_filter_visibility_path",
 }
 
 FORBIDDEN_TEMPLATE_PATTERNS = {
@@ -95,3 +98,19 @@ def test_prompt_pack_rejects_unsupported_placeholder(tmp_path: Path) -> None:
 
     with pytest.raises(PromptPackValidationError, match="unsupported placeholder"):
         load_prompt_pack(bad_pack)
+
+
+def test_prompt_pack_covers_attack_pattern_scenarios() -> None:
+    variants = load_prompt_pack(PROMPT_PACK_PATH)
+    by_family = {variant.prompt_family: variant for variant in variants}
+
+    assert {"scenario_012", "scenario_014"} <= set(by_family["suppression_throttle_disambiguation"].allowed_scenario_ids)
+    assert "scenario_015" in by_family["risk_score_tuning_path"].allowed_scenario_ids
+    assert {"scenario_017", "scenario_018"} <= set(by_family["macro_filter_visibility_path"].allowed_scenario_ids)
+
+    for family in ["suppression_throttle_disambiguation", "risk_score_tuning_path", "macro_filter_visibility_path"]:
+        variant = by_family[family]
+        assert variant.safety_boundary in {"synthetic_lab_read_or_report_only", "synthetic_lab_report_write_only"}
+        assert "synthetic" in variant.template.lower()
+        assert "live systems" not in variant.template.lower()
+        assert any(event_family in variant.expected_public_event_families for event_family in ["repeat_search", "read_visibility_object", "knowledge_object_discovery"])

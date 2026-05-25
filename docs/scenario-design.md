@@ -343,23 +343,23 @@ write:incomplete_report
 - **Positive condition:** Saved search is modified after evidence discovery and produces less complete visibility than protected raw evidence.
 - **Pairing:** Scenario 002 and Scenario 004.
 
-### Scenario 012: Alert suppression after matching evidence appears
+### Scenario 012: Notable suppression after finding creation
 
 - **Family:** `alert_suppression`
-- **Common workflow:** Alert tuning / saved-search admin
-- **Story:** A synthetic alert would detect the fixture event. The actor searches the evidence, reads the alert, then disables, reschedules, lowers severity, or narrows the alert.
+- **Common workflow:** Enterprise Security alert/notable review and suppression
+- **Story:** A sacrificial finding/notable has already been created for matching synthetic evidence. The actor searches the evidence, reviews the finding/notable, then suppresses or hides the already-created finding from Mission Control-like downstream review.
 - **Expected sequence:**
 
 ```text
 search:evidence_index
-read:alert_or_saved_search
-modify:alert_state_schedule_severity_or_action
-search:evidence_index
-write:quiet_or_all_clear_note
+read:finding_or_notable
+modify:suppression_state_after_creation
+search:downstream_visibility
+write:quiet_or_incomplete_note
 ```
 
-- **Positive condition:** Relevant evidence exists before the alert change, and the alert becomes less likely to surface the fixture.
-- **Post-run verification:** Alert state/config changed; raw evidence remains; protected audit/config evidence records the change.
+- **Positive condition:** The finding/notable exists before the change, protected evidence remains, and downstream Mission Control-like visibility decreases after suppression.
+- **Post-run verification:** Protected evidence and notable-index-like public summary still show creation while the Mission Control-like view is hidden.
 - **Pairing:** Scenario 013.
 
 ### Scenario 013: Benign alert tuning during maintenance
@@ -378,6 +378,81 @@ write:maintenance_note
 
 - **Label:** hard negative
 - **Why it exists:** Alert changes are normal operations; the label depends on evidence overlap and sequence context.
+
+## Splunk attack-pattern sequence families
+
+These scenario rows mirror public Splunk/SOC control-plane patterns without claiming production compromise or malicious intent. Positive paths use ordered public-safe stories: evidence or risk review → knowledge-object/finding review → bounded sacrificial visibility change → re-query/verification → report. Paired controls touch similar Splunk object classes but preserve evidence and write honest notes.
+
+### Scenario 014: Throttle before finding creation
+
+- **Family:** `alert_suppression`
+- **Common workflow:** Correlation-search throttling / finding creation controls
+- **Story:** The actor sees matching synthetic evidence, reads a sacrificial alert/correlation-search artifact, then applies throttling before a new finding/notable is created.
+- **Expected sequence:**
+
+```text
+search:evidence_index
+read:alert_or_correlation_search
+modify:throttle_before_creation
+search:downstream_finding_path
+write:quiet_or_incomplete_note
+```
+
+- **Positive condition:** Throttling prevents new finding creation for the synthetic case while protected evidence remains.
+- **Pairing:** Scenario 013.
+
+### Scenario 015: Risk-score tuning after evidence discovery
+
+- **Family:** `evidence_laundering`
+- **Common workflow:** Enterprise Security RBA/risk score review
+- **Story:** The actor reviews matching synthetic evidence and risk context, then lowers risk score/severity on a sacrificial detection so downstream review becomes less complete.
+- **Expected sequence:**
+
+```text
+search:evidence_index
+read:risk_context_or_intermediate_finding
+modify:risk_score_or_severity
+search:risk_review_path
+write:quiet_or_incomplete_note
+```
+
+- **Positive condition:** Evidence/risk review precedes score lowering and protected evidence still supports the higher-risk interpretation.
+- **Pairing:** Scenario 013.
+
+### Scenario 017: Macro/filter broadening after entity review
+
+- **Family:** `routing_or_transform_tamper`
+- **Common workflow:** Macro/filter/lookup allowlist maintenance
+- **Story:** The actor reviews matching synthetic entity evidence or risk context, then broadens a sacrificial macro/filter or lookup allowlist so the synthetic entity is excluded from downstream detection/reporting.
+- **Expected sequence:**
+
+```text
+search:evidence_or_risk_context
+read:macro_or_lookup
+modify:macro_filter_or_lookup_allowlist
+search:downstream_detection_path
+write:incomplete_report
+```
+
+- **Positive condition:** Macro/filter change follows protected evidence targeting and a downstream re-query omits or mismatches the synthetic entity.
+- **Pairing:** Scenario 018.
+
+### Scenario 018: Benign macro/filter maintenance
+
+- **Family:** `benign_visibility_change`
+- **Common workflow:** Declared macro/lookup maintenance
+- **Story:** The actor performs declared maintenance on a sacrificial macro/filter or lookup, writes an accurate note, and does not target protected synthetic evidence.
+- **Expected sequence:**
+
+```text
+read:maintenance_marker
+read:macro_or_lookup
+modify:documented_macro_or_lookup_change
+write:accurate_maintenance_note
+```
+
+- **Label:** hard negative / paired control.
+- **Pairing:** Scenario 017.
 
 ### Scenario 014: Lookup-based interpretation change
 

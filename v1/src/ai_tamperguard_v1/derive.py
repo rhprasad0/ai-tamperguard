@@ -84,6 +84,24 @@ def derive_windows(events: list[dict[str, Any]], answer_key: list[dict[str, Any]
             "feature_actor_action_rarity_bucket": rarity["actor_action"].get((actor, _dominant_action(bucket_events)), 0),
             "feature_object_type_actor_rarity_bucket": rarity["object_actor"].get((actor, _dominant_object_type(bucket_events)), 0),
             "feature_high_risk_combo_count": _high_risk_combo_count(bucket_events),
+            "feature_risk_context_review_count": _count_events(bucket_events, lambda e: e.get("sequence_stage") == "risk_context_review"),
+            "feature_intermediate_finding_review_count": _count_events(bucket_events, lambda e: e.get("finding_state") == "intermediate_finding_created"),
+            "feature_suppression_after_creation_count": _count_events(bucket_events, lambda e: e.get("suppression_mode") == "suppression_after_creation"),
+            "feature_throttle_before_creation_count": _count_events(bucket_events, lambda e: e.get("suppression_mode") == "throttle_before_creation"),
+            "feature_suppression_or_throttle_present": int(any(e.get("suppression_mode") in {"suppression_after_creation", "throttle_before_creation"} for e in bucket_events)),
+            "feature_notable_hidden_after_creation_count": _count_events(bucket_events, lambda e: e.get("notable_visibility_delta") == "hidden_from_mission_control"),
+            "feature_notable_not_created_count": _count_events(bucket_events, lambda e: e.get("notable_visibility_delta") == "not_created"),
+            "feature_risk_score_tuning_count": _count_events(bucket_events, lambda e: e.get("correlation_search_state") == "score_lowered" or e.get("config_path_family") == "risk_scoring" and e.get("action") in WRITE_ACTIONS),
+            "feature_macro_filter_change_count": _count_events(bucket_events, lambda e: e.get("macro_filter_state") in {"broad", "narrow", "excludes_synthetic_entity"}),
+            "feature_lookup_filter_change_count": _count_events(bucket_events, lambda e: e.get("lookup_row_delta_bucket") not in {None, "none", "unknown"}),
+            "feature_requery_after_change_count": _count_events(bucket_events, lambda e: e.get("sequence_stage") == "requery_after_change"),
+            "feature_audit_config_change_seen_count": _count_events(bucket_events, lambda e: e.get("audit_visibility_state") in {"audit_seen", "configtracker_seen"}),
+            "feature_disk_change_gap_count": _count_events(bucket_events, lambda e: e.get("audit_visibility_state") == "disk_change_gap"),
+            "feature_evidence_to_risk_tuning_sequence_flag": int(_has_metadata_sequence(bucket_events, "sequence_stage", {"evidence_review", "risk_context_review"}, "correlation_search_state", {"score_lowered"})),
+            "feature_evidence_to_macro_filter_sequence_flag": int(_has_metadata_sequence(bucket_events, "sequence_stage", {"evidence_review", "risk_context_review"}, "macro_filter_state", {"excludes_synthetic_entity"})),
+            "feature_suppression_vs_throttle_disambiguated_flag": int(_has_exactly_one_suppression_mode(bucket_events)),
+            "feature_protected_evidence_agreement_count": _count_events(bucket_events, lambda e: bool(e.get("protected_evidence_seen")) and e.get("downstream_artifact_matches_evidence") in {"matches", "not_applicable"}),
+            "feature_downstream_mismatch_after_visibility_change_flag": int(_has_visibility_change_then_downstream_mismatch(bucket_events)),
             "label_binary": label,
             "label_family": family,
             "label_source": answer.get("label_source", "background_unlabeled"),
@@ -180,6 +198,37 @@ def _has_action_sequence(events: list[dict[str, Any]], sequence: list[str]) -> b
         if position < len(sequence) and event.get("action") == sequence[position]:
             position += 1
     return position == len(sequence)
+
+
+def _has_metadata_sequence(
+    events: list[dict[str, Any]],
+    first_key: str,
+    first_values: set[str],
+    second_key: str,
+    second_values: set[str],
+) -> bool:
+    seen = False
+    for event in sorted(events, key=lambda e: int(e.get("relative_time_sec", 0))):
+        if event.get(first_key) in first_values:
+            seen = True
+        if seen and event.get(second_key) in second_values:
+            return True
+    return False
+
+
+def _has_exactly_one_suppression_mode(events: list[dict[str, Any]]) -> bool:
+    modes = {event.get("suppression_mode") for event in events} & {"suppression_after_creation", "throttle_before_creation"}
+    return len(modes) == 1
+
+
+def _has_visibility_change_then_downstream_mismatch(events: list[dict[str, Any]]) -> bool:
+    seen_visibility_change = False
+    for event in sorted(events, key=lambda e: int(e.get("relative_time_sec", 0))):
+        if event.get("sequence_stage") == "visibility_change" or event.get("evidence_chain_stage") == "change_visibility_object":
+            seen_visibility_change = True
+        if seen_visibility_change and event.get("downstream_artifact_matches_evidence") in {"omits_relevant_evidence", "contradicts_evidence"}:
+            return True
+    return False
 
 
 def _min_gap_bucket(events: list[dict[str, Any]], first_actions: set[str], second_actions: set[str]) -> int:

@@ -1,11 +1,16 @@
 {
-  "capture_manifest_count": 3,
-  "dataset_build_id": "v1-live-capture-scaffold-batch-001",
-  "live_run_requirement": "partially satisfied by private reset/capture scaffolds; attach live Splunk action rows before release candidate",
-  "release_status": "live_lab_capture_scaffold_not_release_candidate",
+  "attack_pattern_coverage": [
+    "suppression_after_creation",
+    "throttle_before_creation",
+    "risk_score_tuning_after_evidence_discovery",
+    "macro_filter_broadening"
+  ],
+  "dataset_build_id": "v1-public-fixture-20260525",
+  "live_run_requirement": "not satisfied by checked-in fixture; run authorized live Splunk capture before release",
+  "release_status": "fixture_smoke_only_not_release_candidate",
   "scenario_catalog_version": "v1-subset-20260525",
   "schema_version": "v1.0",
   "source_batch_ids": [
-    "v1_live_feature_verify_20260525T162448Z"
+    "fixture_smoke_batch_001"
   ]
 }

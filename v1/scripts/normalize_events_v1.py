@@ -51,6 +51,7 @@ def main() -> int:
     if missing_runs:
         print("captured events missing private run manifest rows: " + ", ".join(missing_runs), file=sys.stderr)
         return 2
+    events = _enrich_events_from_run_manifest(events, run_by_id)
 
     validate_rows("normalized_event_v1.schema.json", events)
     write_jsonl(public, events)
@@ -99,6 +100,38 @@ def _is_private_path(path: _Path, needle: tuple[str, ...]) -> bool:
     return any(parts[idx : idx + len(needle)] == needle for idx in range(len(parts) - len(needle) + 1))
 
 
+PROMPT_METADATA_KEYS = (
+    "prompt_variant_id",
+    "prompt_family",
+    "prompt_pack_version",
+    "prompt_seed",
+    "attempt_index",
+)
+
+
+def _enrich_events_from_run_manifest(events: list[dict[str, Any]], run_by_id: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
+    for event in events:
+        run = run_by_id[event["scenario_run_id"]]
+        row = dict(event)
+        for key in PROMPT_METADATA_KEYS:
+            if key in run and key not in row:
+                row[key] = run[key]
+        for int_key in ("prompt_seed", "attempt_index"):
+            if int_key in row:
+                row[int_key] = int(row[int_key])
+        enriched.append(row)
+    return enriched
+
+
+def _public_prompt_metadata(run: dict[str, Any]) -> dict[str, Any]:
+    metadata = {key: run[key] for key in PROMPT_METADATA_KEYS if key in run}
+    for int_key in ("prompt_seed", "attempt_index"):
+        if int_key in metadata:
+            metadata[int_key] = int(metadata[int_key])
+    return metadata
+
+
 def _scenario_runs(run_rows: list[dict[str, Any]], events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     by_run: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for event in events:
@@ -108,22 +141,22 @@ def _scenario_runs(run_rows: list[dict[str, Any]], events: list[dict[str, Any]])
         run_events = by_run.get(run["scenario_run_id"], [])
         if not run_events:
             continue
-        rows.append(
-            {
-                "scenario_run_id": run["scenario_run_id"],
-                "scenario_id": run["scenario_id"],
-                "run_start_relative_sec": min(int(event["relative_time_sec"]) for event in run_events),
-                "run_end_relative_sec": max(int(event["relative_time_sec"]) for event in run_events),
-                "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
-                "environment_id": run.get("environment_id", "environment_001"),
-                "outcome": _public_outcome(run.get("outcome", "needs_review")),
-                "ground_truth_family": run.get("ground_truth_family", "background_unlabeled"),
-                "paired_control_run_id": run.get("paired_control_run_id"),
-                "reset_id": run.get("public_reset_id", _public_reset_id(run.get("private_reset_id", "reset_001"))),
-                "release_eligibility": "fixture_smoke_only",
-                "source_derivation": "live_lab_public_redacted",
-            }
-        )
+        row = {
+            "scenario_run_id": run["scenario_run_id"],
+            "scenario_id": run["scenario_id"],
+            "run_start_relative_sec": min(int(event["relative_time_sec"]) for event in run_events),
+            "run_end_relative_sec": max(int(event["relative_time_sec"]) for event in run_events),
+            "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
+            "environment_id": run.get("environment_id", "environment_001"),
+            "outcome": _public_outcome(run.get("outcome", "needs_review")),
+            "ground_truth_family": run.get("ground_truth_family", "background_unlabeled"),
+            "paired_control_run_id": run.get("paired_control_run_id"),
+            "reset_id": run.get("public_reset_id", _public_reset_id(run.get("private_reset_id", "reset_001"))),
+            "release_eligibility": "fixture_smoke_only",
+            "source_derivation": "live_lab_public_redacted",
+        }
+        row.update(_public_prompt_metadata(run))
+        rows.append(row)
     return rows
 
 
@@ -148,19 +181,19 @@ def _answer_key(run_rows: list[dict[str, Any]], events: list[dict[str, Any]]) ->
                     "object_type_sequence": object_types,
                 }
             )
-        rows.append(
-            {
-                "scenario_run_id": run["scenario_run_id"],
-                "positive_intervals": positive_intervals,
-                "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
-                "object_ids_or_types": object_types,
-                "label_family": family,
-                "outcome": _public_outcome(run.get("outcome", "needs_review")),
-                "label_source": "post_run_verification",
-                "verification_basis": "private reset/capture scaffold preserved protected evidence surfaces and emitted public-safe action rows; live Splunk raw action attachment remains required before release candidate",
-                "limitations": "live capture scaffold only; not a public release candidate and not evidence of malicious intent",
-            }
-        )
+        row = {
+            "scenario_run_id": run["scenario_run_id"],
+            "positive_intervals": positive_intervals,
+            "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
+            "object_ids_or_types": object_types,
+            "label_family": family,
+            "outcome": _public_outcome(run.get("outcome", "needs_review")),
+            "label_source": "post_run_verification",
+            "verification_basis": "private reset/capture scaffold preserved protected evidence surfaces and emitted public-safe action rows; live Splunk raw action attachment remains required before release candidate",
+            "limitations": "live capture scaffold only; not a public release candidate and not evidence of malicious intent",
+        }
+        row.update(_public_prompt_metadata(run))
+        rows.append(row)
     return rows
 
 

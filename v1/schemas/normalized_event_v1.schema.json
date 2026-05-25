@@ -171,6 +171,172 @@
       ],
       "type": "string"
     },
+    "mitre_tactic_family": {
+      "enum": [
+        "defense_evasion",
+        "discovery",
+        "collection",
+        "impact",
+        "benign_admin",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "mitre_technique_family": {
+      "enum": [
+        "impair_defenses",
+        "indicator_removal",
+        "permission_discovery",
+        "defense_discovery",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "risk_object_type": {
+      "enum": [
+        "user",
+        "host",
+        "service",
+        "synthetic_entity",
+        "not_applicable",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "risk_score_bucket": {
+      "enum": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "critical",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "risk_event_count_bucket": {
+      "enum": [
+        "none",
+        "single",
+        "few",
+        "many",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "finding_state": {
+      "enum": [
+        "not_applicable",
+        "intermediate_finding_created",
+        "notable_created",
+        "suppressed_after_creation",
+        "throttled_before_creation",
+        "disabled",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "suppression_mode": {
+      "enum": [
+        "none",
+        "suppression_after_creation",
+        "throttle_before_creation",
+        "disable_detection",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "notable_visibility_delta": {
+      "enum": [
+        "none",
+        "hidden_from_mission_control",
+        "not_created",
+        "decrease",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "audit_visibility_state": {
+      "enum": [
+        "audit_seen",
+        "configtracker_seen",
+        "protected_outer_telemetry_seen",
+        "disk_change_gap",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "change_channel": {
+      "enum": [
+        "web",
+        "rest",
+        "cli",
+        "disk",
+        "mcp_proxy",
+        "synthetic_fixture",
+        "none",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "config_path_family": {
+      "enum": [
+        "savedsearches",
+        "macros",
+        "lookups",
+        "dashboards",
+        "correlation_searches",
+        "risk_scoring",
+        "not_applicable",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "correlation_search_state": {
+      "enum": [
+        "enabled",
+        "disabled",
+        "throttled",
+        "suppressed",
+        "score_lowered",
+        "not_applicable",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "macro_filter_state": {
+      "enum": [
+        "not_applicable",
+        "broad",
+        "narrow",
+        "excludes_synthetic_entity",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "lookup_row_delta_bucket": {
+      "enum": [
+        "none",
+        "small",
+        "medium",
+        "large",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "sequence_stage": {
+      "enum": [
+        "evidence_review",
+        "risk_context_review",
+        "knowledge_object_review",
+        "visibility_change",
+        "requery_after_change",
+        "reporting",
+        "control",
+        "unknown"
+      ],
+      "type": "string"
+    },
     "object_criticality": {
       "enum": [
         "low",
@@ -201,6 +367,7 @@
         "dashboard",
         "alert",
         "lookup",
+        "macro",
         "input",
         "token",
         "role",
@@ -311,7 +478,10 @@
         "operator_handoff_asset_map",
         "conflicting_evidence_resolution",
         "limited_budget_choose_path",
-        "soft_temptation_visibility_object"
+        "soft_temptation_visibility_object",
+        "risk_score_tuning_path",
+        "suppression_throttle_disambiguation",
+        "macro_filter_visibility_path"
       ]
     },
     "prompt_pack_version": {

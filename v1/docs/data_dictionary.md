@@ -21,7 +21,22 @@ These enriched fields are optional in `normalized_event_v1.schema.json` so older
 | `protected_evidence_seen` | boolean | Public-safe indicator that protected evidence was observed. |
 | `downstream_artifact_updated` | boolean | Whether a downstream report/visibility artifact was updated. |
 | `downstream_artifact_matches_evidence` | `matches`, `omits_relevant_evidence`, `contradicts_evidence`, `not_applicable`, `unknown` | Coarse evidence-chain agreement label. |
-| `evidence_chain_stage` | `search`, `read_visibility_object`, `change_visibility_object`, `write_report`, `verify`, `unknown` | Ordered stage used for sequence features. |
+| `evidence_chain_stage` | `search`, `read_visibility_object`, `change_visibility_object`, `write_report`, `verify`, `metadata_enumeration`, `knowledge_object_discovery`, `requery`, `unknown` | Ordered stage used for sequence features. |
+| `mitre_tactic_family` | `defense_evasion`, `discovery`, `collection`, `impact`, `benign_admin`, `unknown` | Coarse ATT&CK-like tactic family for public-safe Splunk/SOC sequence context. |
+| `mitre_technique_family` | `impair_defenses`, `indicator_removal`, `permission_discovery`, `defense_discovery`, `unknown` | Coarse technique family; conservative analogy only, not intent attribution. |
+| `risk_object_type` | `user`, `host`, `service`, `synthetic_entity`, `not_applicable`, `unknown` | Splunk RBA-style risk object category. |
+| `risk_score_bucket` | `none`, `low`, `medium`, `high`, `critical`, `unknown` | Public-safe risk score bucket, not a raw risk score. |
+| `risk_event_count_bucket` | `none`, `single`, `few`, `many`, `unknown` | Bucketed count of contributing risk/finding events. |
+| `finding_state` | `not_applicable`, `intermediate_finding_created`, `notable_created`, `suppressed_after_creation`, `throttled_before_creation`, `disabled`, `unknown` | Public-safe finding/notable state. |
+| `suppression_mode` | `none`, `suppression_after_creation`, `throttle_before_creation`, `disable_detection`, `unknown` | Distinguishes hiding an existing finding from preventing finding creation or disabling a detection. |
+| `notable_visibility_delta` | `none`, `hidden_from_mission_control`, `not_created`, `decrease`, `unknown` | Mission Control/notable-like public-safe visibility delta. |
+| `audit_visibility_state` | `audit_seen`, `configtracker_seen`, `protected_outer_telemetry_seen`, `disk_change_gap`, `unknown` | Which protected audit/control-plane surface observed the change, or whether a disk-change gap exists. |
+| `change_channel` | `web`, `rest`, `cli`, `disk`, `mcp_proxy`, `synthetic_fixture`, `none`, `unknown` | Public-safe channel family for the configuration/control-plane change. |
+| `config_path_family` | `savedsearches`, `macros`, `lookups`, `dashboards`, `correlation_searches`, `risk_scoring`, `not_applicable`, `unknown` | Coarse Splunk knowledge-object/config path family. |
+| `correlation_search_state` | `enabled`, `disabled`, `throttled`, `suppressed`, `score_lowered`, `not_applicable`, `unknown` | Public-safe state of a correlation-search-like detection artifact. |
+| `macro_filter_state` | `not_applicable`, `broad`, `narrow`, `excludes_synthetic_entity`, `unknown` | Public-safe macro/filter state for filter-broadening or allowlist-like scenarios. |
+| `lookup_row_delta_bucket` | `none`, `small`, `medium`, `large`, `unknown` | Bucketed lookup-row change size. |
+| `sequence_stage` | `evidence_review`, `risk_context_review`, `knowledge_object_review`, `visibility_change`, `requery_after_change`, `reporting`, `control`, `unknown` | Splunk attack-pattern sequence stage used to model ordered stories. |
 
 ## Behavior window features
 
@@ -59,6 +74,24 @@ Every `derive_windows` output row emits the following enriched `feature_*` colum
 | `feature_actor_action_rarity_bucket` | Intra-sample actor/action rarity bucket: `0` unknown, `1` common, `2` uncommon, `3` rare. |
 | `feature_object_type_actor_rarity_bucket` | Intra-sample actor/object-type rarity bucket: `0` unknown, `1` common, `2` uncommon, `3` rare. |
 | `feature_high_risk_combo_count` | Count of high-criticality write/probe events with visibility decrease or denied capability context. |
+| `feature_risk_context_review_count` | Count of events in risk-context review sequence stage. |
+| `feature_intermediate_finding_review_count` | Count of intermediate-finding public-safe states. |
+| `feature_suppression_after_creation_count` | Count of suppression-after-creation events. |
+| `feature_throttle_before_creation_count` | Count of throttle-before-creation events. |
+| `feature_suppression_or_throttle_present` | Flag for either suppression or throttling semantics present. |
+| `feature_notable_hidden_after_creation_count` | Count of notable/finding visibility hidden after creation. |
+| `feature_notable_not_created_count` | Count of finding/notable not-created outcomes from throttling. |
+| `feature_risk_score_tuning_count` | Count of risk scoring or severity lowering signals. |
+| `feature_macro_filter_change_count` | Count of macro/filter state changes or related re-query observations. |
+| `feature_lookup_filter_change_count` | Count of non-empty lookup-row delta buckets. |
+| `feature_requery_after_change_count` | Count of post-change re-query/verification events. |
+| `feature_audit_config_change_seen_count` | Count of audit/configtracker-observed control-plane changes. |
+| `feature_disk_change_gap_count` | Count of direct-disk-change-gap signals. |
+| `feature_evidence_to_risk_tuning_sequence_flag` | Evidence/risk review occurs before risk-score tuning. |
+| `feature_evidence_to_macro_filter_sequence_flag` | Evidence/risk review occurs before a macro/filter entity exclusion. |
+| `feature_suppression_vs_throttle_disambiguated_flag` | Exactly one of suppression-after-creation or throttle-before-creation is present. |
+| `feature_protected_evidence_agreement_count` | Protected evidence observations whose downstream agreement is matching or not-applicable. |
+| `feature_downstream_mismatch_after_visibility_change_flag` | A downstream omission/contradiction appears after a visibility change. |
 
 These features are SOC/SIEM practice signals for fixture/offline and sacrificial lab evaluation. They are not claims of real malicious intent or production detection quality.
 

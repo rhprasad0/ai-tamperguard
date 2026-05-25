@@ -233,6 +233,78 @@
     "window_start_relative_sec": {
       "minimum": 0,
       "type": "integer"
+    },
+    "feature_risk_context_review_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_intermediate_finding_review_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_suppression_after_creation_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_throttle_before_creation_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_suppression_or_throttle_present": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_notable_hidden_after_creation_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_notable_not_created_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_risk_score_tuning_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_macro_filter_change_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_lookup_filter_change_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_requery_after_change_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_audit_config_change_seen_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_disk_change_gap_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_evidence_to_risk_tuning_sequence_flag": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_evidence_to_macro_filter_sequence_flag": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_suppression_vs_throttle_disambiguated_flag": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_protected_evidence_agreement_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "feature_downstream_mismatch_after_visibility_change_flag": {
+      "type": "integer",
+      "minimum": 0
     }
   },
   "required": [

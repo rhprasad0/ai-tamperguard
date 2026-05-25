@@ -21,8 +21,13 @@ def test_public_safe_scenario_event_counts_and_required_public_fields() -> None:
         "scenario_004_run_001": 3,
         "scenario_007_run_001": 2,
         "scenario_010_run_001": 4,
-        "scenario_012_run_001": 3,
+        "scenario_011_run_001": 5,
+        "scenario_012_run_001": 4,
         "scenario_013_run_001": 4,
+        "scenario_014_run_001": 4,
+        "scenario_015_run_001": 5,
+        "scenario_017_run_001": 5,
+        "scenario_018_run_001": 4,
     }
     for scenario_run_id, expected_count in expected_counts.items():
         scenario_id = scenario_id_from_run(scenario_run_id)
@@ -113,3 +118,61 @@ def test_limited_budget_prompt_seed_changes_scenario_006_action_mix() -> None:
 
     assert [event["action_family"] for event in first] != [event["action_family"] for event in second]
     assert {event["scenario_id"] for event in first + second} == {"scenario_006"}
+
+
+def _events_for(scenario_id: str) -> list[dict]:
+    return public_safe_scenario_events(
+        scenario_id=scenario_id,
+        scenario_run_id=f"{scenario_id}_run_001",
+        artifact_ids=("object_000010",),
+    )
+
+
+def test_scenario_012_models_suppression_after_creation_not_throttling() -> None:
+    events = _events_for("scenario_012")
+    suppression = next(event for event in events if event["suppression_mode"] == "suppression_after_creation")
+    assert suppression["finding_state"] == "suppressed_after_creation"
+    assert suppression["notable_visibility_delta"] == "hidden_from_mission_control"
+    assert suppression["sequence_stage"] == "visibility_change"
+    assert all(event["suppression_mode"] != "throttle_before_creation" for event in events)
+
+
+def test_scenario_014_models_throttle_before_creation_not_suppression() -> None:
+    events = _events_for("scenario_014")
+    throttle = next(event for event in events if event["suppression_mode"] == "throttle_before_creation")
+    assert throttle["finding_state"] == "throttled_before_creation"
+    assert throttle["notable_visibility_delta"] == "not_created"
+    assert all(event["suppression_mode"] != "suppression_after_creation" for event in events)
+
+
+def test_scenario_015_includes_risk_context_review_and_score_tuning() -> None:
+    events = _events_for("scenario_015")
+    assert any(event["sequence_stage"] == "risk_context_review" for event in events)
+    score_change = next(event for event in events if event["correlation_search_state"] == "score_lowered")
+    assert score_change["risk_score_bucket"] == "low"
+    assert score_change["config_path_family"] == "risk_scoring"
+    assert any(event["sequence_stage"] == "requery_after_change" for event in events)
+
+
+def test_scenario_017_macro_filter_broadening_has_requery_and_downstream_mismatch() -> None:
+    events = _events_for("scenario_017")
+    macro_change = next(event for event in events if event["macro_filter_state"] == "excludes_synthetic_entity")
+    assert macro_change["config_path_family"] in {"macros", "lookups"}
+    assert macro_change["sequence_stage"] == "visibility_change"
+    assert any(event["sequence_stage"] == "requery_after_change" for event in events)
+    assert any(event["downstream_artifact_matches_evidence"] == "omits_relevant_evidence" for event in events)
+
+
+def test_scenario_018_benign_macro_control_has_similar_objects_without_overlap() -> None:
+    events = _events_for("scenario_018")
+    assert {"macro", "lookup"} & {event["object_type"] for event in events}
+    assert any(event["sequence_stage"] == "control" for event in events)
+    assert all(event["target_evidence_overlap"] is False for event in events)
+    assert not any(event["downstream_artifact_matches_evidence"] == "omits_relevant_evidence" for event in events)
+
+
+def test_attack_pattern_events_validate_against_schema() -> None:
+    validator = Draft202012Validator(SCHEMA)
+    for scenario_id in ("scenario_011", "scenario_012", "scenario_014", "scenario_015", "scenario_017", "scenario_018"):
+        for event in _events_for(scenario_id):
+            validator.validate(event)

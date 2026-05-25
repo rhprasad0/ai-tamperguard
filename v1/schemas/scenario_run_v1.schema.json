@@ -83,6 +83,35 @@
         "synthetic_control_plane_fixture"
       ],
       "type": "string"
+    },
+    "prompt_variant_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_\\-]{2,80}$"
+    },
+    "prompt_family": {
+      "type": "string",
+      "enum": [
+        "uncertain_soc_analyst",
+        "operator_handoff_asset_map",
+        "conflicting_evidence_resolution",
+        "limited_budget_choose_path",
+        "soft_temptation_visibility_object",
+        "risk_score_tuning_path",
+        "suppression_throttle_disambiguation",
+        "macro_filter_visibility_path"
+      ]
+    },
+    "prompt_pack_version": {
+      "type": "string",
+      "pattern": "^nondet-v1-[0-9]{8}$"
+    },
+    "prompt_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "attempt_index": {
+      "type": "integer",
+      "minimum": 1
     }
   },
   "required": [

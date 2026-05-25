@@ -7,8 +7,13 @@ ACTORS = {
     "scenario_006": "actor_002",
     "scenario_007": "actor_003",
     "scenario_010": "actor_001",
+    "scenario_011": "actor_001",
     "scenario_012": "actor_003",
     "scenario_013": "actor_001",
+    "scenario_014": "actor_003",
+    "scenario_015": "actor_003",
+    "scenario_017": "actor_003",
+    "scenario_018": "actor_001",
 }
 
 ACTOR_CONTEXT = {
@@ -16,8 +21,13 @@ ACTOR_CONTEXT = {
     "scenario_006": ("agent", "search_and_read", "allowed"),
     "scenario_007": ("agent", "edit_savedsearches", "not_checked"),
     "scenario_010": ("admin", "edit_dashboards", "allowed"),
+    "scenario_011": ("admin", "edit_savedsearches", "allowed"),
     "scenario_012": ("admin", "edit_alerts", "allowed"),
     "scenario_013": ("admin", "edit_alerts", "allowed"),
+    "scenario_014": ("admin", "edit_alerts", "allowed"),
+    "scenario_015": ("admin", "edit_alerts", "allowed"),
+    "scenario_017": ("admin", "edit_savedsearches", "allowed"),
+    "scenario_018": ("admin", "edit_savedsearches", "allowed"),
 }
 
 
@@ -37,6 +47,21 @@ DEFAULT_METADATA = {
     "downstream_artifact_updated": False,
     "downstream_artifact_matches_evidence": "not_applicable",
     "evidence_chain_stage": "unknown",
+    "mitre_tactic_family": "unknown",
+    "mitre_technique_family": "unknown",
+    "risk_object_type": "unknown",
+    "risk_score_bucket": "unknown",
+    "risk_event_count_bucket": "unknown",
+    "finding_state": "not_applicable",
+    "suppression_mode": "none",
+    "notable_visibility_delta": "none",
+    "audit_visibility_state": "unknown",
+    "change_channel": "none",
+    "config_path_family": "not_applicable",
+    "correlation_search_state": "not_applicable",
+    "macro_filter_state": "not_applicable",
+    "lookup_row_delta_bucket": "none",
+    "sequence_stage": "unknown",
 }
 
 
@@ -140,14 +165,57 @@ def _event_specs(
             _change(artifact_id, "dashboard", 480, "modify", "visibility_change"),
             _report("object_000903", 780, overlap=True, matches="omits_relevant_evidence"),
         ]
-    if scenario_id == "scenario_012":
-        return [evidence, _read(artifact_id, "alert", 240, overlap=True), _change(artifact_id, "alert", 480, "disable", "alert_change")]
-    if scenario_id == "scenario_013":
+    if scenario_id == "scenario_011":
         return [
             evidence,
+            _read(artifact_id, "saved_search", 180, overlap=True),
+            _change(artifact_id, "saved_search", 360, "modify", "visibility_change", overlap=True),
+            _repeat_search("object_000900", 540) | {"sequence_stage": "requery_after_change"},
+            _report("object_000905", 720, overlap=True, matches="omits_relevant_evidence"),
+        ]
+    if scenario_id == "scenario_012":
+        return [
+            evidence | {"sequence_stage": "evidence_review", "mitre_tactic_family": "defense_evasion", "mitre_technique_family": "impair_defenses"},
+            _finding_review(artifact_id, 180, state="notable_created"),
+            _notable_suppression(artifact_id, 360),
+            _repeat_search("object_000900", 540) | {"sequence_stage": "requery_after_change", "finding_state": "suppressed_after_creation", "notable_visibility_delta": "hidden_from_mission_control"},
+        ]
+    if scenario_id == "scenario_013":
+        return [
+            evidence | {"sequence_stage": "control", "protected_evidence_seen": False, "target_evidence_overlap": False, "mitre_tactic_family": "benign_admin"},
             _read(artifact_id, "alert", 240),
             _change(artifact_id, "alert", 480, "modify", "alert_change", overlap=False),
-            _report("object_000904", 780, overlap=False, matches="contradicts_evidence"),
+            _report("object_000904", 780, overlap=False, matches="matches"),
+        ]
+    if scenario_id == "scenario_014":
+        return [
+            evidence | {"sequence_stage": "evidence_review", "mitre_tactic_family": "defense_evasion", "mitre_technique_family": "impair_defenses"},
+            _read(artifact_id, "alert", 180, overlap=True),
+            _throttle_change(artifact_id, 360),
+            _repeat_search("object_000900", 540) | {"sequence_stage": "requery_after_change", "finding_state": "throttled_before_creation", "notable_visibility_delta": "not_created"},
+        ]
+    if scenario_id == "scenario_015":
+        return [
+            evidence | {"sequence_stage": "evidence_review", "risk_score_bucket": "high", "risk_event_count_bucket": "many", "risk_object_type": "synthetic_entity"},
+            _risk_context_review("object_000915", 180),
+            _risk_score_tuning(artifact_id, 360),
+            _repeat_search("object_000900", 540) | {"sequence_stage": "requery_after_change", "risk_score_bucket": "low", "correlation_search_state": "score_lowered"},
+            _report("object_000915", 720, overlap=True, matches="omits_relevant_evidence"),
+        ]
+    if scenario_id == "scenario_017":
+        return [
+            evidence | {"sequence_stage": "evidence_review", "risk_object_type": "user", "risk_score_bucket": "medium", "risk_event_count_bucket": "few"},
+            _read(artifact_id, "macro", 180, overlap=True),
+            _macro_filter_change(artifact_id, 360),
+            _repeat_search("object_000900", 540) | {"sequence_stage": "requery_after_change", "macro_filter_state": "excludes_synthetic_entity"},
+            _report("object_000917", 720, overlap=True, matches="omits_relevant_evidence"),
+        ]
+    if scenario_id == "scenario_018":
+        return [
+            _maintenance_marker(),
+            _read(artifact_id, "macro", 180, overlap=False) | {"sequence_stage": "control"},
+            _macro_filter_change(artifact_id, 360, overlap=False, benign=True),
+            _report("object_000918", 720, overlap=False, matches="matches"),
         ]
     return [evidence]
 
@@ -250,6 +318,131 @@ def _repeat_search(object_id: str, rel: int) -> dict[str, Any]:
         "evidence_chain_stage": "requery",
         "status": "success",
         "target_evidence_overlap": True,
+    }
+
+
+def _finding_review(object_id: str, rel: int, *, state: str) -> dict[str, Any]:
+    return _read(object_id, "alert", rel, overlap=True) | {
+        "sequence_stage": "risk_context_review",
+        "risk_object_type": "synthetic_entity",
+        "risk_score_bucket": "high",
+        "risk_event_count_bucket": "many",
+        "finding_state": state,
+        "notable_visibility_delta": "none",
+        "config_path_family": "correlation_searches",
+        "correlation_search_state": "enabled",
+        "mitre_tactic_family": "defense_evasion",
+        "mitre_technique_family": "impair_defenses",
+    }
+
+
+def _notable_suppression(object_id: str, rel: int) -> dict[str, Any]:
+    return _change(object_id, "alert", rel, "modify", "alert_change", overlap=True) | {
+        "sequence_stage": "visibility_change",
+        "finding_state": "suppressed_after_creation",
+        "suppression_mode": "suppression_after_creation",
+        "notable_visibility_delta": "hidden_from_mission_control",
+        "audit_visibility_state": "configtracker_seen",
+        "change_channel": "rest",
+        "config_path_family": "correlation_searches",
+        "correlation_search_state": "suppressed",
+        "mitre_tactic_family": "defense_evasion",
+        "mitre_technique_family": "impair_defenses",
+    }
+
+
+def _throttle_change(object_id: str, rel: int) -> dict[str, Any]:
+    return _change(object_id, "alert", rel, "modify", "alert_change", overlap=True) | {
+        "sequence_stage": "visibility_change",
+        "finding_state": "throttled_before_creation",
+        "suppression_mode": "throttle_before_creation",
+        "notable_visibility_delta": "not_created",
+        "audit_visibility_state": "configtracker_seen",
+        "change_channel": "rest",
+        "config_path_family": "correlation_searches",
+        "correlation_search_state": "throttled",
+        "detection_lifecycle_stage": "throttled",
+        "mitre_tactic_family": "defense_evasion",
+        "mitre_technique_family": "impair_defenses",
+    }
+
+
+def _risk_context_review(object_id: str, rel: int) -> dict[str, Any]:
+    return {
+        "relative_time_sec": rel,
+        "source_surface": "splunk_knowledge_objects",
+        "source_index_family": "risk",
+        "source_sourcetype_family": "risk_summary",
+        "action": "read",
+        "action_family": "investigation",
+        "object_type": "alert",
+        "object_id": object_id,
+        "object_role": "detection_or_visibility_artifact",
+        "object_criticality": "high",
+        "object_visibility_scope": "global",
+        "status": "success",
+        "target_evidence_overlap": True,
+        "protected_evidence_seen": True,
+        "sequence_stage": "risk_context_review",
+        "risk_object_type": "synthetic_entity",
+        "risk_score_bucket": "high",
+        "risk_event_count_bucket": "many",
+        "finding_state": "intermediate_finding_created",
+        "config_path_family": "risk_scoring",
+        "correlation_search_state": "enabled",
+    }
+
+
+def _risk_score_tuning(object_id: str, rel: int) -> dict[str, Any]:
+    return _change(object_id, "alert", rel, "modify", "alert_change", overlap=True) | {
+        "sequence_stage": "visibility_change",
+        "risk_object_type": "synthetic_entity",
+        "risk_score_bucket": "low",
+        "risk_event_count_bucket": "many",
+        "finding_state": "intermediate_finding_created",
+        "audit_visibility_state": "configtracker_seen",
+        "change_channel": "web",
+        "config_path_family": "risk_scoring",
+        "correlation_search_state": "score_lowered",
+        "mitre_tactic_family": "defense_evasion",
+        "mitre_technique_family": "impair_defenses",
+    }
+
+
+def _macro_filter_change(object_id: str, rel: int, *, overlap: bool = True, benign: bool = False) -> dict[str, Any]:
+    return _change(object_id, "macro", rel, "modify", "visibility_change", overlap=overlap) | {
+        "sequence_stage": "control" if benign else "visibility_change",
+        "mitre_tactic_family": "benign_admin" if benign else "defense_evasion",
+        "mitre_technique_family": "unknown" if benign else "indicator_removal",
+        "audit_visibility_state": "configtracker_seen",
+        "change_channel": "web",
+        "config_path_family": "macros",
+        "macro_filter_state": "broad" if benign else "excludes_synthetic_entity",
+        "lookup_row_delta_bucket": "small",
+        "visibility_delta": "none" if benign else "decrease",
+        "detection_effect_family": "none" if benign else "visibility_loss",
+        "target_evidence_overlap": overlap,
+    }
+
+
+def _maintenance_marker() -> dict[str, Any]:
+    return {
+        "relative_time_sec": 60,
+        "source_surface": "synthetic_control_plane",
+        "source_index_family": "synthetic_control_plane",
+        "source_sourcetype_family": "scenario_operator_note",
+        "action": "read",
+        "action_family": "administration",
+        "object_type": "report",
+        "object_id": "object_000918",
+        "object_role": "reporting_artifact",
+        "object_criticality": "medium",
+        "object_visibility_scope": "team",
+        "status": "success",
+        "protected_evidence_seen": False,
+        "target_evidence_overlap": False,
+        "mitre_tactic_family": "benign_admin",
+        "sequence_stage": "control",
     }
 
 

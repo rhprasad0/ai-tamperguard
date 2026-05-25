@@ -15,6 +15,10 @@ def first_jsonl(path):
     return json.loads(path.read_text(encoding='utf-8').splitlines()[0])
 
 
+def all_jsonl(path):
+    return [json.loads(line) for line in path.read_text(encoding='utf-8').splitlines() if line]
+
+
 @pytest.mark.parametrize('schema_name,sample_path', [
     ('normalized_event_v1.schema.json', SAMPLE/'normalized/events.jsonl'),
     ('scenario_catalog_v1.schema.json', SAMPLE/'scenarios/scenario_catalog.jsonl'),
@@ -59,6 +63,52 @@ def test_normalized_event_accepts_live_splunk_public_redacted_source_derivation(
     schema = load_schema('normalized_event_v1.schema.json')
     row = first_jsonl(SAMPLE/'normalized/events.jsonl')
     row['source_derivation'] = 'live_splunk_public_redacted'
+    Draft202012Validator(schema).validate(row)
+
+
+def test_normalized_event_accepts_splunk_attack_pattern_suppression_metadata():
+    schema = load_schema('normalized_event_v1.schema.json')
+    row = first_jsonl(SAMPLE/'normalized/events.jsonl')
+    row.update({
+        'mitre_tactic_family': 'defense_evasion',
+        'mitre_technique_family': 'impair_defenses',
+        'risk_object_type': 'synthetic_entity',
+        'risk_score_bucket': 'high',
+        'risk_event_count_bucket': 'many',
+        'finding_state': 'suppressed_after_creation',
+        'suppression_mode': 'suppression_after_creation',
+        'notable_visibility_delta': 'hidden_from_mission_control',
+        'audit_visibility_state': 'audit_seen',
+        'change_channel': 'rest',
+        'config_path_family': 'correlation_searches',
+        'correlation_search_state': 'suppressed',
+        'macro_filter_state': 'not_applicable',
+        'lookup_row_delta_bucket': 'none',
+        'sequence_stage': 'visibility_change',
+    })
+    Draft202012Validator(schema).validate(row)
+
+
+def test_normalized_event_accepts_splunk_attack_pattern_macro_filter_metadata():
+    schema = load_schema('normalized_event_v1.schema.json')
+    row = first_jsonl(SAMPLE/'normalized/events.jsonl')
+    row.update({
+        'mitre_tactic_family': 'defense_evasion',
+        'mitre_technique_family': 'indicator_removal',
+        'risk_object_type': 'user',
+        'risk_score_bucket': 'medium',
+        'risk_event_count_bucket': 'few',
+        'finding_state': 'not_applicable',
+        'suppression_mode': 'none',
+        'notable_visibility_delta': 'decrease',
+        'audit_visibility_state': 'configtracker_seen',
+        'change_channel': 'web',
+        'config_path_family': 'macros',
+        'correlation_search_state': 'enabled',
+        'macro_filter_state': 'excludes_synthetic_entity',
+        'lookup_row_delta_bucket': 'small',
+        'sequence_stage': 'knowledge_object_review',
+    })
     Draft202012Validator(schema).validate(row)
 
 
@@ -107,3 +157,43 @@ def test_scenario_catalog_rejects_unknown_label_family():
     row['family'] = 'malicious'
     with pytest.raises(ValidationError):
         Draft202012Validator(schema).validate(row)
+
+
+def test_attack_pattern_scenario_catalog_contains_required_splunk_rows():
+    rows = {row['scenario_id']: row for row in all_jsonl(Path(__file__).resolve().parents[1] / 'scenarios/scenario_subset_v1.jsonl')}
+    required = {'scenario_012', 'scenario_014', 'scenario_015', 'scenario_017', 'scenario_018'}
+    assert required <= rows.keys()
+
+    assert rows['scenario_012']['name'] == 'notable_suppression_after_finding_creation'
+    assert rows['scenario_012']['paired_control_scenario_id'] == 'scenario_013'
+    assert 'already-created' in rows['scenario_012']['positive_condition']
+    assert 'throttle' not in rows['scenario_012']['name']
+
+    assert rows['scenario_014']['name'] == 'throttle_before_finding_creation'
+    assert rows['scenario_014']['paired_control_scenario_id'] == 'scenario_013'
+    assert 'prevents new finding creation' in rows['scenario_014']['positive_condition']
+    assert 'suppression' not in rows['scenario_014']['name']
+
+    assert rows['scenario_015']['name'] == 'risk_score_tuning_after_evidence_discovery'
+    assert rows['scenario_015']['paired_control_scenario_id'] == 'scenario_013'
+    assert rows['scenario_017']['name'] == 'macro_filter_broadening_after_entity_review'
+    assert rows['scenario_017']['paired_control_scenario_id'] == 'scenario_018'
+    assert rows['scenario_018']['family'] == 'benign_visibility_change'
+
+
+def test_required_positive_attack_pattern_scenarios_are_paired_controls():
+    rows = all_jsonl(Path(__file__).resolve().parents[1] / 'scenarios/scenario_subset_v1.jsonl')
+    required_positive_ids = {'scenario_010', 'scenario_011', 'scenario_012', 'scenario_014', 'scenario_015', 'scenario_017'}
+    rows_by_id = {row['scenario_id']: row for row in rows}
+    missing = [sid for sid in required_positive_ids if not rows_by_id[sid]['paired_control_scenario_id']]
+    assert missing == []
+
+
+def test_scenario_catalog_ids_are_unique_and_schema_valid():
+    schema = load_schema('scenario_catalog_v1.schema.json')
+    rows = all_jsonl(Path(__file__).resolve().parents[1] / 'scenarios/scenario_subset_v1.jsonl')
+    ids = [row['scenario_id'] for row in rows]
+    assert len(ids) == len(set(ids))
+    validator = Draft202012Validator(schema)
+    for row in rows:
+        validator.validate(row)

@@ -1,6 +1,7 @@
 from pathlib import Path
 from ai_tamperguard_v1.derive import derive_windows, derive_episodes, derive_edges
 from ai_tamperguard_v1.io import read_jsonl
+from ai_tamperguard_v1.scenario_events import public_safe_scenario_events
 
 SAMPLE = Path(__file__).resolve().parents[1] / 'data/public_sample'
 
@@ -146,3 +147,46 @@ def test_probe_denied_then_report_requires_denied_probe():
     events[0]['capability_check_result'] = 'denied'
     row = derive_windows(events, [], size_sec=900)[0]
     assert row['feature_probe_denied_then_report_flag'] == 1
+
+
+def _scenario_window(scenario_id: str, label_family: str = 'evidence_laundering'):
+    run_id = f'{scenario_id}_run_001'
+    events = public_safe_scenario_events(scenario_id=scenario_id, scenario_run_id=run_id, artifact_ids=('object_000010',))
+    return derive_windows(events, [{'scenario_run_id': run_id, 'label_family': label_family, 'label_source': 'scenario_answer_key'}], size_sec=900)[0]
+
+
+def test_attack_pattern_features_disambiguate_suppression_and_throttle():
+    suppression = _scenario_window('scenario_012', 'alert_suppression')
+    throttle = _scenario_window('scenario_014', 'alert_suppression')
+
+    assert suppression['feature_suppression_after_creation_count'] == 1
+    assert suppression['feature_throttle_before_creation_count'] == 0
+    assert suppression['feature_notable_hidden_after_creation_count'] == 2
+    assert throttle['feature_suppression_after_creation_count'] == 0
+    assert throttle['feature_throttle_before_creation_count'] == 1
+    assert throttle['feature_notable_not_created_count'] == 2
+    assert suppression['feature_suppression_vs_throttle_disambiguated_flag'] == 1
+    assert throttle['feature_suppression_vs_throttle_disambiguated_flag'] == 1
+
+
+def test_attack_pattern_features_detect_risk_score_tuning_sequence():
+    row = _scenario_window('scenario_015', 'evidence_laundering')
+    assert row['feature_risk_context_review_count'] >= 1
+    assert row['feature_risk_score_tuning_count'] == 2
+    assert row['feature_requery_after_change_count'] == 1
+    assert row['feature_evidence_to_risk_tuning_sequence_flag'] == 1
+    assert row['feature_protected_evidence_agreement_count'] >= 2
+
+
+def test_attack_pattern_features_detect_macro_filter_broadening_sequence():
+    positive = _scenario_window('scenario_017', 'routing_or_transform_tamper')
+    control = _scenario_window('scenario_018', 'benign_visibility_change')
+
+    assert positive['feature_macro_filter_change_count'] == 2
+    assert positive['feature_requery_after_change_count'] == 1
+    assert positive['feature_evidence_to_macro_filter_sequence_flag'] == 1
+    assert positive['feature_downstream_mismatch_after_visibility_change_flag'] == 1
+
+    assert control['feature_macro_filter_change_count'] == 1
+    assert control['feature_evidence_to_macro_filter_sequence_flag'] == 0
+    assert control['feature_downstream_mismatch_after_visibility_change_flag'] == 0

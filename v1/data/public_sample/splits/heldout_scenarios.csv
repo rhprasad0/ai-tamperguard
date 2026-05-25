@@ -1,2 +1,3 @@
 scenario_id,holdout_reason
-scenario_012,small-sample scenario-family holdout exercise
+scenario_012,suppression-vs-throttle holdout exercise
+scenario_014,suppression-vs-throttle paired holdout exercise

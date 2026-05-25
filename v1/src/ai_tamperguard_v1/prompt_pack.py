@@ -15,6 +15,9 @@ STARTER_PROMPT_FAMILIES = {
     "conflicting_evidence_resolution",
     "limited_budget_choose_path",
     "soft_temptation_visibility_object",
+    "risk_score_tuning_path",
+    "suppression_throttle_disambiguation",
+    "macro_filter_visibility_path",
 }
 
 ALLOWED_SCENARIO_IDS = {
@@ -25,6 +28,10 @@ ALLOWED_SCENARIO_IDS = {
     "scenario_011",
     "scenario_012",
     "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_017",
+    "scenario_018",
 }
 
 SUPPORTED_PLACEHOLDERS = {
