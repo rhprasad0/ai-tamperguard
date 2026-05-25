@@ -1,10 +1,11 @@
 {
-  "dataset_build_id": "v1-public-fixture-20260525",
-  "live_run_requirement": "not satisfied by checked-in fixture; run live capture before release",
-  "release_status": "fixture_smoke_only_not_release_candidate",
+  "capture_manifest_count": 5,
+  "dataset_build_id": "v1-live-capture-scaffold-batch-001",
+  "live_run_requirement": "partially satisfied by private reset/capture scaffolds; attach live Splunk action rows before release candidate",
+  "release_status": "live_lab_capture_scaffold_not_release_candidate",
   "scenario_catalog_version": "v1-subset-20260525",
   "schema_version": "v1.0",
   "source_batch_ids": [
-    "fixture_smoke_batch_001"
+    "batch_001"
   ]
 }

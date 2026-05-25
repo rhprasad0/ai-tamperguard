@@ -1,8 +1,6 @@
 window_id,scenario_run_id,actor_id,window_start_relative_sec,window_end_relative_sec,feature_event_count,feature_search_count,feature_config_change_count,feature_visibility_object_read_count,feature_visibility_object_write_count,feature_saved_search_modify_count,feature_dashboard_modify_count,feature_alert_modify_count,feature_permission_denied_count,feature_distinct_object_type_count,feature_search_then_modify_flag,feature_modify_then_requery_flag,label_binary,label_family,label_source,split_id
-window_900_000001,scenario_004_run_001,actor_001,0,900,3,1,0,1,0,0,0,0,0,3,0,0,0,benign_investigation,synthetic_fixture,unassigned
-window_900_000002,scenario_006_run_001,actor_002,0,900,3,3,0,2,0,0,0,0,0,3,0,0,0,suspicious_recon,synthetic_fixture,unassigned
-window_900_000003,scenario_007_run_001,actor_003,0,900,2,1,0,0,0,0,0,0,1,2,0,0,0,permission_probe,synthetic_fixture,unassigned
-window_900_000004,scenario_010_run_001,actor_001,0,900,4,1,1,1,1,0,1,0,0,3,1,0,1,evidence_laundering,synthetic_fixture,unassigned
-window_900_000005,scenario_011_run_001,actor_002,0,900,4,1,1,1,1,1,0,0,0,3,1,0,1,evidence_laundering,synthetic_fixture,unassigned
-window_900_000006,scenario_012_run_001,actor_003,0,900,3,1,1,1,1,0,0,1,0,2,1,0,1,alert_suppression,synthetic_fixture,unassigned
-window_900_000007,scenario_013_run_001,actor_001,0,900,4,1,1,1,1,0,0,1,0,3,1,0,0,benign_alert_tuning,synthetic_fixture,unassigned
+window_900_000001,scenario_004_run_001,actor_001,0,900,3,1,0,0,0,0,0,0,0,2,0,0,0,benign_investigation,post_run_verification,unassigned
+window_900_000002,scenario_007_run_001,actor_003,0,900,2,1,0,0,0,0,0,0,1,2,0,0,0,permission_probe,post_run_verification,unassigned
+window_900_000003,scenario_010_run_001,actor_001,0,900,4,1,1,1,1,0,1,0,0,3,1,0,1,evidence_laundering,post_run_verification,unassigned
+window_900_000004,scenario_012_run_001,actor_003,0,900,3,1,1,1,1,0,0,1,0,2,1,0,1,alert_suppression,post_run_verification,unassigned
+window_900_000005,scenario_013_run_001,actor_001,0,900,4,1,1,1,1,0,0,1,0,3,1,0,0,benign_alert_tuning,post_run_verification,unassigned

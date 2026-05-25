@@ -18,22 +18,20 @@
   "splits": {
     "test": {
       "label_counts": {
+        "1": 1
+      },
+      "row_count": 1
+    },
+    "train": {
+      "label_counts": {
         "0": 1,
         "1": 1
       },
       "row_count": 2
     },
-    "train": {
-      "label_counts": {
-        "0": 2,
-        "1": 1
-      },
-      "row_count": 3
-    },
     "validate": {
       "label_counts": {
-        "0": 1,
-        "1": 1
+        "0": 2
       },
       "row_count": 2
     }

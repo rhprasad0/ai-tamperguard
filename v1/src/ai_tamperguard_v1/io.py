@@ -49,7 +49,7 @@ def write_csv_rows(path: Path, rows: list[dict[str, object]], fieldnames: list[s
                     keys.append(key)
         fieldnames = keys
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({k: row.get(k, "") for k in fieldnames})

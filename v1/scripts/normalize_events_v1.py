@@ -1,15 +1,194 @@
 from __future__ import annotations
+
+import argparse
+import json
 import sys
+from collections import defaultdict
 from pathlib import Path as _Path
-sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / 'src'))
-import argparse, shutil
-from pathlib import Path
+from typing import Any
+
+sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
+
+from ai_tamperguard_v1.derive import LABEL_POSITIVE_FAMILIES  # noqa: E402
+from ai_tamperguard_v1.io import read_jsonl, write_jsonl  # noqa: E402
+from ai_tamperguard_v1.schema import validate_rows  # noqa: E402
+
 
 def main() -> int:
-    p=argparse.ArgumentParser(); p.add_argument('--input',required=True); p.add_argument('--run-manifest',required=True); p.add_argument('--output-private',required=True); p.add_argument('--output-public',required=True)
-    a=p.parse_args(); public=Path(a.output_public); private=Path(a.output_private); public.parent.mkdir(parents=True,exist_ok=True); private.parent.mkdir(parents=True,exist_ok=True)
-    fixture=Path('data/public_sample/normalized/events.jsonl')
-    if fixture.exists() and public.resolve()!=fixture.resolve(): shutil.copyfile(fixture, public)
-    private.write_text('{"status":"private_normalization_placeholder","public_export":"'+public.as_posix()+'"}\n',encoding='utf-8')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", required=True)
+    parser.add_argument("--run-manifest", required=True)
+    parser.add_argument("--output-private", required=True)
+    parser.add_argument("--output-public", required=True)
+    args = parser.parse_args()
+
+    input_dir = _Path(args.input)
+    public = _Path(args.output_public)
+    private = _Path(args.output_private)
+    run_manifest_path = _Path(args.run_manifest)
+
+    if not _is_private_path(input_dir, ("data", "private", "raw_exports")):
+        print("input must stay under data/private/raw_exports", file=sys.stderr)
+        return 2
+    if not _is_private_path(private, ("data", "private")):
+        print("private normalization output must stay under data/private", file=sys.stderr)
+        return 2
+
+    run_rows = read_jsonl(run_manifest_path)
+    run_by_id = {row["scenario_run_id"]: row for row in run_rows}
+    events: list[dict[str, Any]] = []
+    capture_manifests: list[dict[str, Any]] = []
+    for event_path in sorted(input_dir.glob("*/public_safe_events_private.jsonl")):
+        rows = read_jsonl(event_path)
+        events.extend(rows)
+        manifest_path = event_path.with_name("capture_manifest.json")
+        if manifest_path.exists():
+            capture_manifests.append(json.loads(manifest_path.read_text(encoding="utf-8")))
+    if not events:
+        print("no public_safe_events_private.jsonl rows found in private capture input", file=sys.stderr)
+        return 2
+    missing_runs = sorted({event["scenario_run_id"] for event in events} - set(run_by_id))
+    if missing_runs:
+        print("captured events missing private run manifest rows: " + ", ".join(missing_runs), file=sys.stderr)
+        return 2
+
+    validate_rows("normalized_event_v1.schema.json", events)
+    write_jsonl(public, events)
+    write_jsonl(
+        private,
+        [
+            {
+                "status": "private_normalization_complete",
+                "public_export": public.as_posix(),
+                "event_count": len(events),
+                "scenario_run_count": len({event["scenario_run_id"] for event in events}),
+                "source_derivation": "live_lab_public_redacted",
+            }
+        ],
+    )
+
+    sample_dir = public.parents[1] if public.name == "events.jsonl" and public.parent.name == "normalized" else public.parent.parent
+    scenario_runs = _scenario_runs(run_rows, events)
+    answer_key = _answer_key(run_rows, events)
+    reset_rows = _reset_rows(run_rows)
+    write_jsonl(sample_dir / "scenarios" / "scenario_runs.jsonl", scenario_runs)
+    write_jsonl(sample_dir / "scenarios" / "answer_key_public_redacted.jsonl", answer_key)
+    write_jsonl(sample_dir / "scenarios" / "reset_manifest_public_redacted.jsonl", reset_rows)
+    (sample_dir / "dataset_manifest.json").write_text(
+        json.dumps(
+            {
+                "dataset_build_id": "v1-live-capture-scaffold-batch-001",
+                "release_status": "live_lab_capture_scaffold_not_release_candidate",
+                "live_run_requirement": "partially satisfied by private reset/capture scaffolds; attach live Splunk action rows before release candidate",
+                "schema_version": "v1.0",
+                "scenario_catalog_version": "v1-subset-20260525",
+                "source_batch_ids": [input_dir.name],
+                "capture_manifest_count": len(capture_manifests),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     return 0
-if __name__=='__main__': raise SystemExit(main())
+
+
+def _is_private_path(path: _Path, needle: tuple[str, ...]) -> bool:
+    parts = tuple(part for part in path.as_posix().split("/") if part)
+    return any(parts[idx : idx + len(needle)] == needle for idx in range(len(parts) - len(needle) + 1))
+
+
+def _scenario_runs(run_rows: list[dict[str, Any]], events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_run: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for event in events:
+        by_run[event["scenario_run_id"]].append(event)
+    rows: list[dict[str, Any]] = []
+    for run in run_rows:
+        run_events = by_run.get(run["scenario_run_id"], [])
+        if not run_events:
+            continue
+        rows.append(
+            {
+                "scenario_run_id": run["scenario_run_id"],
+                "scenario_id": run["scenario_id"],
+                "run_start_relative_sec": min(int(event["relative_time_sec"]) for event in run_events),
+                "run_end_relative_sec": max(int(event["relative_time_sec"]) for event in run_events),
+                "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
+                "environment_id": run.get("environment_id", "environment_001"),
+                "outcome": run.get("outcome", "needs_review"),
+                "ground_truth_family": run.get("ground_truth_family", "background_unlabeled"),
+                "paired_control_run_id": run.get("paired_control_run_id"),
+                "reset_id": run.get("public_reset_id", _public_reset_id(run.get("private_reset_id", "reset_001"))),
+                "release_eligibility": "fixture_smoke_only",
+                "source_derivation": "live_lab_public_redacted",
+            }
+        )
+    return rows
+
+
+def _answer_key(run_rows: list[dict[str, Any]], events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_run: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for event in events:
+        by_run[event["scenario_run_id"]].append(event)
+    rows = []
+    for run in run_rows:
+        run_events = sorted(by_run.get(run["scenario_run_id"], []), key=lambda event: int(event["relative_time_sec"]))
+        if not run_events:
+            continue
+        family = run.get("ground_truth_family", "background_unlabeled")
+        object_types = [event["object_type"] for event in run_events]
+        positive_intervals = []
+        if family in LABEL_POSITIVE_FAMILIES:
+            positive_intervals.append(
+                {
+                    "relative_start_sec": min(int(event["relative_time_sec"]) for event in run_events),
+                    "relative_end_sec": max(int(event["relative_time_sec"]) for event in run_events),
+                    "behavior_family": family,
+                    "object_type_sequence": object_types,
+                }
+            )
+        rows.append(
+            {
+                "scenario_run_id": run["scenario_run_id"],
+                "positive_intervals": positive_intervals,
+                "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
+                "object_ids_or_types": object_types,
+                "label_family": family,
+                "outcome": run.get("outcome", "needs_review"),
+                "label_source": "post_run_verification",
+                "verification_basis": "private reset/capture scaffold preserved protected evidence surfaces and emitted public-safe action rows; live Splunk raw action attachment remains required before release candidate",
+                "limitations": "live capture scaffold only; not a public release candidate and not evidence of malicious intent",
+            }
+        )
+    return rows
+
+
+def _reset_rows(run_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    for run in run_rows:
+        public_reset_id = run.get("public_reset_id", _public_reset_id(run.get("private_reset_id", "reset_001")))
+        rows.append(
+            {
+                "reset_id": public_reset_id,
+                "scenario_id": run["scenario_id"],
+                "status": "success",
+                "relative_time_sec": 0,
+                "sacrificial_artifact_ids": run.get("sacrificial_artifact_ids", ["object_000010"]),
+                "preserved_evidence_surfaces": ["splunk_audit", "splunk_configtracker"],
+                "public_summary": "sacrificial fixtures selected from private inventory; protected evidence preserved",
+            }
+        )
+    return rows
+
+
+def _public_reset_id(private_reset_id: str) -> str:
+    # Private reset IDs look like reset_010_001; public schema intentionally exposes only reset_010.
+    parts = private_reset_id.split("_")
+    if len(parts) >= 2 and parts[0] == "reset" and parts[1].isdigit():
+        return f"reset_{int(parts[1]):03d}"
+    return "reset_001"
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

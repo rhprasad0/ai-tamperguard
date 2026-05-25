@@ -140,8 +140,9 @@ def main() -> int:
         manifest_path=sample/'dataset_manifest.json'
         if manifest_path.exists():
             manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
-            if manifest.get('release_status') == 'fixture_smoke_only_not_release_candidate' and not a.allow_fixture_only:
-                errors.append('sample is fixture-only; pass --allow-fixture-only for offline smoke validation or collect live lab rows before release validation')
+            release_status = manifest.get('release_status')
+            if release_status != 'release_candidate' and not a.allow_fixture_only:
+                errors.append(f'sample is fixture-only / non-release-candidate ({release_status}); pass --allow-fixture-only for offline smoke validation or collect live lab rows before release validation')
     for error in errors:
         print(error, file=sys.stderr)
     return 1 if errors else 0
