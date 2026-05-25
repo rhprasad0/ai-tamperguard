@@ -57,7 +57,7 @@ def scan_paths(paths: list[str]) -> list[Finding]:
         path = Path(raw)
         norm = normalize_path(path)
         if _is_private_path(norm):
-            findings.append(Finding(norm, "private generated path must not be included in public scan"))
+            findings.append(Finding(norm, "secret/private config path must not be included in public scan"))
             continue
         if not path.exists():
             findings.append(Finding(norm, "missing path explicitly passed to scanner"))

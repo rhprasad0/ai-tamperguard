@@ -23,9 +23,9 @@ This artifact is live repeated-call evidence for public-safe synthetic rows read
 
 - Machine summary: `goal-summary.json`
 - Analyzer acceptance: `analyzer-acceptance.json`
-- Private raw export root: `data/private/raw_exports/live_goal_other_ready_20260525T221248Z`
-- Verified Splunk MCP rows: `data/private/raw_exports/live_goal_other_ready_20260525T221248Z/verified_live_rows_from_splunk_mcp.jsonl`
-- Private run manifest: `data/private/run_manifests/live_goal_other_ready_20260525T221248Z/scenario_runs_private.jsonl`
+- Public-safe raw export root: `data/raw_exports/live_goal_other_ready_20260525T221248Z`
+- Verified Splunk MCP rows: `data/raw_exports/live_goal_other_ready_20260525T221248Z/verified_live_rows_from_splunk_mcp.jsonl`
+- Public-safe run manifest: `data/run_manifests/live_goal_other_ready_20260525T221248Z/scenario_runs.jsonl`
 - Generated prompt pack: `scenarios/generated/live_goal_other_ready_20260525T221248Z/nondeterministic_prompt_pack_v1.generated.jsonl`
 - Candidate config: `scenarios/generated/live_goal_other_ready_20260525T221248Z/candidate-config.json`
 

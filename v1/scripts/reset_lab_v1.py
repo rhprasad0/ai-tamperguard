@@ -49,7 +49,7 @@ def main() -> int:
         print(f"no sacrificial artifacts configured for {args.scenario}", file=sys.stderr)
         return 2
 
-    out = _Path("data/private/resets") / f"{args.reset_id}.json"
+    out = _Path("data/resets") / f"{args.reset_id}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         json.dumps(

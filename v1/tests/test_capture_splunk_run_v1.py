@@ -16,7 +16,7 @@ def _private_files(root: Path, scenario: str = "scenario_010", reset_id: str = "
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'
@@ -25,7 +25,7 @@ def _private_files(root: Path, scenario: str = "scenario_010", reset_id: str = "
         'allowed_object_types = ["dashboard", "saved_search", "alert", "report"]\n',
         encoding="utf-8",
     )
-    reset_dir = root / "data" / "private" / "resets"
+    reset_dir = root / "data" / "resets"
     reset_dir.mkdir(parents=True)
     reset = reset_dir / f"{reset_id}.json"
     reset.write_text(
@@ -50,7 +50,7 @@ def _jsonl(path: Path) -> list[dict]:
 
 def test_capture_writes_private_public_safe_event_rows_from_reset_manifest(tmp_path: Path) -> None:
     cfg, _reset = _private_files(tmp_path)
-    output_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_010_run_001"
+    output_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_010_run_001"
 
     result = subprocess.run(
         [
@@ -73,10 +73,10 @@ def test_capture_writes_private_public_safe_event_rows_from_reset_manifest(tmp_p
 
     assert result.returncode == 0
     manifest = json.loads((output_dir / "capture_manifest.json").read_text(encoding="utf-8"))
-    assert manifest["status"] == "captured_private_public_safe_scaffold"
+    assert manifest["status"] == "captured_public_safe_scaffold"
     assert manifest["scenario_id"] == "scenario_010"
     assert manifest["public_release_ready"] is False
-    events = _jsonl(output_dir / "public_safe_events_private.jsonl")
+    events = _jsonl(output_dir / "public_safe_events.jsonl")
     assert [event["source_derivation"] for event in events] == ["live_lab_public_redacted"] * len(events)
     assert {event["scenario_run_id"] for event in events} == {"scenario_010_run_001"}
     assert any(event["action"] == "modify" and event["object_type"] == "dashboard" for event in events)
@@ -86,7 +86,7 @@ def test_capture_writes_private_public_safe_event_rows_from_reset_manifest(tmp_p
 
 def test_capture_rejects_mismatched_scenario_run_and_reset(tmp_path: Path) -> None:
     cfg, _reset = _private_files(tmp_path, scenario="scenario_004", reset_id="reset_004_001")
-    output_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_010_run_001"
+    output_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_010_run_001"
 
     result = subprocess.run(
         [
@@ -113,7 +113,7 @@ def test_capture_rejects_mismatched_scenario_run_and_reset(tmp_path: Path) -> No
 
 def test_capture_accepts_verified_live_rows_jsonl_under_private_raw_exports(tmp_path: Path) -> None:
     cfg, _reset = _private_files(tmp_path)
-    batch_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_010_run_001"
+    batch_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_010_run_001"
     batch_dir.mkdir(parents=True)
     rows = batch_dir / "verified_splunk_rows.jsonl"
     rows.write_text(
@@ -186,7 +186,7 @@ def test_capture_accepts_verified_live_rows_jsonl_under_private_raw_exports(tmp_
     manifest = json.loads((output_dir / "capture_manifest.json").read_text(encoding="utf-8"))
     assert manifest["status"] == "captured_live_splunk_public_safe"
     assert manifest["source_index"] == "openclaw_tamper_lab"
-    events = _jsonl(output_dir / "public_safe_events_private.jsonl")
+    events = _jsonl(output_dir / "public_safe_events.jsonl")
     assert len(events) == 1
     assert events[0]["source_derivation"] == "live_splunk_public_redacted"
     assert events[0]["actor_role_family"] == "admin"
@@ -197,7 +197,7 @@ def test_capture_accepts_verified_live_rows_jsonl_under_private_raw_exports(tmp_
 
 def test_capture_preserves_prompt_pack_metadata_from_verified_live_rows(tmp_path: Path) -> None:
     cfg, _reset = _private_files(tmp_path, scenario="scenario_006", reset_id="reset_006_001")
-    batch_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001"
+    batch_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001"
     batch_dir.mkdir(parents=True)
     rows = batch_dir / "verified_splunk_rows.jsonl"
     rows.write_text(
@@ -257,7 +257,7 @@ def test_capture_preserves_prompt_pack_metadata_from_verified_live_rows(tmp_path
     )
 
     assert result.returncode == 0
-    events = _jsonl(output_dir / "public_safe_events_private.jsonl")
+    events = _jsonl(output_dir / "public_safe_events.jsonl")
     assert events[0]["relative_time_sec"] == 60
     assert events[0]["prompt_variant_id"] == "operator_handoff_asset_map_v1_a"
     assert events[0]["prompt_family"] == "operator_handoff_asset_map"
@@ -268,7 +268,7 @@ def test_capture_preserves_prompt_pack_metadata_from_verified_live_rows(tmp_path
 
 def test_capture_require_live_rows_fails_closed_without_search_config(tmp_path: Path) -> None:
     cfg, _reset = _private_files(tmp_path, scenario="scenario_004", reset_id="reset_004_001")
-    output_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_004_run_001"
+    output_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_004_run_001"
 
     result = subprocess.run(
         [
@@ -301,7 +301,7 @@ def test_capture_live_rows_write_live_manifest(monkeypatch: pytest.MonkeyPatch, 
     import capture_splunk_run_v1 as capture
 
     cfg, _reset = _private_files(tmp_path, scenario="scenario_004", reset_id="reset_004_001")
-    output_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_004_run_001"
+    output_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_004_run_001"
     rows = [
         {
             "event_id": "evt_000004001",
@@ -351,8 +351,60 @@ def test_capture_live_rows_write_live_manifest(monkeypatch: pytest.MonkeyPatch, 
     manifest = json.loads((output_dir / "capture_manifest.json").read_text(encoding="utf-8"))
     assert manifest["status"] == "captured_live_splunk_public_safe"
     assert manifest["source_index"] == "openclaw_tamper_lab"
-    events = _jsonl(output_dir / "public_safe_events_private.jsonl")
+    events = _jsonl(output_dir / "public_safe_events.jsonl")
     assert events[0]["event_id"] == "evt_000004001"
     assert events[0]["actor_role_family"] == "unknown"
     assert events[0]["protected_evidence_seen"] is False
     assert "private_name" not in events[0]
+
+
+def test_rejects_capture_output_traversal_out_of_raw_exports(tmp_path: Path) -> None:
+    config, _reset = _private_files(tmp_path, scenario="scenario_001", reset_id="reset_001")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "scripts" / "capture_splunk_run_v1.py"),
+            "--config",
+            str(config),
+            "--scenario-run-id",
+            "scenario_001_run_001",
+            "--reset-id",
+            "reset_001",
+            "--output-dir",
+            str(tmp_path / "data" / "raw_exports" / ".." / "public_sample" / "leak"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "capture output must stay under data/raw_exports" in result.stderr
+
+
+def test_rejects_verified_live_rows_traversal_out_of_raw_exports(tmp_path: Path) -> None:
+    config, _reset = _private_files(tmp_path, scenario="scenario_001", reset_id="reset_001")
+    leak = tmp_path / "data" / "public_sample" / "leak.jsonl"
+    leak.parent.mkdir(parents=True, exist_ok=True)
+    leak.write_text("{}\n", encoding="utf-8")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "scripts" / "capture_splunk_run_v1.py"),
+            "--config",
+            str(config),
+            "--scenario-run-id",
+            "scenario_001_run_001",
+            "--reset-id",
+            "reset_001",
+            "--output-dir",
+            str(tmp_path / "data" / "raw_exports" / "batch" / "scenario_001_run_001"),
+            "--require-live-splunk-rows",
+            "--verified-live-rows-jsonl",
+            str(tmp_path / "data" / "raw_exports" / ".." / "public_sample" / "leak.jsonl"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "verified live rows JSONL must stay under data/raw_exports" in result.stderr

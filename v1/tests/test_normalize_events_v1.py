@@ -12,7 +12,7 @@ def _write_jsonl(path: Path, rows: list[dict]) -> None:
 
 
 def test_normalize_live_capture_writes_public_events_and_metadata(tmp_path: Path) -> None:
-    capture_dir = tmp_path / "data" / "private" / "raw_exports" / "batch_001" / "scenario_010_run_001"
+    capture_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_010_run_001"
     events = [
         {
             "event_id": "evt_000010001",
@@ -57,20 +57,20 @@ def test_normalize_live_capture_writes_public_events_and_metadata(tmp_path: Path
             "target_evidence_overlap": True,
         },
     ]
-    _write_jsonl(capture_dir / "public_safe_events_private.jsonl", events)
+    _write_jsonl(capture_dir / "public_safe_events.jsonl", events)
     (capture_dir / "capture_manifest.json").write_text(
         json.dumps(
             {
                 "scenario_run_id": "scenario_010_run_001",
                 "scenario_id": "scenario_010",
                 "reset_id": "reset_010_001",
-                "status": "captured_private_public_safe_scaffold",
+                "status": "captured_public_safe_scaffold",
                 "public_release_ready": False,
             }
         ),
         encoding="utf-8",
     )
-    run_manifest = tmp_path / "data" / "private" / "run_manifests" / "batch_001" / "scenario_runs_private.jsonl"
+    run_manifest = tmp_path / "data" / "run_manifests" / "batch_001" / "scenario_runs.jsonl"
     _write_jsonl(
         run_manifest,
         [
@@ -88,14 +88,14 @@ def test_normalize_live_capture_writes_public_events_and_metadata(tmp_path: Path
         ],
     )
     public_events = tmp_path / "data" / "public_sample" / "normalized" / "events.jsonl"
-    private_out = tmp_path / "data" / "private" / "normalized" / "events_private.jsonl"
+    private_out = tmp_path / "data" / "normalized" / "events_private.jsonl"
 
     result = subprocess.run(
         [
             sys.executable,
             str(Path(__file__).resolve().parents[1] / "scripts" / "normalize_events_v1.py"),
             "--input",
-            str(tmp_path / "data" / "private" / "raw_exports" / "batch_001"),
+            str(tmp_path / "data" / "raw_exports" / "batch_001"),
             "--run-manifest",
             str(run_manifest),
             "--output-private",
@@ -125,7 +125,7 @@ def test_normalize_live_capture_writes_public_events_and_metadata(tmp_path: Path
 
 def test_normalize_propagates_prompt_pack_metadata_from_run_manifest(tmp_path: Path) -> None:
     run_id = "scenario_015_nondet_risk_score_tuning_path_v1_a_attempt_002"
-    capture_dir = tmp_path / "data" / "private" / "raw_exports" / "nondet_batch_001" / run_id
+    capture_dir = tmp_path / "data" / "raw_exports" / "nondet_batch_001" / run_id
     events = [
         {
             "event_id": "evt_000015001",
@@ -164,12 +164,12 @@ def test_normalize_propagates_prompt_pack_metadata_from_run_manifest(tmp_path: P
             "evidence_chain_stage": "search",
         }
     ]
-    _write_jsonl(capture_dir / "public_safe_events_private.jsonl", events)
+    _write_jsonl(capture_dir / "public_safe_events.jsonl", events)
     (capture_dir / "capture_manifest.json").write_text(
-        json.dumps({"scenario_run_id": run_id, "scenario_id": "scenario_015", "status": "captured_private_public_safe_scaffold"}),
+        json.dumps({"scenario_run_id": run_id, "scenario_id": "scenario_015", "status": "captured_public_safe_scaffold"}),
         encoding="utf-8",
     )
-    run_manifest = tmp_path / "data" / "private" / "run_manifests" / "nondet_batch_001" / "scenario_runs_private.jsonl"
+    run_manifest = tmp_path / "data" / "run_manifests" / "nondet_batch_001" / "scenario_runs.jsonl"
     _write_jsonl(
         run_manifest,
         [
@@ -194,14 +194,14 @@ def test_normalize_propagates_prompt_pack_metadata_from_run_manifest(tmp_path: P
         ],
     )
     public_events = tmp_path / "data" / "public_sample" / "normalized" / "events.jsonl"
-    private_out = tmp_path / "data" / "private" / "normalized" / "events_private.jsonl"
+    private_out = tmp_path / "data" / "normalized" / "events_private.jsonl"
 
     result = subprocess.run(
         [
             sys.executable,
             str(Path(__file__).resolve().parents[1] / "scripts" / "normalize_events_v1.py"),
             "--input",
-            str(tmp_path / "data" / "private" / "raw_exports" / "nondet_batch_001"),
+            str(tmp_path / "data" / "raw_exports" / "nondet_batch_001"),
             "--run-manifest",
             str(run_manifest),
             "--output-private",
@@ -230,3 +230,49 @@ def test_normalize_propagates_prompt_pack_metadata_from_run_manifest(tmp_path: P
     answer = json.loads((sample / "scenarios" / "answer_key_public_redacted.jsonl").read_text(encoding="utf-8").splitlines()[0])
     assert answer["prompt_variant_id"] == "risk_score_tuning_path_v1_a"
     assert answer["attempt_index"] == 2
+
+
+def test_rejects_input_traversal_out_of_raw_exports(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "scripts" / "normalize_events_v1.py"),
+            "--input",
+            str(tmp_path / "data" / "raw_exports" / ".." / "public_sample" / "leak"),
+            "--run-manifest",
+            str(tmp_path / "data" / "run_manifests" / "runs.jsonl"),
+            "--output-metadata",
+            str(tmp_path / "data" / "normalized" / "meta.jsonl"),
+            "--output-public",
+            str(tmp_path / "data" / "public_sample" / "normalized" / "events.jsonl"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "input must stay under data/raw_exports" in result.stderr
+
+
+def test_rejects_metadata_traversal_out_of_normalized(tmp_path: Path) -> None:
+    batch = tmp_path / "data" / "raw_exports" / "batch"
+    batch.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "scripts" / "normalize_events_v1.py"),
+            "--input",
+            str(batch),
+            "--run-manifest",
+            str(tmp_path / "data" / "run_manifests" / "runs.jsonl"),
+            "--output-metadata",
+            str(tmp_path / "data" / "normalized" / ".." / "public_sample" / "leak.jsonl"),
+            "--output-public",
+            str(tmp_path / "data" / "public_sample" / "normalized" / "events.jsonl"),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "normalization metadata output must stay under data/normalized" in result.stderr

@@ -9,8 +9,8 @@ def test_public_sample_scans_clean():
     assert scan_paths(['data/public_sample', 'docs', 'schemas', 'scenarios']) == []
 
 
-def test_blocks_private_path_metadata():
-    assert any('private generated path' in reason for reason in reasons(['data/private/raw_exports/foo.json']))
+def test_blocks_secret_private_config_path_metadata():
+    assert any('secret/private config path' in reason for reason in reasons(['splunk/private/lab.toml']))
 
 
 def test_blocks_secret_assignment(tmp_path):

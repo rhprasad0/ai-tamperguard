@@ -18,48 +18,48 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True)
     parser.add_argument("--run-manifest", required=True)
-    parser.add_argument("--output-private", required=True)
+    parser.add_argument("--output-metadata", "--output-private", dest="output_metadata", required=True)
     parser.add_argument("--output-public", required=True)
     args = parser.parse_args()
 
     input_dir = _Path(args.input)
     public = _Path(args.output_public)
-    private = _Path(args.output_private)
+    metadata = _Path(args.output_metadata)
     run_manifest_path = _Path(args.run_manifest)
 
-    if not _is_private_path(input_dir, ("data", "private", "raw_exports")):
-        print("input must stay under data/private/raw_exports", file=sys.stderr)
+    if not _is_artifact_path(input_dir, ("data", "raw_exports")):
+        print("input must stay under data/raw_exports", file=sys.stderr)
         return 2
-    if not _is_private_path(private, ("data", "private")):
-        print("private normalization output must stay under data/private", file=sys.stderr)
+    if not _is_artifact_path(metadata, ("data", "normalized")):
+        print("normalization metadata output must stay under data/normalized", file=sys.stderr)
         return 2
 
     run_rows = read_jsonl(run_manifest_path)
     run_by_id = {row["scenario_run_id"]: row for row in run_rows}
     events: list[dict[str, Any]] = []
     capture_manifests: list[dict[str, Any]] = []
-    for event_path in sorted(input_dir.glob("*/public_safe_events_private.jsonl")):
+    for event_path in sorted(input_dir.glob("*/public_safe_events.jsonl")):
         rows = read_jsonl(event_path)
         events.extend(rows)
         manifest_path = event_path.with_name("capture_manifest.json")
         if manifest_path.exists():
             capture_manifests.append(json.loads(manifest_path.read_text(encoding="utf-8")))
     if not events:
-        print("no public_safe_events_private.jsonl rows found in private capture input", file=sys.stderr)
+        print("no public_safe_events.jsonl rows found in capture input", file=sys.stderr)
         return 2
     missing_runs = sorted({event["scenario_run_id"] for event in events} - set(run_by_id))
     if missing_runs:
-        print("captured events missing private run manifest rows: " + ", ".join(missing_runs), file=sys.stderr)
+        print("captured events missing run manifest rows: " + ", ".join(missing_runs), file=sys.stderr)
         return 2
     events = _enrich_events_from_run_manifest(events, run_by_id)
 
     validate_rows("normalized_event_v1.schema.json", events)
     write_jsonl(public, events)
     write_jsonl(
-        private,
+        metadata,
         [
             {
-                "status": "private_normalization_complete",
+                "status": "normalization_complete",
                 "public_export": public.as_posix(),
                 "event_count": len(events),
                 "scenario_run_count": len({event["scenario_run_id"] for event in events}),
@@ -80,7 +80,7 @@ def main() -> int:
             {
                 "dataset_build_id": "v1-live-capture-scaffold-batch-001",
                 "release_status": "live_lab_capture_scaffold_not_release_candidate",
-                "live_run_requirement": "partially satisfied by private reset/capture scaffolds; attach live Splunk action rows before release candidate",
+                "live_run_requirement": "partially satisfied by public-safe reset/capture scaffolds; attach live Splunk action rows before release candidate",
                 "schema_version": "v1.0",
                 "scenario_catalog_version": "v1-subset-20260525",
                 "source_batch_ids": [input_dir.name],
@@ -95,9 +95,11 @@ def main() -> int:
     return 0
 
 
-def _is_private_path(path: _Path, needle: tuple[str, ...]) -> bool:
-    parts = tuple(part for part in path.as_posix().split("/") if part)
-    return any(parts[idx : idx + len(needle)] == needle for idx in range(len(parts) - len(needle) + 1))
+def _is_artifact_path(path: _Path, needle: tuple[str, ...]) -> bool:
+    repo_root = _Path.cwd().resolve()
+    artifact_root = repo_root.joinpath(*needle).resolve()
+    resolved = path.expanduser().resolve()
+    return resolved == artifact_root or resolved.is_relative_to(artifact_root)
 
 
 PROMPT_METADATA_KEYS = (
@@ -191,7 +193,7 @@ def _answer_key(run_rows: list[dict[str, Any]], events: list[dict[str, Any]]) ->
             "label_family": family,
             "outcome": _public_outcome(run.get("outcome", "needs_review")),
             "label_source": "post_run_verification",
-            "verification_basis": "private reset/capture scaffold preserved protected evidence surfaces and emitted public-safe action rows; live Splunk raw action attachment remains required before release candidate",
+            "verification_basis": "public-safe reset/capture scaffold preserved protected evidence surfaces and emitted public-safe action rows; live Splunk raw action attachment remains required before release candidate",
             "limitations": "live capture scaffold only; not a public release candidate and not evidence of malicious intent",
         }
         row.update(_public_prompt_metadata(run))

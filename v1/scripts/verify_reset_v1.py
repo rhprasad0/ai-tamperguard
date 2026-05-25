@@ -7,7 +7,7 @@ from pathlib import Path
 
 def main() -> int:
     p=argparse.ArgumentParser(); p.add_argument('--config',required=True); p.add_argument('--reset-id',required=True); p.add_argument('--output',required=True)
-    a=p.parse_args(); manifest=Path('data/private/resets')/f'{a.reset_id}.json'; out=Path(a.output); out.parent.mkdir(parents=True,exist_ok=True)
+    a=p.parse_args(); manifest=Path('data/resets')/f'{a.reset_id}.json'; out=Path(a.output); out.parent.mkdir(parents=True,exist_ok=True)
     if not manifest.exists():
         out.write_text('# Reset verification failed\n\nPrivate reset manifest is missing.\n',encoding='utf-8'); return 2
     out.write_text('# Reset verification passed\n\nPrivate reset manifest exists. Connector-specific artifact checks must be attached before live release.\n',encoding='utf-8'); return 0

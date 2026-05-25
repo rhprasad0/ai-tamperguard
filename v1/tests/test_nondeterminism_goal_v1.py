@@ -13,23 +13,22 @@ from ai_tamperguard_v1.nondeterminism_goal import (
 )
 
 
-def test_load_existing_summary_reproduces_last_k3_baseline() -> None:
+def test_load_existing_summary_reproduces_preserved_live_goal() -> None:
     v1_root = Path(__file__).resolve().parents[1]
     baseline = load_existing_summary(
-        v1_root / "reports" / "private" / "full_live_v1_k3_fixed_20260525T204429Z" / "nondeterminism-summary.json"
+        v1_root / "reports" / "goal_runs" / "live_goal_nondet50_20260525T214956Z" / "goal-summary.json"
     )
 
-    assert baseline.batch_id == "full_live_v1_k3_fixed_20260525T204429Z"
-    assert baseline.group_count == 23
-    assert baseline.classification_counts["stable"] == 22
-    assert baseline.classification_counts["partially_variable"] == 1
-    assert baseline.classification_counts.get("variable", 0) == 0
-    assert baseline.nondet_group_count == 1
-    assert baseline.group_nondet_rate == 1 / 23
+    assert baseline.batch_id == "live_goal_nondet50_20260525T214956Z"
+    assert baseline.group_count == 4
+    assert baseline.classification_counts["variable"] == 4
+    assert baseline.classification_counts.get("stable", 0) == 0
+    assert baseline.nondet_group_count == 4
+    assert baseline.group_nondet_rate == 1.0
 
     status = acceptance_status(baseline, target_group_rate=0.50, target_scenario_rate=0.50)
-    assert status["status"] == "rejected"
-    assert "group_nondet_rate" in status["reasons"]
+    assert status["status"] == "accepted"
+    assert status["reasons"] == []
 
 
 def test_group_classifier_distinguishes_stable_partial_and_variable() -> None:

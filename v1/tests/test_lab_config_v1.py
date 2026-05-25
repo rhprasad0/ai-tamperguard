@@ -16,7 +16,7 @@ def test_load_lab_config_rejects_public_config_path(tmp_path: Path) -> None:
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n',
+        'capture_destination = "data/raw_exports"\n',
         encoding="utf-8",
     )
 
@@ -40,7 +40,7 @@ def test_load_lab_config_requires_mandatory_indexes_and_private_capture_destinat
         load_lab_config(cfg)
 
     message = str(excinfo.value)
-    assert "data/private/raw_exports" in message
+    assert "data/raw_exports" in message
     assert "_configtracker" in message
     assert "openclaw_tamper_lab" in message
 
@@ -52,7 +52,7 @@ def test_load_lab_config_accepts_defaults_and_keeps_agentops_optional(tmp_path: 
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'
@@ -69,7 +69,7 @@ def test_load_lab_config_accepts_defaults_and_keeps_agentops_optional(tmp_path: 
     assert loaded.target_namespace == "ai_tamperguard_v1"
     assert loaded.required_indexes == ("_audit", "_configtracker", "openclaw_tamper_lab")
     assert loaded.optional_indexes == ("agentops",)
-    assert loaded.capture_destination.as_posix() == "data/private/raw_exports"
+    assert loaded.capture_destination.as_posix() == "data/raw_exports"
     assert loaded.splunk_hec is None
     assert loaded.splunk_search is None
 
@@ -81,7 +81,7 @@ def test_load_lab_config_accepts_optional_splunk_hec_and_search_env_refs(tmp_pat
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'
@@ -115,7 +115,7 @@ def test_load_lab_config_rejects_unsafe_splunk_hec_index_and_token_env(tmp_path:
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'

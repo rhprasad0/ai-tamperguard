@@ -48,7 +48,7 @@ Rules for workers:
 - work only inside the assigned implementation workspace;
 - do not commit unless the controller card explicitly asks for it;
 - do not modify `.worktrees/` except for the designated implementation workspace;
-- keep private outputs under ignored `v1/data/private/`, `v1/reports/private/`, `v1/models/private/`, or `v1/splunk/private/` paths;
+- keep public-safe generated outputs under tracked `v1/data/` and `v1/reports/` paths; only real secrets, credentials, tokens, PII, local lab config, and model bundles with private material belong under ignored `v1/models/private/` or `v1/splunk/private/` paths;
 - include exact validation commands and results in the card completion summary;
 - block with `review-required:` when a live Splunk credential, lab endpoint, reset decision, or public/private boundary decision is needed.
 
@@ -153,12 +153,10 @@ v1/
     templates/
 ```
 
-Create or update ignore rules:
+Keep ignore rules limited to genuinely private locations:
 
 ```text
-v1/data/private/
 v1/models/private/
-v1/reports/private/
 v1/splunk/private/
 ```
 
@@ -222,13 +220,13 @@ Implement `v1/scripts/check_splunk_readiness_v1.py` to verify:
 - Sacrificial artifacts exist or can be created from fixtures: dashboards, saved searches, alerts, lookups, reports, and optional synthetic inputs.
 - The run operator has only the intended lab capability surface.
 - The lab clock, time zone handling, and relative-time conversion are documented.
-- Capture and export destinations are private ignored paths.
+- Capture and export destinations for public-safe generated artifacts are tracked `v1/data/**` and `v1/reports/**` paths; only credential-bearing lab config, true secrets, tokens, PII, and private model material stay in ignored private paths.
 
-Recommended private outputs:
+Recommended public-safe generated outputs:
 
 ```text
-v1/reports/private/splunk-readiness-<batch_id>.md
-v1/data/private/readiness/readiness-<batch_id>.json
+v1/reports/runs/splunk-readiness-<batch_id>.md
+v1/data/readiness/readiness-<batch_id>.json
 ```
 
 Validation command shape:
@@ -236,7 +234,7 @@ Validation command shape:
 ```bash
 uv run --directory v1 python scripts/check_splunk_readiness_v1.py \
   --config splunk/private/lab.toml \
-  --output reports/private/splunk-readiness-<batch_id>.md
+  --output reports/runs/splunk-readiness-<batch_id>.md
 ```
 
 Open decision to record in the readiness report:
@@ -273,11 +271,11 @@ Reset should:
 7. produce a public redacted reset manifest row;
 8. mark the next scenario run as excluded if reset fails partway through, until a later reset verification succeeds.
 
-Private reset output:
+Public-safe reset output:
 
 ```text
-v1/data/private/resets/reset-<reset_id>.json
-v1/reports/private/reset-<reset_id>.md
+v1/data/resets/reset-<reset_id>.json
+v1/reports/runs/reset-<reset_id>.md
 ```
 
 Public reset output in the sample:
@@ -297,7 +295,7 @@ uv run --directory v1 python scripts/reset_lab_v1.py \
 uv run --directory v1 python scripts/verify_reset_v1.py \
   --config splunk/private/lab.toml \
   --reset-id reset_<id> \
-  --output reports/private/reset-<reset_id>.md
+  --output reports/runs/reset-<reset_id>.md
 ```
 
 Tests/checks:
@@ -388,14 +386,14 @@ Implement `v1/scripts/capture_splunk_run_v1.py` to:
 - capture protected audit/config evidence for the run window;
 - capture synthetic fixture evidence and downstream sacrificial view results;
 - capture optional redacted agent/tool telemetry;
-- write private run manifests and raw exports under ignored paths.
+- write public-safe run manifests and raw exports under tracked paths.
 
-Private paths:
+Public-safe generated paths:
 
 ```text
-v1/data/private/raw_exports/<batch_id>/<scenario_run_id>/
-v1/data/private/run_manifests/<batch_id>/scenario_runs_private.jsonl
-v1/reports/private/runs/<scenario_run_id>.md
+v1/data/raw_exports/<batch_id>/<scenario_run_id>/
+v1/data/run_manifests/<batch_id>/scenario_runs.jsonl
+v1/reports/runs/runs/<scenario_run_id>.md
 ```
 
 Public redacted paths:
@@ -421,7 +419,7 @@ uv run --directory v1 python scripts/capture_splunk_run_v1.py \
   --config splunk/private/lab.toml \
   --scenario-run-id scenario_004_run_<id> \
   --reset-id reset_<id> \
-  --output-dir data/private/raw_exports/<batch_id>/scenario_004_run_<id>
+  --output-dir data/raw_exports/<batch_id>/scenario_004_run_<id>
 ```
 
 Tests/checks:
@@ -460,7 +458,7 @@ Normalization must:
 Output paths:
 
 ```text
-v1/data/private/normalized/events_private.jsonl
+v1/data/normalized/normalization_manifest.jsonl
 v1/data/public_sample/normalized/events.jsonl
 ```
 
@@ -468,9 +466,9 @@ Validation command shape:
 
 ```bash
 uv run --directory v1 python scripts/normalize_events_v1.py \
-  --input data/private/raw_exports/<batch_id> \
-  --run-manifest data/private/run_manifests/<batch_id>/scenario_runs_private.jsonl \
-  --output-private data/private/normalized/events_private.jsonl \
+  --input data/raw_exports/<batch_id> \
+  --run-manifest data/run_manifests/<batch_id>/scenario_runs.jsonl \
+  --output-private data/normalized/normalization_manifest.jsonl \
   --output-public data/public_sample/normalized/events.jsonl
 ```
 
@@ -495,7 +493,7 @@ Create:
 
 ```text
 v1/schemas/answer_key_v1.schema.json
-v1/data/private/answer_keys/answer_key_private.jsonl
+v1/data/answer_keys/answer_key_private.jsonl
 v1/data/public_sample/scenarios/answer_key_public_redacted.jsonl
 ```
 
@@ -720,7 +718,7 @@ rg -n --pcre2 "(?i)(password|passwd|api[_-]?key|secret|token|bearer)\\s*[:=]" \
 rg -n --pcre2 "AKIA[0-9A-Z]{16}|BEGIN (RSA |OPENSSH |EC |DSA )?PRIVATE KEY|eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+" \
   docs/v1-dataset-spec.md docs/v1-dataset-implementation-plan.md
 
-uv run --directory v1 python scripts/public_safety_scan_v1.py data/public_sample docs schemas scenarios
+uv run --directory v1 python scripts/public_safety_scan_v1.py data/raw_exports data/run_manifests data/public_sample docs schemas scenarios reports/goal_runs reports/artifact-cleanup-20260525
 
 uv run --directory v1 python scripts/validate_dataset_v1.py \
   --schemas schemas \
@@ -732,7 +730,7 @@ uv run --directory v1 pytest
 git diff --check
 ```
 
-The secret-assignment grep and token-shape grep are expected to return no matches for docs and public sample files. `public_safety_scan_v1.py` should fail closed for matches in public paths. If it finds a match in a private ignored path, that path must remain unpublished and the report should say the scan found private-only material that was excluded.
+The secret-assignment grep and token-shape grep are expected to return no matches for tracked public-safe docs, generated artifacts, reports, scenarios, schemas, and sample files. `public_safety_scan_v1.py` should fail closed for matches in public paths. If it finds a match in a private ignored path, that path must remain unpublished and the report should say the scan found private-only material that was excluded.
 
 Quality gates enforced here:
 
@@ -821,7 +819,7 @@ For full V1 implementation after the scaffold exists, add:
 ```bash
 uv run --directory v1 pytest
 uv run --directory v1 python scripts/validate_dataset_v1.py --schemas schemas --sample data/public_sample --check all
-uv run --directory v1 python scripts/public_safety_scan_v1.py data/public_sample docs schemas scenarios
+uv run --directory v1 python scripts/public_safety_scan_v1.py data/raw_exports data/run_manifests data/public_sample docs schemas scenarios reports/goal_runs reports/artifact-cleanup-20260525
 ```
 
 ## Open Questions / Decisions

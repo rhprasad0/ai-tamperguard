@@ -16,7 +16,7 @@ def _config(tmp_path: Path, *, hec_index: str = "openclaw_tamper_lab") -> Path:
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'

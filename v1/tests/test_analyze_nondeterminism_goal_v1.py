@@ -18,7 +18,7 @@ def test_analyzer_cli_reads_baseline_and_writes_public_report() -> None:
             sys.executable,
             "scripts/analyze_nondeterminism_goal_v1.py",
             "--summary",
-            "reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json",
+            "reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json",
             "--target-group-rate",
             "0.50",
             "--target-scenario-rate",
@@ -35,11 +35,11 @@ def test_analyzer_cli_reads_baseline_and_writes_public_report() -> None:
     try:
         assert result.returncode == 0, result.stderr
         report = json.loads(output.read_text(encoding="utf-8"))
-        assert report["batch_id"] == "full_live_v1_k3_fixed_20260525T204429Z"
-        assert report["group_count"] == 23
-        assert report["nondet_group_count"] == 1
-        assert report["group_nondet_rate"] == 1 / 23
-        assert report["acceptance"]["status"] == "rejected"
+        assert report["batch_id"] == "live_goal_nondet50_20260525T214956Z"
+        assert report["group_count"] == 4
+        assert report["nondet_group_count"] == 4
+        assert report["group_nondet_rate"] == 1.0
+        assert report["acceptance"]["status"] == "accepted"
         assert str(output.relative_to(v1_root)).startswith("reports/goal_runs/")
     finally:
         if output.exists():

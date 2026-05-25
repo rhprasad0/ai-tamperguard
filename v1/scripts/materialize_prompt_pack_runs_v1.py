@@ -12,7 +12,7 @@ sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 
 from ai_tamperguard_v1.prompt_pack import PromptVariant, variants_for_scenario  # noqa: E402
 
-PRIVATE_RUN_MANIFEST_PREFIX = Path("data/private/run_manifests")
+RUN_MANIFEST_PREFIX = Path("data/run_manifests")
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,8 +60,8 @@ def materialize_prompt_pack_runs(
     if attempts < 1:
         raise SystemExit("--attempts must be >= 1")
     normalized_output = _normalize_relative_output_dir(output_dir)
-    if not _is_under_private_run_manifests(normalized_output):
-        raise SystemExit("--output-dir must be under data/private/run_manifests")
+    if not _is_under_run_manifests(normalized_output):
+        raise SystemExit("--output-dir must be under data/run_manifests")
 
     variants = variants_for_scenario(prompt_pack, scenario_id)
     if prompt_variant_ids:
@@ -96,7 +96,7 @@ def materialize_prompt_pack_runs(
                 "object_family": "synthetic_visibility_note",
                 "sacrificial_report_id": sacrificial_report_id,
             }
-            prompt_text = _render_private_prompt(variant, render_values, dry_run=dry_run)
+            prompt_text = _render_actor_prompt(variant, render_values, dry_run=dry_run)
             prompt_path = prompt_dir / f"{run_id}.txt"
             prompt_path.write_text(prompt_text, encoding="utf-8")
             rows.append(
@@ -113,12 +113,12 @@ def materialize_prompt_pack_runs(
                     "max_tool_budget": variant.max_tool_budget,
                     "synthetic_case_id": synthetic_case_id,
                     "sacrificial_report_id": sacrificial_report_id,
-                    "private_actor_prompt_path": prompt_path.as_posix(),
+                    "actor_prompt_path": prompt_path.as_posix(),
                     "public_release_ready": False,
                 }
             )
 
-    scenario_runs_path = normalized_output / "scenario_runs_private.jsonl"
+    scenario_runs_path = normalized_output / "scenario_runs.jsonl"
     scenario_runs_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
     manifest = {
         "batch_id": batch_id,
@@ -129,8 +129,8 @@ def materialize_prompt_pack_runs(
         "seed": seed,
         "dry_run": dry_run,
         "scenario_run_count": len(rows),
-        "private_actor_prompt_dir": prompt_dir.as_posix(),
-        "scenario_runs_private_path": scenario_runs_path.as_posix(),
+        "actor_prompt_dir": prompt_dir.as_posix(),
+        "scenario_runs_path": scenario_runs_path.as_posix(),
         "public_release_ready": False,
     }
     (normalized_output / "prompt_pack_manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -147,9 +147,9 @@ def _normalize_relative_output_dir(output_dir: Path) -> Path:
         raise SystemExit("--output-dir must be relative to the v1 project root") from exc
 
 
-def _is_under_private_run_manifests(path: Path) -> bool:
+def _is_under_run_manifests(path: Path) -> bool:
     parts = path.parts
-    prefix = PRIVATE_RUN_MANIFEST_PREFIX.parts
+    prefix = RUN_MANIFEST_PREFIX.parts
     return parts[: len(prefix)] == prefix and len(parts) > len(prefix)
 
 
@@ -157,7 +157,7 @@ def _scenario_run_id(scenario_id: str, prompt_variant_id: str, attempt_index: in
     return f"{scenario_id}_nondet_{prompt_variant_id}_attempt_{attempt_index:03d}"
 
 
-def _render_private_prompt(variant: PromptVariant, values: dict[str, Any], *, dry_run: bool) -> str:
+def _render_actor_prompt(variant: PromptVariant, values: dict[str, Any], *, dry_run: bool) -> str:
     body = variant.render(values)
     mode = "DRY RUN" if dry_run else "AUTHORIZED PRIVATE HARNESS"
     return (

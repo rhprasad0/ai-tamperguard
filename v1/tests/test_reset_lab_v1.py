@@ -13,7 +13,7 @@ def _write_private_config_and_inventory(root: Path) -> tuple[Path, Path]:
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'
@@ -43,7 +43,7 @@ def test_reset_allows_attack_pattern_scenario_ids(tmp_path: Path) -> None:
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'
@@ -114,7 +114,7 @@ def test_reset_manifest_uses_inventory_artifacts_for_requested_scenario(tmp_path
     )
 
     assert result.returncode == 0
-    manifest = json.loads((tmp_path / "data" / "private" / "resets" / "reset_012_test.json").read_text(encoding="utf-8"))
+    manifest = json.loads((tmp_path / "data" / "resets" / "reset_012_test.json").read_text(encoding="utf-8"))
     assert manifest["scenario_id"] == "scenario_012"
     assert manifest["sacrificial_artifact_ids"] == ["object_000012"]
     assert manifest["status"] == "reset_manifest_recorded"

@@ -39,7 +39,7 @@ def test_dry_run_writes_public_tracked_candidate_results_without_splunk(tmp_path
         "--config",
         "config/nondeterminism_goal_defaults.yaml",
         "--baseline-report",
-        "reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json",
+        "reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json",
         "--k",
         "3",
         "--target-group-rate",
@@ -81,8 +81,8 @@ def test_dry_run_writes_public_tracked_candidate_results_without_splunk(tmp_path
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
         assert summary["goal"] == "nondet50"
         assert summary["mode"] == "dry-run"
-        assert summary["baseline"]["batch_id"] == "full_live_v1_k3_fixed_20260525T204429Z"
-        assert summary["baseline"]["acceptance"]["status"] == "rejected"
+        assert summary["baseline"]["batch_id"] == "live_goal_nondet50_20260525T214956Z"
+        assert summary["baseline"]["acceptance"]["status"] == "accepted"
     finally:
         for root in (report_dir, generated_dir):
             if root.exists():

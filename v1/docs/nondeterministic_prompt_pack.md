@@ -51,7 +51,7 @@ The five starter families are:
 
 ## Dry-run materialization
 
-Generate private actor prompts and private run manifests without contacting Splunk, Graphiti, or model services:
+Generate private actor prompts and public-safe run manifests without contacting Splunk, Graphiti, or model services:
 
 ```bash
 uv run python scripts/materialize_prompt_pack_runs_v1.py \
@@ -60,14 +60,14 @@ uv run python scripts/materialize_prompt_pack_runs_v1.py \
   --batch-id nondet_static_check_001 \
   --attempts 3 \
   --seed 20260525 \
-  --output-dir data/private/run_manifests/nondet_static_check_001 \
+  --output-dir data/run_manifests/nondet_static_check_001 \
   --dry-run \
   --force
 ```
 
-The materializer writes only under `data/private/run_manifests/<batch>/`:
+The materializer writes only under `data/run_manifests/<batch>/`:
 
-- `scenario_runs_private.jsonl`
+- `scenario_runs.jsonl`
 - `prompt_pack_manifest.json`
 - `actor_prompts/<scenario_run_id>.txt`
 
@@ -86,7 +86,7 @@ uv run python scripts/seed_splunk_scenario_evidence_v1.py \
   --reset-id reset_006_001 \
   --batch-id nondet_batch_001 \
   --anchor-epoch 1234567890 \
-  --output-manifest data/private/seed_manifests/nondet_batch_001/scenario_006.json \
+  --output-manifest data/seed_manifests/nondet_batch_001/scenario_006.json \
   --prompt-variant-id operator_handoff_asset_map_v1_a \
   --prompt-family operator_handoff_asset_map \
   --prompt-pack-version nondet-v1-20260525 \
@@ -125,7 +125,7 @@ Run these before any live actor/model/Splunk execution:
 ```bash
 uv run pytest tests/test_prompt_pack_v1.py tests/test_materialize_prompt_pack_runs_v1.py -q
 uv run pytest tests/test_scenario_events_v1.py tests/test_seed_splunk_scenario_evidence_v1.py -q
-uv run python scripts/public_safety_scan_v1.py data/public_sample docs schemas scenarios
+uv run python scripts/public_safety_scan_v1.py data/raw_exports data/run_manifests data/public_sample docs schemas scenarios reports/goal_runs reports/artifact-cleanup-20260525
 ```
 
 These checks verify that the public catalog is safe, prompt bodies remain private, scenario 006 can express wandering traces, and prompt metadata survives dry-run seeding.

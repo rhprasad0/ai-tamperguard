@@ -97,16 +97,16 @@ These features are SOC/SIEM practice signals for fixture/offline and sacrificial
 
 ## Training CSV exports
 
-Raw harness files under `data/private/raw_exports/<batch_id>/<scenario_run_id>/public_safe_events_private.jsonl` are event-level public-safe atoms, not the final model table. Use `scripts/raw_harness_jsonl_to_training_csv_v1.py` to validate those rows, derive behavior-window features, and write a private training CSV.
+Raw harness files under `data/raw_exports/<batch_id>/<scenario_run_id>/public_safe_events.jsonl` are event-level public-safe atoms, not the final model table. Use `scripts/raw_harness_jsonl_to_training_csv_v1.py` to validate those rows, derive behavior-window features, and write a public-safe training CSV.
 
 Example:
 
 ```bash
 uv run --directory v1 python scripts/raw_harness_jsonl_to_training_csv_v1.py \
-  --input data/private/raw_exports/v1_live_feature_verify_20260525T162448Z \
+  --input data/raw_exports/v1_live_feature_verify_20260525T162448Z \
   --answer-key data/public_sample/scenarios/answer_key_public_redacted.jsonl \
-  --output data/private/training/v1_live_feature_verify_20260525T162448Z/windows_actor_15m.csv \
+  --output data/training/v1_live_feature_verify_20260525T162448Z/windows_actor_15m.csv \
   --window-size-sec 900
 ```
 
-The output is one row per actor/window with `feature_*` columns, `label_binary`, `label_family`, `label_source`, and `split_id`. Keep generated training CSVs under `data/private/training/` unless Ryan explicitly promotes a public-safe fixture. For supervised training, provide an answer key or private run manifest; `--allow-unlabeled` is debug-only and emits `background_unlabeled` labels.
+The output is one row per actor/window with `feature_*` columns, `label_binary`, `label_family`, `label_source`, and `split_id`. Keep generated training CSVs under `data/training/` unless Ryan explicitly promotes a public-safe fixture. For supervised training, provide an answer key or public-safe run manifest; `--allow-unlabeled` is debug-only and emits `background_unlabeled` labels.

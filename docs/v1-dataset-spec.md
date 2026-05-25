@@ -30,10 +30,10 @@ V1 uses these layers, ordered from most private to publishable.
 | Layer | Location | Public status | Purpose |
 |---|---|---|---|
 | Live Splunk lab state | `v1/splunk/private/` or external private storage | Private | Concrete connection config, reset fixtures, app namespace details, and run operator notes. |
-| Raw protected evidence | `v1/data/private/raw_exports/` | Private | Authorized `_audit`, `_configtracker`, scenario fixture, and optional agent/tool telemetry exports. |
-| Run manifests and reset records | `v1/data/private/run_manifests/`, redacted copy under public sample | Mixed | Prove which scenario ran, which reset prepared it, what prompt variant stimulated it when applicable, and what verification decided. |
+| Raw protected evidence | `v1/data/raw_exports/` | Private | Authorized `_audit`, `_configtracker`, scenario fixture, and optional agent/tool telemetry exports. |
+| Run manifests and reset records | `v1/data/run_manifests/`, redacted copy under public sample | Mixed | Prove which scenario ran, which reset prepared it, what prompt variant stimulated it when applicable, and what verification decided. |
 | Prompt-pack catalog | `v1/scenarios/nondeterministic_prompt_pack_v1.jsonl` | Public-safe | Versioned synthetic prompt templates and metadata for bounded nondeterministic exploration; private materialized prompt bodies remain under run manifests only. |
-| Normalized events | `v1/data/private/normalized/`, redacted copy under public sample | Mixed | Canonical actor/action/object rows with stable pseudonyms and no private strings. |
+| Normalized events | `v1/data/normalized/`, redacted copy under public sample | Mixed | Canonical actor/action/object rows with stable pseudonyms and no private strings. |
 | Answer keys | Private full key plus `v1/data/public_sample/scenarios/answer_key_public_redacted.jsonl` | Mixed | Link labels to scenario intervals and evidence chains without exposing raw values. |
 | Derived views | `v1/data/public_sample/derived/` | Public-safe | Trainable behavior windows, episodes, sequences, and actor-object edges. |
 | Split manifests | `v1/data/public_sample/splits/` | Public-safe | Persisted train, validation, test, and holdout decisions before model training. |
@@ -119,12 +119,10 @@ v1/
     templates/
 ```
 
-Private/generated V1 paths must be ignored:
+Only genuinely private V1 paths must be ignored:
 
 ```text
-v1/data/private/
 v1/models/private/
-v1/reports/private/
 v1/splunk/private/
 ```
 
@@ -273,7 +271,7 @@ V1 maintains two answer-key forms.
 
 Private answer key:
 
-- stored under `v1/data/private/answer_keys/`;
+- stored under `v1/data/answer_keys/`;
 - may reference raw private event IDs, private verification notes, and full evidence chains;
 - never committed.
 

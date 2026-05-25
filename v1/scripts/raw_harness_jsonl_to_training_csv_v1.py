@@ -12,7 +12,7 @@ from ai_tamperguard_v1.derive import derive_windows  # noqa: E402
 from ai_tamperguard_v1.io import read_jsonl, write_csv_rows  # noqa: E402
 from ai_tamperguard_v1.schema import load_schema, validate_rows  # noqa: E402
 
-EVENT_FILE_NAME = "public_safe_events_private.jsonl"
+EVENT_FILE_NAME = "public_safe_events.jsonl"
 ID_COLUMNS = ["window_id", "scenario_run_id", "actor_id", "window_start_relative_sec", "window_end_relative_sec"]
 LABEL_COLUMNS = ["label_binary", "label_family", "label_source", "split_id"]
 
@@ -23,14 +23,14 @@ class UserInputError(Exception):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Convert AI TamperGuard V1 raw harness JSONL into window-level training CSV.")
-    parser.add_argument("--input", action="append", required=True, help="Batch dir, scenario dir, or public_safe_events_private.jsonl file. Repeatable.")
+    parser.add_argument("--input", action="append", required=True, help="Batch dir, scenario dir, or public_safe_events.jsonl file. Repeatable.")
     parser.add_argument("--answer-key", help="JSONL answer key with scenario_run_id and label_family.")
-    parser.add_argument("--run-manifest", help="Private run manifest JSONL used to synthesize labels when no answer key is provided.")
+    parser.add_argument("--run-manifest", help="Run manifest JSONL used to synthesize labels when no answer key is provided.")
     parser.add_argument("--output", required=True, help="Output training CSV path.")
     parser.add_argument("--window-size-sec", type=int, default=900, help="Behavior window size in seconds. Default: 900.")
     parser.add_argument("--allow-unlabeled", action="store_true", help="Emit background_unlabeled labels for debug exports.")
     parser.add_argument("--add-source-batch-column", action="store_true", help="Add source_batch_id/source_input_path_count audit columns.")
-    parser.add_argument("--allow-public-output", action="store_true", help="Allow output outside data/private/training for explicitly reviewed public fixtures.")
+    parser.add_argument("--allow-public-output", action="store_true", help="Allow output outside data/training for explicitly reviewed public fixtures.")
     parser.add_argument("--fail-on-empty", dest="fail_on_empty", action="store_true", default=True)
     parser.add_argument("--no-fail-on-empty", dest="fail_on_empty", action="store_false")
     args = parser.parse_args()
@@ -39,11 +39,11 @@ def main() -> int:
         if args.window_size_sec <= 0:
             raise UserInputError("--window-size-sec must be positive")
         output = _Path(args.output)
-        if not args.allow_public_output and not _is_under_private_training(output):
-            raise UserInputError("output must stay under data/private/training unless --allow-public-output is set")
+        if not args.allow_public_output and not _is_under_training(output):
+            raise UserInputError("output must stay under data/training unless --allow-public-output is set")
         event_files = discover_event_files([_Path(value) for value in args.input])
         if not event_files and args.fail_on_empty:
-            raise UserInputError("no public_safe_events_private.jsonl files discovered")
+            raise UserInputError("no public_safe_events.jsonl files discovered")
         events, source_by_run = load_events(event_files)
         if not events and args.fail_on_empty:
             raise UserInputError("no input event rows discovered")
@@ -113,7 +113,7 @@ def load_events(event_files: list[_Path]) -> tuple[list[dict[str, Any]], dict[st
 
 
 def source_batch_id(event_file: _Path) -> str:
-    # Known shape: raw_exports/<batch_id>/<scenario_run_id>/public_safe_events_private.jsonl
+    # Known shape: raw_exports/<batch_id>/<scenario_run_id>/public_safe_events.jsonl
     return event_file.parent.parent.name if event_file.parent.parent.name else "unknown_batch"
 
 
@@ -124,10 +124,14 @@ def reject_duplicate_runs_across_batches(source_by_run: dict[str, set[str]]) -> 
         raise UserInputError(f"duplicate scenario_run_id across batches; rerun with --namespace-repeated-runs after that mode is implemented: {detail}")
 
 
-def _is_under_private_training(path: _Path) -> bool:
+def _is_under_training(path: _Path) -> bool:
     output_path = path.expanduser().resolve()
-    training_root = (_Path.cwd() / "data" / "private" / "training").resolve()
+    training_root = (_Path.cwd() / "data" / "training").resolve()
     return output_path == training_root or output_path.is_relative_to(training_root)
+
+
+# Backward-compatible alias for older imports.
+_is_under_private_training = _is_under_training
 
 
 def _ordered_events(events: list[dict[str, Any]]) -> list[dict[str, Any]]:

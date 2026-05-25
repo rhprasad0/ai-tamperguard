@@ -124,12 +124,12 @@ def main() -> int:
     parser.add_argument("--earliest-epoch", type=int, default=0)
     parser.add_argument("--require-live-splunk-rows", action="store_true")
     parser.add_argument("--allow-scaffold-fallback", action="store_true")
-    parser.add_argument("--verified-live-rows-jsonl", help="Private JSONL export of Splunk-verified rows, e.g. from Splunk MCP readback")
+    parser.add_argument("--verified-live-rows-jsonl", help="Public-safe JSONL export of Splunk-verified rows, e.g. from Splunk MCP readback")
     args = parser.parse_args()
 
     out = _Path(args.output_dir)
-    if not _is_private_capture_path(out):
-        print("capture output must stay under data/private/raw_exports", file=sys.stderr)
+    if not _is_capture_path(out):
+        print("capture output must stay under data/raw_exports", file=sys.stderr)
         return 2
 
     try:
@@ -139,9 +139,9 @@ def main() -> int:
         return 2
 
     scenario_id = scenario_id_from_run(args.scenario_run_id)
-    reset_path = _Path("data/private/resets") / f"{args.reset_id}.json"
+    reset_path = _Path("data/resets") / f"{args.reset_id}.json"
     if not reset_path.exists():
-        print("capture requires successful private reset manifest", file=sys.stderr)
+        print("capture requires successful reset manifest", file=sys.stderr)
         return 2
     reset = json.loads(reset_path.read_text(encoding="utf-8"))
     if reset.get("scenario_id") != scenario_id:
@@ -153,8 +153,8 @@ def main() -> int:
     if args.require_live_splunk_rows:
         if args.verified_live_rows_jsonl:
             rows_path = _Path(args.verified_live_rows_jsonl)
-            if not _is_private_raw_export_path(rows_path):
-                print("verified live rows JSONL must stay under data/private/raw_exports", file=sys.stderr)
+            if not _is_raw_export_path(rows_path):
+                print("verified live rows JSONL must stay under data/raw_exports", file=sys.stderr)
                 return 2
             if not rows_path.exists():
                 print("verified live rows JSONL does not exist", file=sys.stderr)
@@ -174,7 +174,7 @@ def main() -> int:
         search_rows = [row for row in search_rows if row.get("scenario_run_id") == args.scenario_run_id]
         if search_rows:
             events = [_normalize_splunk_row(row, scenario_id=scenario_id, scenario_run_id=args.scenario_run_id) for row in search_rows]
-            write_jsonl(out / "public_safe_events_private.jsonl", events)
+            write_jsonl(out / "public_safe_events.jsonl", events)
             _write_manifest(
                 out=out,
                 scenario_run_id=args.scenario_run_id,
@@ -200,13 +200,13 @@ def main() -> int:
         actor_id=scenario_actor_id(scenario_id),
         artifact_ids=tuple(reset.get("sacrificial_artifact_ids", [])),
     )
-    write_jsonl(out / "public_safe_events_private.jsonl", events)
+    write_jsonl(out / "public_safe_events.jsonl", events)
     _write_manifest(
         out=out,
         scenario_run_id=args.scenario_run_id,
         scenario_id=scenario_id,
         reset_id=args.reset_id,
-        status="captured_private_public_safe_scaffold",
+        status="captured_public_safe_scaffold",
         source_derivation="live_lab_public_redacted",
         source_surfaces=sorted({event["source_surface"] for event in events}),
         event_count=len(events),
@@ -280,16 +280,19 @@ def _coerce_bool(value: Any) -> bool:
     return bool(value)
 
 
-def _is_private_capture_path(path: _Path) -> bool:
-    parts = tuple(part for part in path.as_posix().split("/") if part)
-    needle = ("data", "private", "raw_exports")
-    return any(parts[idx : idx + 3] == needle for idx in range(len(parts) - 2))
+def _is_capture_path(path: _Path) -> bool:
+    return _is_under_artifact_root(path, ("data", "raw_exports"))
 
 
-def _is_private_raw_export_path(path: _Path) -> bool:
-    parts = tuple(part for part in path.as_posix().split("/") if part)
-    needle = ("data", "private", "raw_exports")
-    return any(parts[idx : idx + 3] == needle for idx in range(len(parts) - 2))
+def _is_raw_export_path(path: _Path) -> bool:
+    return _is_under_artifact_root(path, ("data", "raw_exports"))
+
+
+def _is_under_artifact_root(path: _Path, relative_root: tuple[str, ...]) -> bool:
+    repo_root = _Path.cwd().resolve()
+    artifact_root = repo_root.joinpath(*relative_root).resolve()
+    resolved = path.expanduser().resolve()
+    return resolved == artifact_root or resolved.is_relative_to(artifact_root)
 
 
 def _read_jsonl(path: _Path) -> list[dict[str, Any]]:

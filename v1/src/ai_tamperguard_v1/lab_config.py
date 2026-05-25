@@ -14,7 +14,7 @@ _SAFE_LITERAL_RE = re.compile(r"^[A-Za-z0-9:_-]+$")
 
 
 class LabConfigError(ValueError):
-    """Raised when private lab configuration is missing or unsafe."""
+    """Raised when lab configuration is missing or unsafe."""
 
 
 @dataclass(frozen=True)
@@ -77,7 +77,7 @@ def load_lab_config(path: Path | str) -> LabConfig:
     cfg_path = Path(path)
     _require_private_path(cfg_path)
     if not cfg_path.exists():
-        raise LabConfigError(f"missing private lab config: {cfg_path}")
+        raise LabConfigError(f"missing lab config: {cfg_path}")
 
     data = _read_toml(cfg_path)
     errors: list[str] = []
@@ -86,8 +86,8 @@ def load_lab_config(path: Path | str) -> LabConfig:
             errors.append(f"missing required key: {key}")
 
     capture_destination = Path(str(data.get("capture_destination", "")))
-    if capture_destination.as_posix() != "data/private/raw_exports":
-        errors.append("capture_destination must be data/private/raw_exports")
+    if capture_destination.as_posix() != "data/raw_exports":
+        errors.append("capture_destination must be data/raw_exports")
 
     allowed_indexes = _as_str_tuple(data.get("allowed_indexes", ()))
     missing_indexes = [index for index in REQUIRED_INDEXES if index not in allowed_indexes]
@@ -143,7 +143,7 @@ def load_sacrificial_inventory(path: Path | str, *, expected_namespace: str) -> 
     inventory_path = Path(path)
     _require_private_path(inventory_path)
     if not inventory_path.exists():
-        raise LabConfigError(f"missing private sacrificial inventory: {inventory_path}")
+        raise LabConfigError(f"missing sacrificial inventory: {inventory_path}")
 
     data = _read_toml(inventory_path)
     namespace = str(data.get("namespace", ""))

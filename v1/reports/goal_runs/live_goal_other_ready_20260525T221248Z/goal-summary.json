@@ -741,8 +741,8 @@
   "nondet_group_count": 18,
   "nondet_scenario_count": 9,
   "public_release_ready": false,
-  "raw_export_dir": "data/private/raw_exports/live_goal_other_ready_20260525T221248Z",
-  "run_manifest": "data/private/run_manifests/live_goal_other_ready_20260525T221248Z/scenario_runs_private.jsonl",
+  "raw_export_dir": "data/raw_exports/live_goal_other_ready_20260525T221248Z",
+  "run_manifest": "data/run_manifests/live_goal_other_ready_20260525T221248Z/scenario_runs.jsonl",
   "scenario_count": 9,
   "scenario_nondet_rate": 1.0,
   "scenario_nondeterministic": {
@@ -770,5 +770,5 @@
   "semantic_failures": [],
   "target_group_rate": 0.5,
   "target_scenario_rate": 0.5,
-  "verified_live_rows_jsonl": "data/private/raw_exports/live_goal_other_ready_20260525T221248Z/verified_live_rows_from_splunk_mcp.jsonl"
+  "verified_live_rows_jsonl": "data/raw_exports/live_goal_other_ready_20260525T221248Z/verified_live_rows_from_splunk_mcp.jsonl"
 }

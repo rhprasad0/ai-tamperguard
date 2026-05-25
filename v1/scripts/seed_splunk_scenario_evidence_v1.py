@@ -38,8 +38,8 @@ def main() -> int:
         print("scenario and scenario_run_id mismatch", file=sys.stderr)
         return 2
     out_manifest = _Path(args.output_manifest)
-    if not _is_private_seed_manifest_path(out_manifest):
-        print("seed output manifest must stay under data/private/seed_manifests", file=sys.stderr)
+    if not _is_seed_manifest_path(out_manifest):
+        print("seed output manifest must stay under data/seed_manifests", file=sys.stderr)
         return 2
 
     try:
@@ -49,9 +49,9 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 2
 
-    reset_path = _Path("data/private/resets") / f"{args.reset_id}.json"
+    reset_path = _Path("data/resets") / f"{args.reset_id}.json"
     if not reset_path.exists():
-        print("seed requires successful private reset manifest", file=sys.stderr)
+        print("seed requires successful reset manifest", file=sys.stderr)
         return 2
     reset = json.loads(reset_path.read_text(encoding="utf-8"))
     if reset.get("scenario_id") != args.scenario:
@@ -118,15 +118,15 @@ def main() -> int:
     return 0
 
 
-def _is_private_seed_manifest_path(path: _Path) -> bool:
+def _is_seed_manifest_path(path: _Path) -> bool:
     cwd = _Path.cwd().resolve()
     try:
         relative = path.resolve().relative_to(cwd)
     except ValueError:
         return False
     parts = tuple(part for part in relative.as_posix().split("/") if part)
-    needle = ("data", "private", "seed_manifests")
-    return parts[:3] == needle and len(parts) > 3
+    needle = ("data", "seed_manifests")
+    return parts[:2] == needle and len(parts) > 2
 
 
 if __name__ == "__main__":

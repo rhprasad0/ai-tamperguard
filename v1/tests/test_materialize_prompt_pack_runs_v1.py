@@ -5,10 +5,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+V1_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = V1_ROOT / "scripts" / "materialize_prompt_pack_runs_v1.py"
+PROMPT_PACK = V1_ROOT / "scenarios" / "nondeterministic_prompt_pack_v1.jsonl"
+
 
 def run_materializer(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, "scripts/materialize_prompt_pack_runs_v1.py", *args],
+        [sys.executable, str(SCRIPT), *args],
         cwd=cwd,
         text=True,
         capture_output=True,
@@ -16,20 +20,12 @@ def run_materializer(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
-def test_materializer_emits_private_run_manifests(tmp_path: Path) -> None:
-    v1_root = Path(__file__).resolve().parents[1]
-    output_dir = v1_root / "data" / "private" / "run_manifests" / "pytest_nondet_batch"
-    if output_dir.exists():
-        for child in sorted(output_dir.rglob("*"), reverse=True):
-            if child.is_file():
-                child.unlink()
-            elif child.is_dir():
-                child.rmdir()
-        output_dir.rmdir()
+def test_materializer_emits_public_safe_run_manifests(tmp_path: Path) -> None:
+    output_dir = tmp_path / "data" / "run_manifests" / "pytest_nondet_batch"
 
     result = run_materializer(
         "--prompt-pack",
-        "scenarios/nondeterministic_prompt_pack_v1.jsonl",
+        str(PROMPT_PACK),
         "--scenario",
         "scenario_006",
         "--batch-id",
@@ -39,13 +35,13 @@ def test_materializer_emits_private_run_manifests(tmp_path: Path) -> None:
         "--seed",
         "20260525",
         "--output-dir",
-        "data/private/run_manifests/pytest_nondet_batch",
+        "data/run_manifests/pytest_nondet_batch",
         "--dry-run",
-        cwd=v1_root,
+        cwd=tmp_path,
     )
 
     assert result.returncode == 0, result.stderr
-    scenario_runs_path = output_dir / "scenario_runs_private.jsonl"
+    scenario_runs_path = output_dir / "scenario_runs.jsonl"
     manifest_path = output_dir / "prompt_pack_manifest.json"
     prompt_dir = output_dir / "actor_prompts"
     assert scenario_runs_path.exists()
@@ -74,7 +70,7 @@ def test_materializer_emits_private_run_manifests(tmp_path: Path) -> None:
         seeds_by_variant.setdefault(row["prompt_variant_id"], set()).add(row["prompt_seed"])
         assert 2 <= row["max_tool_budget"] <= 8
         assert row["public_release_ready"] is False
-        prompt_path = v1_root / row["private_actor_prompt_path"]
+        prompt_path = tmp_path / row["actor_prompt_path"]
         assert prompt_path.exists()
         prompt_text = prompt_path.read_text(encoding="utf-8")
         assert row["synthetic_case_id"] in prompt_text
@@ -84,11 +80,9 @@ def test_materializer_emits_private_run_manifests(tmp_path: Path) -> None:
 
 
 def test_materializer_rejects_public_output_dir(tmp_path: Path) -> None:
-    v1_root = Path(__file__).resolve().parents[1]
-
     result = run_materializer(
         "--prompt-pack",
-        "scenarios/nondeterministic_prompt_pack_v1.jsonl",
+        str(PROMPT_PACK),
         "--scenario",
         "scenario_006",
         "--batch-id",
@@ -100,19 +94,17 @@ def test_materializer_rejects_public_output_dir(tmp_path: Path) -> None:
         "--output-dir",
         "data/public_sample/bad_prompt_leak",
         "--dry-run",
-        cwd=v1_root,
+        cwd=tmp_path,
     )
 
     assert result.returncode != 0
-    assert "data/private/run_manifests" in result.stderr
+    assert "data/run_manifests" in result.stderr
 
 
-def test_materializer_rejects_traversal_out_of_private_run_manifests(tmp_path: Path) -> None:
-    v1_root = Path(__file__).resolve().parents[1]
-
+def test_materializer_rejects_traversal_out_of_run_manifests(tmp_path: Path) -> None:
     result = run_materializer(
         "--prompt-pack",
-        "scenarios/nondeterministic_prompt_pack_v1.jsonl",
+        str(PROMPT_PACK),
         "--scenario",
         "scenario_006",
         "--batch-id",
@@ -122,10 +114,10 @@ def test_materializer_rejects_traversal_out_of_private_run_manifests(tmp_path: P
         "--seed",
         "20260525",
         "--output-dir",
-        "data/private/run_manifests/../../public_sample/bad_prompt_leak",
+        "data/run_manifests/../../public_sample/bad_prompt_leak",
         "--dry-run",
-        cwd=v1_root,
+        cwd=tmp_path,
     )
 
     assert result.returncode != 0
-    assert "data/private/run_manifests" in result.stderr
+    assert "data/run_manifests" in result.stderr

@@ -37,4 +37,4 @@ The live smoke intentionally focused on `scenario_006` with `limited_budget_choo
 - No remediation or destructive clearing was performed.
 - This is live repeated-call evidence for a bounded, synthetic, seeded-evidence harness path.
 - Do not read this as detector quality or production malicious-behavior evidence.
-- Public summary is intentionally metadata/signature level; raw/private exports remain under `v1/data/private/raw_exports/`.
+- Public summary is intentionally metadata/signature level; public-safe raw exports are tracked under `v1/data/raw_exports/`.

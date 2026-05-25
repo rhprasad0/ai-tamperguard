@@ -246,7 +246,7 @@
       "trajectory_distinct": 3
     }
   ],
-  "live_evidence_basis": "Splunk MCP read-back from openclaw_tamper_lab after HEC seed; captured as public-safe rows under data/private/raw_exports.",
+  "live_evidence_basis": "Splunk MCP read-back from openclaw_tamper_lab after HEC seed; captured as public-safe rows under data/raw_exports.",
   "live_splunk_used": true,
   "missing_attempt_groups": [],
   "mode": "live-splunk",
@@ -255,8 +255,8 @@
   "nondet_group_count": 4,
   "nondet_scenario_count": 1,
   "public_release_ready": false,
-  "raw_export_dir": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z",
-  "run_manifest": "v1/data/private/run_manifests/live_goal_nondet50_20260525T214956Z/scenario_runs_private.jsonl",
+  "raw_export_dir": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z",
+  "run_manifest": "v1/data/run_manifests/live_goal_nondet50_20260525T214956Z/scenario_runs.jsonl",
   "scenario_count": 1,
   "scenario_nondet_rate": 1.0,
   "scenario_nondeterministic": {
@@ -265,5 +265,5 @@
   "semantic_failures": [],
   "target_group_rate": 0.5,
   "target_scenario_rate": 0.5,
-  "verified_live_rows_jsonl": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/verified_live_rows_splunk_mcp.jsonl"
+  "verified_live_rows_jsonl": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/verified_live_rows_splunk_mcp.jsonl"
 }

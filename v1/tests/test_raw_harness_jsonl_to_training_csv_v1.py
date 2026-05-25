@@ -72,9 +72,9 @@ def _event(
 
 
 def _write_training_fixture(tmp_path: Path) -> tuple[Path, Path]:
-    batch = tmp_path / "data" / "private" / "raw_exports" / "batch_001"
+    batch = tmp_path / "data" / "raw_exports" / "batch_001"
     _write_jsonl(
-        batch / "scenario_010_run_001" / "public_safe_events_private.jsonl",
+        batch / "scenario_010_run_001" / "public_safe_events.jsonl",
         [
             _event(
                 event_id="evt_000010001",
@@ -129,7 +129,7 @@ def _write_training_fixture(tmp_path: Path) -> tuple[Path, Path]:
         ],
     )
     _write_jsonl(
-        batch / "scenario_004_run_001" / "public_safe_events_private.jsonl",
+        batch / "scenario_004_run_001" / "public_safe_events.jsonl",
         [
             _event(
                 event_id="evt_000004001",
@@ -171,7 +171,7 @@ def _write_training_fixture(tmp_path: Path) -> tuple[Path, Path]:
 
 def test_converts_raw_export_batch_to_training_csv(tmp_path: Path) -> None:
     batch, answer_key = _write_training_fixture(tmp_path)
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output), "--window-size-sec", "900")
 
@@ -191,7 +191,7 @@ def test_converts_raw_export_batch_to_training_csv(tmp_path: Path) -> None:
 
 def test_requires_labels_by_default(tmp_path: Path) -> None:
     batch, _answer_key = _write_training_fixture(tmp_path)
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--output", str(output))
 
@@ -202,11 +202,11 @@ def test_requires_labels_by_default(tmp_path: Path) -> None:
 
 def test_rejects_invalid_event_schema(tmp_path: Path) -> None:
     batch, answer_key = _write_training_fixture(tmp_path)
-    first_event_path = batch / "scenario_010_run_001" / "public_safe_events_private.jsonl"
+    first_event_path = batch / "scenario_010_run_001" / "public_safe_events.jsonl"
     row = json.loads(first_event_path.read_text(encoding="utf-8").splitlines()[0])
     row["source_derivation"] = "private_raw_unredacted"
     _write_jsonl(first_event_path, [row])
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output))
 
@@ -217,7 +217,7 @@ def test_rejects_invalid_event_schema(tmp_path: Path) -> None:
 
 def test_can_build_labels_from_private_run_manifest(tmp_path: Path) -> None:
     batch, _answer_key = _write_training_fixture(tmp_path)
-    run_manifest = tmp_path / "data" / "private" / "run_manifests" / "batch_001" / "scenario_runs_private.jsonl"
+    run_manifest = tmp_path / "data" / "run_manifests" / "batch_001" / "scenario_runs.jsonl"
     _write_jsonl(
         run_manifest,
         [
@@ -225,7 +225,7 @@ def test_can_build_labels_from_private_run_manifest(tmp_path: Path) -> None:
             {"scenario_run_id": "scenario_004_run_001", "ground_truth_family": "benign_investigation"},
         ],
     )
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--run-manifest", str(run_manifest), "--output", str(output))
 
@@ -237,7 +237,7 @@ def test_can_build_labels_from_private_run_manifest(tmp_path: Path) -> None:
 
 def test_allow_unlabeled_emits_background_labels_with_warning(tmp_path: Path) -> None:
     batch, _answer_key = _write_training_fixture(tmp_path)
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--output", str(output), "--allow-unlabeled")
 
@@ -251,12 +251,12 @@ def test_allow_unlabeled_emits_background_labels_with_warning(tmp_path: Path) ->
 
 def test_rejects_duplicate_scenario_run_ids_across_batches_by_default(tmp_path: Path) -> None:
     batch, answer_key = _write_training_fixture(tmp_path)
-    second_batch = tmp_path / "data" / "private" / "raw_exports" / "batch_002"
-    source = batch / "scenario_010_run_001" / "public_safe_events_private.jsonl"
-    dest = second_batch / "scenario_010_run_001" / "public_safe_events_private.jsonl"
+    second_batch = tmp_path / "data" / "raw_exports" / "batch_002"
+    source = batch / "scenario_010_run_001" / "public_safe_events.jsonl"
+    dest = second_batch / "scenario_010_run_001" / "public_safe_events.jsonl"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
-    output = tmp_path / "data" / "private" / "training" / "combined" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "combined" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--input", str(second_batch), "--answer-key", str(answer_key), "--output", str(output))
 
@@ -268,7 +268,7 @@ def test_rejects_duplicate_scenario_run_ids_across_batches_by_default(tmp_path: 
 def test_missing_label_for_input_run_fails_closed(tmp_path: Path) -> None:
     batch, answer_key = _write_training_fixture(tmp_path)
     _write_jsonl(answer_key, [{"scenario_run_id": "scenario_004_run_001", "label_family": "benign_investigation"}])
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output))
 
@@ -287,7 +287,7 @@ def test_answer_key_without_label_source_defaults_to_schema_allowed_source(tmp_p
             {"scenario_run_id": "scenario_004_run_001", "label_family": "benign_investigation"},
         ],
     )
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output))
 
@@ -305,7 +305,7 @@ def test_duplicate_label_rows_fail_closed(tmp_path: Path) -> None:
             {"scenario_run_id": "scenario_004_run_001", "label_family": "benign_investigation"},
         ],
     )
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output))
 
@@ -321,13 +321,13 @@ def test_rejects_public_output_path_by_default(tmp_path: Path) -> None:
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output))
 
     assert result.returncode == 2
-    assert "output must stay under data/private/training" in result.stderr
+    assert "output must stay under data/training" in result.stderr
     assert not output.exists()
 
 
 def test_rejects_non_positive_window_size_cleanly(tmp_path: Path) -> None:
     batch, answer_key = _write_training_fixture(tmp_path)
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output), "--window-size-sec", "0")
 
@@ -336,20 +336,20 @@ def test_rejects_non_positive_window_size_cleanly(tmp_path: Path) -> None:
     assert not output.exists()
 
 
-def test_rejects_traversal_out_of_private_training(tmp_path: Path) -> None:
+def test_rejects_traversal_out_of_training(tmp_path: Path) -> None:
     batch, answer_key = _write_training_fixture(tmp_path)
-    output = tmp_path / "data" / "private" / "training" / ".." / ".." / "public_sample" / "leak.csv"
+    output = tmp_path / "data" / "training" / ".." / ".." / "public_sample" / "leak.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--answer-key", str(answer_key), "--output", str(output))
 
     assert result.returncode == 2
-    assert "output must stay under data/private/training" in result.stderr
+    assert "output must stay under data/training" in result.stderr
     assert not (tmp_path / "data" / "public_sample" / "leak.csv").exists()
 
 
 def test_run_manifest_requires_ground_truth_family_by_default(tmp_path: Path) -> None:
     batch, _answer_key = _write_training_fixture(tmp_path)
-    run_manifest = tmp_path / "data" / "private" / "run_manifests" / "batch_001" / "scenario_runs_private.jsonl"
+    run_manifest = tmp_path / "data" / "run_manifests" / "batch_001" / "scenario_runs.jsonl"
     _write_jsonl(
         run_manifest,
         [
@@ -357,7 +357,7 @@ def test_run_manifest_requires_ground_truth_family_by_default(tmp_path: Path) ->
             {"scenario_run_id": "scenario_004_run_001"},
         ],
     )
-    output = tmp_path / "data" / "private" / "training" / "batch_001" / "windows_actor_15m.csv"
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
 
     result = _run(tmp_path, "--input", str(batch), "--run-manifest", str(run_manifest), "--output", str(output))
 

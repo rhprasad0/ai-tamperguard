@@ -15,7 +15,7 @@ def _files(tmp_path: Path, *, hec_index: str = "openclaw_tamper_lab", scenario: 
     cfg.write_text(
         'authorized_lab_marker = "ai_tamperguard_v1_lab"\n'
         'target_namespace = "ai_tamperguard_v1"\n'
-        'capture_destination = "data/private/raw_exports"\n'
+        'capture_destination = "data/raw_exports"\n'
         'allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab"]\n'
         'protected_indexes = ["_audit", "_configtracker"]\n'
         'synthetic_evidence_index = "openclaw_tamper_lab"\n'
@@ -39,7 +39,7 @@ def _files(tmp_path: Path, *, hec_index: str = "openclaw_tamper_lab", scenario: 
         f'scenario_ids = ["{scenario}"]\n',
         encoding="utf-8",
     )
-    reset_dir = tmp_path / "data" / "private" / "resets"
+    reset_dir = tmp_path / "data" / "resets"
     reset_dir.mkdir(parents=True)
     (reset_dir / f"{reset_id}.json").write_text(
         json.dumps({"reset_id": reset_id, "scenario_id": scenario, "sacrificial_artifact_ids": ["object_000010"]}),
@@ -94,7 +94,7 @@ def test_seed_dry_run_expected_counts_for_three_scenarios(tmp_path: Path) -> Non
     for scenario, run_id, reset_id, count in cases:
         case_root = tmp_path / scenario
         cfg, inventory = _files(case_root, scenario=scenario, reset_id=reset_id)
-        output = case_root / "data" / "private" / "seed_manifests" / "batch_001" / f"{run_id}.json"
+        output = case_root / "data" / "seed_manifests" / "batch_001" / f"{run_id}.json"
         result = _run(case_root, cfg, inventory, scenario=scenario, scenario_run_id=run_id, reset_id=reset_id, output=output)
         assert result.returncode == 0, result.stderr
         manifest = json.loads(output.read_text(encoding="utf-8"))
@@ -104,7 +104,7 @@ def test_seed_dry_run_expected_counts_for_three_scenarios(tmp_path: Path) -> Non
 
 def test_seed_propagates_prompt_metadata_for_scenario_006(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path, scenario="scenario_006", reset_id="reset_006_001")
-    output = tmp_path / "data" / "private" / "seed_manifests" / "batch_001" / "scenario_006.json"
+    output = tmp_path / "data" / "seed_manifests" / "batch_001" / "scenario_006.json"
     result = _run(
         tmp_path,
         cfg,
@@ -138,7 +138,7 @@ def test_seed_propagates_prompt_metadata_for_scenario_006(tmp_path: Path) -> Non
 
 def test_seed_rejects_scenario_run_mismatch(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path)
-    output = tmp_path / "data" / "private" / "seed_manifests" / "batch_001" / "x.json"
+    output = tmp_path / "data" / "seed_manifests" / "batch_001" / "x.json"
     result = _run(tmp_path, cfg, inventory, scenario="scenario_004", scenario_run_id="scenario_010_run_001", reset_id="reset_004_001", output=output)
     assert result.returncode == 2
     assert "mismatch" in result.stderr
@@ -146,8 +146,8 @@ def test_seed_rejects_scenario_run_mismatch(tmp_path: Path) -> None:
 
 def test_seed_rejects_missing_reset_manifest(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path)
-    (tmp_path / "data" / "private" / "resets" / "reset_004_001.json").unlink()
-    output = tmp_path / "data" / "private" / "seed_manifests" / "batch_001" / "x.json"
+    (tmp_path / "data" / "resets" / "reset_004_001.json").unlink()
+    output = tmp_path / "data" / "seed_manifests" / "batch_001" / "x.json"
     result = _run(tmp_path, cfg, inventory, scenario="scenario_004", scenario_run_id="scenario_004_run_001", reset_id="reset_004_001", output=output)
     assert result.returncode == 2
     assert "reset manifest" in result.stderr
@@ -158,20 +158,20 @@ def test_seed_rejects_output_manifest_outside_private_seed_manifests(tmp_path: P
     output = tmp_path / "public" / "seed.json"
     result = _run(tmp_path, cfg, inventory, scenario="scenario_004", scenario_run_id="scenario_004_run_001", reset_id="reset_004_001", output=output)
     assert result.returncode == 2
-    assert "data/private/seed_manifests" in result.stderr
+    assert "data/seed_manifests" in result.stderr
 
 
 def test_seed_rejects_traversal_out_of_private_seed_manifests(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path)
-    output = tmp_path / "data" / "private" / "seed_manifests" / ".." / ".." / "public" / "seed.json"
+    output = tmp_path / "data" / "seed_manifests" / ".." / ".." / "public" / "seed.json"
     result = _run(tmp_path, cfg, inventory, scenario="scenario_004", scenario_run_id="scenario_004_run_001", reset_id="reset_004_001", output=output)
     assert result.returncode == 2
-    assert "data/private/seed_manifests" in result.stderr
+    assert "data/seed_manifests" in result.stderr
 
 
 def test_seed_rejects_bad_hec_index(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path, hec_index="main")
-    output = tmp_path / "data" / "private" / "seed_manifests" / "batch_001" / "x.json"
+    output = tmp_path / "data" / "seed_manifests" / "batch_001" / "x.json"
     result = _run(tmp_path, cfg, inventory, scenario="scenario_004", scenario_run_id="scenario_004_run_001", reset_id="reset_004_001", output=output)
     assert result.returncode == 2
     assert "openclaw_tamper_lab" in result.stderr

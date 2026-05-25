@@ -1,0 +1,173 @@
+{
+  "cleanup_id": "ai-tamperguard-v1-artifact-cleanup-20260525",
+  "decisions": [
+    "No bulky archive; keep concise cleanup manifest and README.",
+    "Remove obsolete fixed-k3 tracked bundle and related reports.",
+    "Track generated prompt metadata/configs; full prompt bodies are not part of public sample promotion."
+  ],
+  "deleted_file_count": 2111,
+  "deleted_path_class_counts": {
+    "v1/data/private/derived": 3,
+    "v1/data/private/edges": 1,
+    "v1/data/private/episodes": 1,
+    "v1/data/private/full_live_sample": 61,
+    "v1/data/private/normalized": 19,
+    "v1/data/private/raw_exports": 797,
+    "v1/data/private/readiness": 4,
+    "v1/data/private/reports": 33,
+    "v1/data/private/reset_manifests": 45,
+    "v1/data/private/resets": 65,
+    "v1/data/private/run_manifests": 604,
+    "v1/data/private/seed_manifests": 380,
+    "v1/data/private/smoke_sample": 13,
+    "v1/data/private/training": 5,
+    "v1/data/private/triggers": 3,
+    "v1/data/tracked/full_live_k3_fixed_20260525": 13,
+    "v1/reports/full_live_k3_fixed_20260525": 6,
+    "v1/reports/goal_runs/baseline_recheck_20260525T204429Z": 1,
+    "v1/reports/goal_runs/full_live_v1_k3_fixed_20260525T204429Z": 1,
+    "v1/reports/private/full_live_v1_20260525T193736Z": 3,
+    "v1/reports/private/full_live_v1_20260525T202747Z": 5,
+    "v1/reports/private/full_live_v1_k3_20260525T195348Z": 5,
+    "v1/reports/private/full_live_v1_k3_fixed_20260525T204429Z": 7,
+    "v1/reports/private/live_goal_nondet50_20260525T214956Z": 1,
+    "v1/reports/private/live_goal_other_ready_20260525T221248Z": 1,
+    "v1/reports/private/readiness_goal_live_nondet50_20260525T214956Z.md": 1,
+    "v1/reports/private/reset-reset_004_001.md": 1,
+    "v1/reports/private/reset-reset_007_001.md": 1,
+    "v1/reports/private/reset-reset_010_001.md": 1,
+    "v1/reports/private/reset-reset_012_001.md": 1,
+    "v1/reports/private/reset-reset_013_001.md": 1,
+    "v1/reports/private/splunk-readiness-attack-pattern-prelive.md": 1,
+    "v1/reports/private/splunk-readiness-local-config.md": 1,
+    "v1/reports/private/splunk-readiness-local.md": 1,
+    "v1/reports/private/splunk-readiness-pre-attack-pattern-live.md": 1,
+    "v1/reports/private/splunk-readiness-v1_live_smoke_20260525T134111Z.md": 1,
+    "v1/reports/private/splunk-readiness-v1_live_smoke_20260525T142112Z.md": 1,
+    "v1/reports/private/splunk-readiness-v1_live_smoke_20260525T142857Z.md": 1,
+    "v1/reports/private/splunk-readiness-v1_live_smoke_20260525T143852Z.md": 1,
+    "v1/reports/private/v1_live_smoke_20260525T134111Z": 5,
+    "v1/reports/private/v1_live_smoke_20260525T142112Z": 2,
+    "v1/reports/private/v1_live_smoke_20260525T142857Z": 4,
+    "v1/reports/private/v1_live_smoke_20260525T143852Z": 2,
+    "v1/reports/private/v1_live_smoke_20260525T144031Z": 7
+  },
+  "graphiti_group_id": "policy-bonfire-2",
+  "migrated_examples": [
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/public_safe_events_private.combined.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/public_safe_events.combined.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_001/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_001/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_001/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_001/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_002/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_002/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_002/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_002/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_003/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_003/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_003/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_a_attempt_003/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_001/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_001/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_001/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_001/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_002/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_002/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_002/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_002/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_003/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_003/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_003/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_b_attempt_003/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_001/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_001/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_001/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_001/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_002/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_002/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_002/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_002/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_003/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_003/capture_manifest.json"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_003/public_safe_events_private.jsonl",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_c_attempt_003/public_safe_events.jsonl"
+    },
+    {
+      "from": "v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_d_attempt_001/capture_manifest.json",
+      "status": "R100",
+      "to": "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/scenario_006_nondet_limited_budget_choose_path_goal_probe_v1_d_attempt_001/capture_manifest.json"
+    }
+  ],
+  "migrated_file_count": 294,
+  "preserved_roots": [
+    "v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z",
+    "v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z",
+    "v1/data/raw_exports/live_goal_nondet50_20260525T214956Z",
+    "v1/data/raw_exports/live_goal_other_ready_20260525T221248Z",
+    "v1/data/run_manifests/live_goal_nondet50_20260525T214956Z",
+    "v1/data/run_manifests/live_goal_other_ready_20260525T221248Z"
+  ],
+  "protected_out_of_scope": [
+    "v1/splunk/private/**",
+    "real credentials",
+    "tokens",
+    "PII"
+  ]
+}

@@ -21,11 +21,11 @@ analyze last k=3 batch
 - Repo: `<repo>`
 - V1 root: `<repo>/v1`
 - Last referenced raw batch:
-  - `v1/data/private/raw_exports/full_live_v1_k3_fixed_20260525T204429Z/` (legacy historical input; do not use this shape for new outputs)
+  - `v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/` (migrated public-safe accepted run evidence; legacy fixed-k3 private input removed)
 - Last legacy reports (historical source artifacts; future outputs should be tracked/public):
-  - `v1/reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json`
-  - `v1/reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-analysis.md`
-  - `v1/reports/private/full_live_v1_k3_fixed_20260525T204429Z/full-live-k3-fixed-nondeterminism-summary.md`
+  - `v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json` (migrated public-safe baseline; legacy private report removed)
+  - legacy private nondeterminism analysis removed during artifact cleanup; use `v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.md`
+  - legacy private fixed-k3 summary removed during artifact cleanup; use `v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.md`
 - Last k=3 run counts:
   - 11 required scenarios represented
   - 80 scenario runs
@@ -209,7 +209,7 @@ Do not allow knobs that:
 
 ### Public/tracked path migration note
 
-Some current V1 scripts may still enforce legacy `data/private/**` output guards. The implementation should update those guards for AI TamperGuard so non-secret generated data, reports, run manifests, raw exports, and training CSVs can live in tracked public paths. Keep only credential-bearing configuration, true secrets, tokens, and PII in ignored paths.
+Current V1 scripts should enforce tracked public-safe roots for non-secret generated data, reports, run manifests, raw exports, and training CSVs. Keep only credential-bearing configuration, true secrets, tokens, and PII in ignored paths.
 
 ## Step-by-step implementation plan
 
@@ -300,7 +300,7 @@ cd <repo>/v1
 uv run python scripts/optimize_nondeterminism_goal_v1.py \
   --goal nondet50 \
   --config config/nondeterminism_goal_defaults.yaml \
-  --baseline-report reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json \
+  --baseline-report reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json \
   --k 3 \
   --target-group-rate 0.50 \
   --target-scenario-rate 0.50 \
@@ -359,7 +359,7 @@ Live mode must reuse the full-live fail-closed ladder:
 1. Static preflight:
    - `uv run pytest -q`
    - `uv run python scripts/validate_dataset_v1.py --schemas schemas --sample data/public_sample --check all --allow-fixture-only`
-   - `uv run python scripts/public_safety_scan_v1.py data/public_sample docs schemas scenarios`
+   - `uv run python scripts/public_safety_scan_v1.py data/raw_exports data/run_manifests data/public_sample docs schemas scenarios reports/goal_runs reports/artifact-cleanup-20260525`
    - `git diff --check`
 2. Splunk readiness check.
 3. HEC write/read-back probe into `openclaw_tamper_lab`.
@@ -447,7 +447,7 @@ uv run python scripts/validate_dataset_v1.py \
   --sample data/public_sample \
   --check all \
   --allow-fixture-only
-uv run python scripts/public_safety_scan_v1.py data/public_sample docs schemas scenarios
+uv run python scripts/public_safety_scan_v1.py data/raw_exports data/run_manifests data/public_sample docs schemas scenarios reports/goal_runs reports/artifact-cleanup-20260525
 ```
 
 ### Baseline analyzer validation
@@ -455,7 +455,7 @@ uv run python scripts/public_safety_scan_v1.py data/public_sample docs schemas s
 ```bash
 cd <repo>/v1
 uv run python scripts/analyze_nondeterminism_goal_v1.py \
-  --summary reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json \
+  --summary reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json \
   --target-group-rate 0.50 \
   --target-scenario-rate 0.50 \
   --output reports/goal_runs/full_live_v1_k3_fixed_20260525T204429Z/goal-baseline-analysis.json
@@ -475,7 +475,7 @@ cd <repo>/v1
 uv run python scripts/optimize_nondeterminism_goal_v1.py \
   --goal nondet50 \
   --config config/nondeterminism_goal_defaults.yaml \
-  --baseline-report reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json \
+  --baseline-report reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json \
   --k 3 \
   --target-group-rate 0.50 \
   --target-scenario-rate 0.50 \
@@ -595,7 +595,7 @@ Verification performed:
 cd <repo>/v1
 uv run pytest -q
 uv run python scripts/validate_dataset_v1.py --schemas schemas --sample data/public_sample --check all --allow-fixture-only
-uv run python scripts/public_safety_scan_v1.py data/public_sample docs schemas scenarios reports/goal_runs
+uv run python scripts/public_safety_scan_v1.py data/raw_exports data/run_manifests data/public_sample docs schemas scenarios reports/goal_runs reports/artifact-cleanup-20260525
 git diff --check
 ```
 
@@ -618,14 +618,14 @@ A focused live Splunk smoke was run after Ryan's explicit authorization for this
 - Generated prompt pack/config: `v1/scenarios/generated/live_goal_nondet50_20260525T214956Z/`
 - Public goal report: `v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.md`
 - Machine-readable report: `v1/reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json`
-- Private raw/read-back export root: `v1/data/private/raw_exports/live_goal_nondet50_20260525T214956Z/`
+- Public-safe raw/read-back export root: `v1/data/raw_exports/live_goal_nondet50_20260525T214956Z/`
 - Evaluated scope: focused `scenario_006` / `limited_budget_choose_path` probe, selected because the baseline k=3 run showed this was the only partially variable family.
 - k: `3` attempts per group.
 - Result: `4/4` evaluated groups nondeterministic; group nondeterminism rate `1.0000`; scenario nondeterminism rate `1.0000`.
 - Acceptance: accepted against the configured `>=0.50` group and scenario thresholds.
 - Boundary: this is live repeated-call evidence for a focused seeded-evidence harness path. It is not full-suite detector quality, not Openclaw grading, not production malicious-behavior evidence, and not a dry-run/projection claim.
 
-Reality divergence from the original plan: the successful live run used the existing legacy private-guarded raw export path because current V1 scripts still enforce `data/private/raw_exports/**` for raw captures. The public/tracked deliverables are the generated prompt pack/config and goal summaries; raw read-back rows remain in the script-mandated private export root until a separate path-guard migration is implemented.
+Post-cleanup reality: the accepted live run evidence was migrated to tracked public-safe `data/raw_exports/**` and `data/run_manifests/**`; current scripts now enforce those public-safe roots for non-secret generated artifacts.
 
 ## Live goal other-ready status — 2026-05-25T221248Z
 
@@ -635,14 +635,14 @@ A second focused live Splunk smoke was run for ready scenarios beyond the alread
 - Generated prompt pack/config: `v1/scenarios/generated/live_goal_other_ready_20260525T221248Z/`
 - Public goal report: `v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z/goal-summary.md`
 - Machine-readable report: `v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z/goal-summary.json`
-- Private raw/read-back export root: `v1/data/private/raw_exports/live_goal_other_ready_20260525T221248Z/`
+- Public-safe raw/read-back export root: `v1/data/raw_exports/live_goal_other_ready_20260525T221248Z/`
 - Evaluated scope: `scenario_004`, `scenario_007`, `scenario_010`, `scenario_012`, `scenario_013`, `scenario_014`, `scenario_015`, `scenario_017`, and `scenario_018`, excluding `scenario_006` because it already passed in `live_goal_nondet50_20260525T214956Z`.
 - k: `3` attempts per scenario/prompt-variant group.
 - Result: `18/18` evaluated groups nondeterministic; group nondeterminism rate `1.0000`; scenario nondeterminism rate `1.0000`.
 - Acceptance: accepted against the configured `>=0.50` group and scenario thresholds.
 - Boundary: this is live repeated-call evidence for bounded synthetic seeded-evidence rows read back from Splunk. It is not a detector-quality claim, not Openclaw grading, and not a claim that dry-run/projection results were live.
 
-Reality divergence from the original plan: live capture still used script-mandated `data/private/raw_exports/**` raw/read-back roots. Public-safe reproduction metadata and summaries were written under `v1/scenarios/generated/live_goal_other_ready_20260525T221248Z/` and `v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z/`.
+Post-cleanup reality: live capture/read-back evidence was migrated to tracked public-safe `data/raw_exports/**` and `data/run_manifests/**`; reproduction metadata and summaries remain under `v1/scenarios/generated/live_goal_other_ready_20260525T221248Z/` and `v1/reports/goal_runs/live_goal_other_ready_20260525T221248Z/`.
 
 ## Definition of done
 

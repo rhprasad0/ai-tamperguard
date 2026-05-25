@@ -21,7 +21,7 @@ from ai_tamperguard_v1.nondeterminism_goal import (  # noqa: E402
     summarize_scenario_variability,
 )
 
-DEFAULT_BASELINE = Path("reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json")
+DEFAULT_BASELINE = Path("reports/goal_runs/live_goal_nondet50_20260525T214956Z/goal-summary.json")
 DEFAULT_PROMPT_PACK = Path("scenarios/nondeterministic_prompt_pack_v1.jsonl")
 
 
