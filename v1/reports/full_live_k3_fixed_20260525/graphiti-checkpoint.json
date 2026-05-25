@@ -1,0 +1,53 @@
+{
+  "batch_id": "full_live_v1_k3_fixed_20260525T204429Z",
+  "graphiti_group_id": "policy-bonfire-2",
+  "public_safe": true,
+  "openclaw_grading": false,
+  "scope": "AI TamperGuard V1 k=3 full-live nondeterminism rerun after prompt-seed nondeterminism fix",
+  "commit": "ba2b697",
+  "counts": {
+    "required_scenarios": 11,
+    "scenario_runs": 80,
+    "nondeterministic_variant_groups": 23,
+    "splunk_verified_events": 315,
+    "normalized_events": 315,
+    "windows": 80,
+    "episodes": 80,
+    "edges": 315,
+    "private_training_rows": 80
+  },
+  "nondeterminism_result": {
+    "trajectory_groups_stable": 22,
+    "trajectory_groups_partially_variable": 1,
+    "trajectory_groups_variable": 0,
+    "feature_groups_stable": 22,
+    "feature_groups_partially_variable": 1,
+    "feature_groups_variable": 0,
+    "fix_effect_observed": true,
+    "variable_group": "scenario_006 / limited_budget_choose_path_v1_a"
+  },
+  "validation": {
+    "preflight_tests": "110 passed",
+    "final_tests": "110 passed",
+    "public_fixture_validation": "passed",
+    "public_safety_scan": "passed",
+    "diff_check": "passed",
+    "splunk_readiness": "passed",
+    "hec_probe_readback_events": 3,
+    "capture_mode": "require-live-splunk-rows; no scaffold fallback",
+    "acceptance_errors": []
+  },
+  "private_artifacts": {
+    "summary_report": "v1/reports/private/full_live_v1_k3_fixed_20260525T204429Z/full-live-k3-fixed-nondeterminism-summary.md",
+    "nondeterminism_summary": "v1/reports/private/full_live_v1_k3_fixed_20260525T204429Z/nondeterminism-summary.json",
+    "acceptance_checks": "v1/reports/private/full_live_v1_k3_fixed_20260525T204429Z/acceptance-checks.json",
+    "sample_root": "v1/data/private/full_live_sample/full_live_v1_k3_fixed_20260525T204429Z",
+    "verified_rows": "v1/data/private/raw_exports/full_live_v1_k3_fixed_20260525T204429Z/verified_live_rows_all.jsonl",
+    "training_csv": "v1/data/private/training/full_live_v1_k3_fixed_20260525T204429Z/windows_actor_15m.csv"
+  },
+  "caveats": [
+    "Small-k synthetic seeded evidence, not formal reliability estimation.",
+    "Reports observed trajectory and feature variability in this run path, not global model nondeterminism.",
+    "No Openclaw grading, production detector, or model-quality claim."
+  ]
+}

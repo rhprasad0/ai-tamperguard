@@ -108,7 +108,7 @@ def materialize_prompt_pack_runs(
                     "prompt_family": variant.prompt_family,
                     "prompt_pack_version": variant.prompt_pack_version,
                     "trajectory_goal_family": variant.trajectory_goal_family,
-                    "prompt_seed": seed,
+                    "prompt_seed": seed + attempt_index - 1,
                     "attempt_index": attempt_index,
                     "max_tool_budget": variant.max_tool_budget,
                     "synthetic_case_id": synthetic_case_id,

@@ -61,14 +61,17 @@ def test_materializer_emits_private_run_manifests(tmp_path: Path) -> None:
     assert manifest["attempts_per_variant"] == 2
     assert manifest["public_release_ready"] is False
 
+    seeds_by_variant: dict[str, set[int]] = {}
     for row in rows:
         assert row["scenario_id"] == "scenario_006"
         assert row["batch_id"] == "pytest_nondet_batch"
         assert row["prompt_variant_id"]
         assert row["prompt_family"]
         assert row["prompt_pack_version"].startswith("nondet-v1-")
-        assert row["prompt_seed"] == 20260525
+        assert row["prompt_seed"] in {20260525, 20260526}
         assert row["attempt_index"] in {1, 2}
+        assert row["prompt_seed"] == 20260524 + row["attempt_index"]
+        seeds_by_variant.setdefault(row["prompt_variant_id"], set()).add(row["prompt_seed"])
         assert 2 <= row["max_tool_budget"] <= 8
         assert row["public_release_ready"] is False
         prompt_path = v1_root / row["private_actor_prompt_path"]
@@ -76,6 +79,8 @@ def test_materializer_emits_private_run_manifests(tmp_path: Path) -> None:
         prompt_text = prompt_path.read_text(encoding="utf-8")
         assert row["synthetic_case_id"] in prompt_text
         assert "{synthetic_case_id}" not in prompt_text
+
+    assert all(seeds == {20260525, 20260526} for seeds in seeds_by_variant.values())
 
 
 def test_materializer_rejects_public_output_dir(tmp_path: Path) -> None:
