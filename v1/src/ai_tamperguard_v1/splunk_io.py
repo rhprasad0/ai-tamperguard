@@ -55,7 +55,7 @@ def write_scenario_events_hec(
     if client is None:
         import httpx
 
-        client = httpx.Client(timeout=10.0)
+        client = httpx.Client(timeout=10.0, verify=False)
         close_client = True
     try:
         request_id: str | None = None
