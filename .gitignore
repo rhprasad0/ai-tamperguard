@@ -20,6 +20,10 @@ __pycache__/
 /data/windows/*.csv
 /models/*.onnx
 /models/*.mlmodel
+/.worktrees/
+
+# Hermes local project artifacts
+/.hermes/
 
 # Private/generated v0 artifacts (never commit)
 data/private/
