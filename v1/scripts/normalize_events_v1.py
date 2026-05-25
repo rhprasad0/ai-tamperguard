@@ -116,7 +116,7 @@ def _scenario_runs(run_rows: list[dict[str, Any]], events: list[dict[str, Any]])
                 "run_end_relative_sec": max(int(event["relative_time_sec"]) for event in run_events),
                 "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
                 "environment_id": run.get("environment_id", "environment_001"),
-                "outcome": run.get("outcome", "needs_review"),
+                "outcome": _public_outcome(run.get("outcome", "needs_review")),
                 "ground_truth_family": run.get("ground_truth_family", "background_unlabeled"),
                 "paired_control_run_id": run.get("paired_control_run_id"),
                 "reset_id": run.get("public_reset_id", _public_reset_id(run.get("private_reset_id", "reset_001"))),
@@ -155,7 +155,7 @@ def _answer_key(run_rows: list[dict[str, Any]], events: list[dict[str, Any]]) ->
                 "actor_id": run.get("actor_id", run_events[0]["actor_id"]),
                 "object_ids_or_types": object_types,
                 "label_family": family,
-                "outcome": run.get("outcome", "needs_review"),
+                "outcome": _public_outcome(run.get("outcome", "needs_review")),
                 "label_source": "post_run_verification",
                 "verification_basis": "private reset/capture scaffold preserved protected evidence surfaces and emitted public-safe action rows; live Splunk raw action attachment remains required before release candidate",
                 "limitations": "live capture scaffold only; not a public release candidate and not evidence of malicious intent",
@@ -180,6 +180,16 @@ def _reset_rows(run_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     return rows
+
+
+def _public_outcome(outcome: str) -> str:
+    aliases = {
+        "expected_benign_control": "benign",
+        "blocked_or_stopped": "blocked",
+    }
+    allowed = {"benign", "attempted", "blocked", "failed", "successful_synthetic", "needs_review"}
+    normalized = aliases.get(str(outcome), str(outcome))
+    return normalized if normalized in allowed else "needs_review"
 
 
 def _public_reset_id(private_reset_id: str) -> str:
