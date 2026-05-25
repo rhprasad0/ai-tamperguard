@@ -1,0 +1,26 @@
+{
+  "results": [
+    {"title": "_audit", "disabled": "0", "currentDBSizeMB": "7", "totalEventCount": "45933", "splunk_server": "workbox"},
+    {"title": "_configtracker", "disabled": "0", "currentDBSizeMB": "4", "totalEventCount": "902", "splunk_server": "workbox"},
+    {"title": "_dsappevent", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "_dsclient", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "_dsphonehome", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "_internal", "disabled": "0", "currentDBSizeMB": "518", "totalEventCount": "6003328", "splunk_server": "workbox"},
+    {"title": "_introspection", "disabled": "0", "currentDBSizeMB": "2422", "totalEventCount": "2519448", "splunk_server": "workbox"},
+    {"title": "_telemetry", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "376", "splunk_server": "workbox"},
+    {"title": "_thefishbucket", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "agentops", "disabled": "0", "currentDBSizeMB": "2", "totalEventCount": "35930", "splunk_server": "workbox"},
+    {"title": "endpoint", "disabled": "0", "currentDBSizeMB": "30", "totalEventCount": "432066", "splunk_server": "workbox"},
+    {"title": "history", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "infra", "disabled": "0", "currentDBSizeMB": "7", "totalEventCount": "46883", "splunk_server": "workbox"},
+    {"title": "main", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "netops", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "65", "splunk_server": "workbox"},
+    {"title": "openclaw_tamper_lab", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "648", "splunk_server": "workbox"},
+    {"title": "soc_summary", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "splunklogger", "disabled": "1", "currentDBSizeMB": "0", "totalEventCount": "0", "splunk_server": "workbox"},
+    {"title": "summary", "disabled": "0", "currentDBSizeMB": "1", "totalEventCount": "0", "splunk_server": "workbox"}
+  ],
+  "truncated": false,
+  "total_rows": 19,
+  "captured_at_batch": "full_live_v1_20260525T202747Z"
+}

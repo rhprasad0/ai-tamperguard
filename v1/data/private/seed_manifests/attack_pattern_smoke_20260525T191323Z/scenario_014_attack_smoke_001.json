@@ -1,0 +1,21 @@
+{
+  "artifact_ids": [
+    "object_000014"
+  ],
+  "batch_id": "attack_pattern_smoke_20260525T191323Z",
+  "event_count": 4,
+  "event_ids": [
+    "evt_000014001",
+    "evt_000014002",
+    "evt_000014003",
+    "evt_000014004"
+  ],
+  "public_release_ready": false,
+  "reset_id": "attack_prelive_scenario_014",
+  "scenario_id": "scenario_014",
+  "scenario_run_id": "scenario_014_attack_smoke_001",
+  "seed_anchor_epoch": 1779736403,
+  "status": "seeded_splunk_hec",
+  "target_index": "openclaw_tamper_lab",
+  "write_status": "written"
+}

@@ -1,0 +1,11 @@
+{
+  "capture_manifest_count": 80,
+  "dataset_build_id": "v1-live-capture-scaffold-batch-001",
+  "live_run_requirement": "partially satisfied by private reset/capture scaffolds; attach live Splunk action rows before release candidate",
+  "release_status": "live_lab_capture_scaffold_not_release_candidate",
+  "scenario_catalog_version": "v1-subset-20260525",
+  "schema_version": "v1.0",
+  "source_batch_ids": [
+    "full_live_v1_k3_20260525T195348Z"
+  ]
+}

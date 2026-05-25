@@ -1,8 +1,3 @@
-# V1 private/generated artifacts. Public samples are intentionally trackable.
-data/private/
-models/private/
-reports/private/
-splunk/private/
 .venv/
 __pycache__/
 .pytest_cache/

@@ -1,0 +1,30 @@
+Sergeant Openclaw investigation summary
+Incident: openclaw-d225c98015a0
+Classification: inconclusive
+Confidence: low
+Human review required: true
+Remediation executed: false
+incident_id: openclaw-d225c98015a0
+classification: inconclusive
+confidence: low
+investigation_status: completed
+top_findings: Single bounded Splunk result was returned for template_id tamperguard_scenario_run_evidence, but the raw event body is omitted.; Only selected fields are available and they are insufficient to establish malicious behavior or benign context.; Evidence quality is partial and there are no memory matches to corroborate the event.
+evidence_sources: splunk_template_summary | tamperguard_scenario_run_evidence | 1 bounded Splunk result(s) for tamperguard_scenario_run_evidence; selected fields only, raw event body omitted.
+memory_precedent: none
+recommended_actions: monitor (low, execution_allowed=false): Insufficient evidence to determine intent or impact from the redacted single-result summary.
+human_review_required: true
+remediation_executed: false
+trace/search anchors: 2b22561d554439fb23944e7b165a73cbfcae6b01efcf399f9ed0151de6970f8b; 55e697a3826c7b289179bfe0496036de2335e769f944facbd8917aa97534e40d; synthetic_full
+summary_short: Partial redacted evidence is insufficient for a confident determination.
+summary_details: A single bounded Splunk result is present for the tamperguard scenario, but the raw event body is omitted and only limited selected fields are available. With partial evidence quality and no memory matches, the case remains inconclusive and should be monitored for additional corroborating telemetry.
+redaction_notes: none
+memory_write_status: skipped
+notification_status: not_configured
+Live service call counters:
+{
+  "graphiti_lookup": 1,
+  "graphiti_write": 0,
+  "llm": 1,
+  "notifier": 1,
+  "splunk": 1
+}

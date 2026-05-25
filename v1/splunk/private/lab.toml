@@ -1,0 +1,23 @@
+# AI TamperGuard V1 private lab config.
+# Private/ignored local file: no secrets here, but keep lab topology out of public samples.
+
+authorized_lab_marker = "ai_tamperguard_v1_authorized_local_lab"
+target_namespace = "ai_tamperguard_v1"
+capture_destination = "data/private/raw_exports"
+allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab", "agentops"]
+protected_indexes = ["_audit", "_configtracker", "agentops"]
+synthetic_evidence_index = "openclaw_tamper_lab"
+public_sample_policy = "live_run_required"
+
+[sacrificial]
+allowed_app = "ai_tamperguard_v1"
+allowed_object_id_prefixes = ["object_"]
+allowed_object_types = ["index", "report", "saved_search", "dashboard", "alert", "role", "macro", "lookup", "config"]
+
+[splunk_hec]
+url = "https://192.168.0.102:8088/services/collector/event"
+token_env = "AI_TAMPERGUARD_SPLUNK_HEC_TOKEN"
+index = "openclaw_tamper_lab"
+sourcetype = "ai_tamperguard:v1:scenario_evidence"
+source = "ai_tamperguard:v1:seed"
+

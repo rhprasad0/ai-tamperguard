@@ -1,0 +1,20 @@
+{
+  "incident_mode": "synthetic",
+  "operator": "local-hermes-user",
+  "source_alert": {
+    "alert_type": "telemetry_disable_canary",
+    "description": "Synthetic V1 smoke trigger for a bounded sacrificial Splunk scenario.",
+    "raw": {
+      "batch_id": "v1_live_smoke_20260525T134111Z",
+      "host": "pi-agent-01",
+      "scenario_id": "scenario_004",
+      "scenario_run_id": "scenario_004_run_001"
+    },
+    "source": "ai_tamperguard_v1_private_runner"
+  },
+  "time_window": {
+    "earliest": "-2h",
+    "latest": "now"
+  },
+  "trigger_type": "manual_hermes"
+}

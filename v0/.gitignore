@@ -1,9 +1,3 @@
-# Private/generated v0 artifacts (never commit)
-data/private/
-models/private/
-reports/private/
-splunk/private/
-
 # Local Python environment/cache
 .venv/
 .pytest_cache/

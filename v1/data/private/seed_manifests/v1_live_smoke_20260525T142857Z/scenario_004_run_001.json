@@ -1,0 +1,21 @@
+{
+  "artifact_ids": [
+    "object_000010",
+    "object_000901"
+  ],
+  "batch_id": "v1_live_smoke_20260525T142857Z",
+  "event_count": 3,
+  "event_ids": [
+    "evt_000004001",
+    "evt_000004002",
+    "evt_000004003"
+  ],
+  "public_release_ready": false,
+  "reset_id": "reset_004_001",
+  "scenario_id": "scenario_004",
+  "scenario_run_id": "scenario_004_run_001",
+  "seed_anchor_epoch": 1779719337,
+  "status": "seeded_splunk_hec",
+  "target_index": "openclaw_tamper_lab",
+  "write_status": "written"
+}

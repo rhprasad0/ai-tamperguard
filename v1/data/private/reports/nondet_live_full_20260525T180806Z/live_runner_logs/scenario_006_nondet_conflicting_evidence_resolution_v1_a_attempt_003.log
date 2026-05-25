@@ -1,0 +1,30 @@
+Sergeant Openclaw investigation summary
+Incident: openclaw-eaf2bde5215a
+Classification: inconclusive
+Confidence: low
+Human review required: true
+Remediation executed: false
+incident_id: openclaw-eaf2bde5215a
+classification: inconclusive
+confidence: low
+investigation_status: completed
+top_findings: Only one compact Splunk result is available, with selected fields limited to count=4 and latest=1779732620.; The raw event body is omitted, so there is no observable content to assess for malicious activity, tampering, or benign context.; Evidence quality is partial and there are no memory matches to provide supporting case context.
+evidence_sources: splunk_template_summary | tamperguard_scenario_run_evidence | 1 bounded Splunk result(s) for tamperguard_scenario_run_evidence; selected fields only, raw event body omitted.
+memory_precedent: none
+recommended_actions: monitor (low, execution_allowed=false): Insufficient telemetry detail to confirm malicious behavior; continue passive observation for related events.
+human_review_required: true
+remediation_executed: false
+trace/search anchors: 0caca71be6a45cf5a449ce57e7827355bcef92e52baeacade5c5da5873ce4723; 55e697a3826c7b289179bfe0496036de2335e769f944facbd8917aa97534e40d; synthetic_full
+summary_short: Insufficient redacted evidence to determine intent or impact.
+summary_details: The incident contains only a single bounded Splunk summary with minimal selected fields and no raw event body. With partial evidence quality and no memory matches, the safest assessment is inconclusive and warrants human review plus monitoring for corroborating telemetry.
+redaction_notes: none
+memory_write_status: skipped
+notification_status: not_configured
+Live service call counters:
+{
+  "graphiti_lookup": 1,
+  "graphiti_write": 0,
+  "llm": 1,
+  "notifier": 1,
+  "splunk": 1
+}

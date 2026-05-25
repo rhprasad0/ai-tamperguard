@@ -25,17 +25,4 @@ __pycache__/
 # Hermes local project artifacts
 /.hermes/
 
-# Private/generated v0 artifacts (never commit)
-data/private/
-models/private/
-reports/private/
-splunk/private/
-v0/data/private/
-v0/models/private/
-v0/reports/private/
-v0/splunk/private/
-# AI TamperGuard V1 private artifacts
-v1/data/private/
-v1/models/private/
-v1/reports/private/
-v1/splunk/private/
+

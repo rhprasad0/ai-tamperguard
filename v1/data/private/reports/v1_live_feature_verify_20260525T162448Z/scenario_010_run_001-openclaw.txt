@@ -1,0 +1,30 @@
+Sergeant Openclaw investigation summary
+Incident: openclaw-0eb0b18e29e1
+Classification: telemetry_failure
+Confidence: high
+Human review required: true
+Remediation executed: false
+incident_id: openclaw-0eb0b18e29e1
+classification: telemetry_failure
+confidence: high
+investigation_status: completed
+top_findings: No evidence or memory matches were provided in the incident payload.; Evidence quality is none, so there is insufficient telemetry to assess behavior or indicators.; The incident is synthetic and contains only an analysis instruction, which is not operational evidence.
+evidence_sources: none
+memory_precedent: none
+recommended_actions: monitor (low, execution_allowed=false): Track for any later-arriving telemetry or linked events, since current evidence is absent.
+human_review_required: true
+remediation_executed: false
+trace/search anchors: fd63ffcef63ab1d25de53a9796f548dd4fc92fafd016a749fd648d96df80631e; 9118eda2a0fb5f93c2390230f105ec75e9fa5a77caeb832da22c6a449f94a532; synthetic_full
+summary_short: No evidence was provided; this is a telemetry failure.
+summary_details: The incident payload contains no evidence and no memory matches, so there is nothing substantive to classify beyond a telemetry failure or placeholder synthetic case. No signs of prompt injection or telemetry evasion are present in the provided payload.
+redaction_notes: none
+memory_write_status: skipped
+notification_status: not_configured
+Live service call counters:
+{
+  "graphiti_lookup": 1,
+  "graphiti_write": 0,
+  "llm": 1,
+  "notifier": 1,
+  "splunk": 1
+}

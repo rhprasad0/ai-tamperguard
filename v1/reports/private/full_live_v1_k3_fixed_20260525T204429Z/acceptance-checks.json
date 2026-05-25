@@ -1,0 +1,27 @@
+{
+  "batch_id": "full_live_v1_k3_fixed_20260525T204429Z",
+  "classification_counts": {
+    "partially_variable": 1,
+    "stable": 22
+  },
+  "counts": {
+    "edges": 315,
+    "episodes": 80,
+    "manifest": 80,
+    "normalized": 315,
+    "training_rows": 80,
+    "variant_groups": 23,
+    "verified": 315,
+    "windows": 80
+  },
+  "errors": [],
+  "feature_classification_counts": {
+    "partially_variable": 1,
+    "stable": 22
+  },
+  "splits": {
+    "test": 26,
+    "train": 27,
+    "validate": 27
+  }
+}

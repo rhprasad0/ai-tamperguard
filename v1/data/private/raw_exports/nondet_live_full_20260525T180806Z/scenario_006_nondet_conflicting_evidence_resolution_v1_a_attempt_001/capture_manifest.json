@@ -1,0 +1,18 @@
+{
+  "batch_id": "nondet_live_full_20260525T180806Z",
+  "event_count": 4,
+  "public_release_blocker": "requires review before release-candidate promotion",
+  "public_release_ready": false,
+  "reset_id": "reset_006_full_20260525T180806Z",
+  "scenario_id": "scenario_006",
+  "scenario_run_id": "scenario_006_nondet_conflicting_evidence_resolution_v1_a_attempt_001",
+  "source_derivation": "live_splunk_public_redacted",
+  "source_index": "openclaw_tamper_lab",
+  "source_surfaces": [
+    "splunk_audit",
+    "splunk_configtracker",
+    "synthetic_control_plane"
+  ],
+  "status": "captured_live_splunk_public_safe",
+  "target_namespace": "ai_tamperguard_v1"
+}

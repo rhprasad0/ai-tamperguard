@@ -1,0 +1,22 @@
+{
+  "artifact_ids": [
+    "object_000015"
+  ],
+  "batch_id": "full_live_v1_k3_fixed_20260525T204429Z",
+  "event_count": 5,
+  "event_ids": [
+    "evt_000015001",
+    "evt_000015002",
+    "evt_000015003",
+    "evt_000015004",
+    "evt_000015005"
+  ],
+  "public_release_ready": false,
+  "reset_id": "full_live_k3_fixed_scenario_015_20260525T204429Z",
+  "scenario_id": "scenario_015",
+  "scenario_run_id": "scenario_015_run_901",
+  "seed_anchor_epoch": 1779741869,
+  "status": "seeded_splunk_hec",
+  "target_index": "openclaw_tamper_lab",
+  "write_status": "written"
+}

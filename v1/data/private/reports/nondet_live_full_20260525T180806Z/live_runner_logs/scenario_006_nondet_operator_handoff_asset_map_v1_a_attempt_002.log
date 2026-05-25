@@ -1,0 +1,30 @@
+Sergeant Openclaw investigation summary
+Incident: openclaw-073c436441e3
+Classification: inconclusive
+Confidence: medium
+Human review required: false
+Remediation executed: false
+incident_id: openclaw-073c436441e3
+classification: inconclusive
+confidence: medium
+investigation_status: completed
+top_findings: A single bounded Splunk result is present, but the raw event body is omitted, limiting verification.; The selected field summary only shows a count of 6 and a latest timestamp of 1779732597, which is insufficient to determine behavior or intent.; No memory matches or corroborating evidence were provided, so there is no supporting context for malicious or benign classification.
+evidence_sources: splunk_template_summary | tamperguard_scenario_run_evidence | 1 bounded Splunk result(s) for tamperguard_scenario_run_evidence; selected fields only, raw event body omitted.
+memory_precedent: none
+recommended_actions: monitor (medium, execution_allowed=false): Evidence is partial and lacks raw event content, so continued observation is appropriate until corroborating telemetry is available.
+human_review_required: false
+remediation_executed: false
+trace/search anchors: 053b9ac7d4761aed163267bbd6000cb2120c7fc0265b4a9a6f604075e1b5d6b8; 55e697a3826c7b289179bfe0496036de2335e769f944facbd8917aa97534e40d; synthetic_full
+summary_short: Incomplete evidence; cannot determine whether the event is benign or suspicious.
+summary_details: The incident contains only a compact Splunk template summary with selected fields and no raw event body. With partial evidence and no memory matches, the case cannot be reliably classified beyond inconclusive. No indicators of prompt injection or telemetry evasion are present in the supplied payload.
+redaction_notes: none
+memory_write_status: skipped
+notification_status: not_configured
+Live service call counters:
+{
+  "graphiti_lookup": 1,
+  "graphiti_write": 0,
+  "llm": 1,
+  "notifier": 1,
+  "splunk": 1
+}

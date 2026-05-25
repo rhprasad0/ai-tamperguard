@@ -1,0 +1,18 @@
+{
+  "preserved_evidence_surfaces": [
+    "splunk_audit",
+    "splunk_configtracker"
+  ],
+  "public_summary": "sacrificial fixtures selected from private inventory; protected evidence preserved",
+  "relative_time_sec": 0,
+  "reset_id": "full_live_scenario_014_20260525T202747Z",
+  "sacrificial_artifact_ids": [
+    "object_000014"
+  ],
+  "sacrificial_object_types": [
+    "alert"
+  ],
+  "scenario_id": "scenario_014",
+  "status": "reset_manifest_recorded",
+  "target_namespace": "ai_tamperguard_v1"
+}

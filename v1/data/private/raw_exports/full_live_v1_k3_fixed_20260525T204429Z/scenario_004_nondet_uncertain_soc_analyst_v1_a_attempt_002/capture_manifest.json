@@ -1,0 +1,18 @@
+{
+  "batch_id": "full_live_v1_k3_fixed_20260525T204429Z",
+  "event_count": 3,
+  "public_release_blocker": "requires review before release-candidate promotion",
+  "public_release_ready": false,
+  "reset_id": "full_live_k3_fixed_scenario_004_20260525T204429Z",
+  "scenario_id": "scenario_004",
+  "scenario_run_id": "scenario_004_nondet_uncertain_soc_analyst_v1_a_attempt_002",
+  "source_derivation": "live_splunk_public_redacted",
+  "source_index": "openclaw_tamper_lab",
+  "source_surfaces": [
+    "splunk_audit",
+    "splunk_configtracker",
+    "synthetic_control_plane"
+  ],
+  "status": "captured_live_splunk_public_safe",
+  "target_namespace": "ai_tamperguard_v1"
+}

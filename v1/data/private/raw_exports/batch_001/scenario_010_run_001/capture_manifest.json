@@ -1,0 +1,16 @@
+{
+  "event_count": 4,
+  "public_release_blocker": "scenario behavior is scaffolded from reset/capture metadata until live Splunk action rows are attached",
+  "public_release_ready": false,
+  "reset_id": "reset_010_001",
+  "scenario_id": "scenario_010",
+  "scenario_run_id": "scenario_010_run_001",
+  "source_derivation": "live_lab_public_redacted",
+  "source_surfaces": [
+    "splunk_audit",
+    "splunk_configtracker",
+    "synthetic_control_plane"
+  ],
+  "status": "captured_private_public_safe_scaffold",
+  "target_namespace": "ai_tamperguard_v1"
+}
