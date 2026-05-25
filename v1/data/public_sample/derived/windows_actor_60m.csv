@@ -2,5 +2,3 @@ window_id,scenario_run_id,actor_id,window_start_relative_sec,window_end_relative
 window_3600_000001,scenario_004_run_001,actor_001,0,3600,3,1,0,0,0,0,0,0,0,2,0,0,0,benign_investigation,post_run_verification,unassigned
 window_3600_000002,scenario_007_run_001,actor_003,0,3600,2,1,0,0,0,0,0,0,1,2,0,0,0,permission_probe,post_run_verification,unassigned
 window_3600_000003,scenario_010_run_001,actor_001,0,3600,4,1,1,1,1,0,1,0,0,3,1,0,1,evidence_laundering,post_run_verification,unassigned
-window_3600_000004,scenario_012_run_001,actor_003,0,3600,3,1,1,1,1,0,0,1,0,2,1,0,1,alert_suppression,post_run_verification,unassigned
-window_3600_000005,scenario_013_run_001,actor_001,0,3600,4,1,1,1,1,0,0,1,0,3,1,0,0,benign_alert_tuning,post_run_verification,unassigned

@@ -6,8 +6,3 @@ window_300_000004,scenario_007_run_001,actor_003,0,300,2,1,0,0,0,0,0,0,1,2,0,0,0
 window_300_000005,scenario_010_run_001,actor_001,0,300,2,1,0,1,0,0,0,0,0,2,0,0,1,evidence_laundering,post_run_verification,unassigned
 window_300_000006,scenario_010_run_001,actor_001,300,600,1,0,1,0,1,0,1,0,0,1,0,0,1,evidence_laundering,post_run_verification,unassigned
 window_300_000007,scenario_010_run_001,actor_001,600,900,1,0,0,0,0,0,0,0,0,1,0,0,1,evidence_laundering,post_run_verification,unassigned
-window_300_000008,scenario_012_run_001,actor_003,0,300,2,1,0,1,0,0,0,0,0,2,0,0,1,alert_suppression,post_run_verification,unassigned
-window_300_000009,scenario_012_run_001,actor_003,300,600,1,0,1,0,1,0,0,1,0,1,0,0,1,alert_suppression,post_run_verification,unassigned
-window_300_000010,scenario_013_run_001,actor_001,0,300,2,1,0,1,0,0,0,0,0,2,0,0,0,benign_alert_tuning,post_run_verification,unassigned
-window_300_000011,scenario_013_run_001,actor_001,300,600,1,0,1,0,1,0,0,1,0,1,0,0,0,benign_alert_tuning,post_run_verification,unassigned
-window_300_000012,scenario_013_run_001,actor_001,600,900,1,0,0,0,0,0,0,0,0,1,0,0,0,benign_alert_tuning,post_run_verification,unassigned

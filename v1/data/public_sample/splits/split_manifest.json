@@ -24,16 +24,15 @@
     },
     "train": {
       "label_counts": {
-        "0": 1,
-        "1": 1
+        "0": 1
       },
-      "row_count": 2
+      "row_count": 1
     },
     "validate": {
       "label_counts": {
-        "0": 2
+        "0": 1
       },
-      "row_count": 2
+      "row_count": 1
     }
   }
 }
