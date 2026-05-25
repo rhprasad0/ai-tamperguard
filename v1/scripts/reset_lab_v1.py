@@ -9,7 +9,19 @@ sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 
 from ai_tamperguard_v1.lab_config import LabConfigError, load_lab_config, load_sacrificial_inventory  # noqa: E402
 
-ALLOWED_SCENARIOS = {"scenario_004", "scenario_006", "scenario_007", "scenario_010", "scenario_011", "scenario_012", "scenario_013"}
+ALLOWED_SCENARIOS = {
+    "scenario_004",
+    "scenario_006",
+    "scenario_007",
+    "scenario_010",
+    "scenario_011",
+    "scenario_012",
+    "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_017",
+    "scenario_018",
+}
 
 
 def main() -> int:

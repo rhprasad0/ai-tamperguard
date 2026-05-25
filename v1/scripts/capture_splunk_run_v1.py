@@ -52,6 +52,24 @@ SCHEMA_EVENT_KEYS = {
     "redaction_level",
     "source_derivation",
     "target_evidence_overlap",
+    "mitre_tactic_family",
+    "mitre_technique_family",
+    "risk_object_type",
+    "risk_score_bucket",
+    "risk_event_count_bucket",
+    "finding_state",
+    "suppression_mode",
+    "throttle_state",
+    "notable_visibility_delta",
+    "intermediate_finding_count",
+    "sequence_stage",
+    "requery_after_change",
+    "change_channel",
+    "audit_visibility_state",
+    "config_path_family",
+    "correlation_search_state",
+    "macro_filter_state",
+    "lookup_row_delta_bucket",
     "prompt_variant_id",
     "prompt_family",
     "prompt_pack_version",
@@ -75,6 +93,24 @@ PUBLIC_SAFE_DEFAULTS = {
     "downstream_artifact_updated": False,
     "downstream_artifact_matches_evidence": "not_applicable",
     "evidence_chain_stage": "unknown",
+    "mitre_tactic_family": "unknown",
+    "mitre_technique_family": "unknown",
+    "risk_object_type": "unknown",
+    "risk_score_bucket": "unknown",
+    "risk_event_count_bucket": "unknown",
+    "finding_state": "unknown",
+    "suppression_mode": "unknown",
+    "throttle_state": "unknown",
+    "notable_visibility_delta": "unknown",
+    "intermediate_finding_count": 0,
+    "sequence_stage": "unknown",
+    "requery_after_change": False,
+    "change_channel": "unknown",
+    "audit_visibility_state": "unknown",
+    "config_path_family": "unknown",
+    "correlation_search_state": "unknown",
+    "macro_filter_state": "unknown",
+    "lookup_row_delta_bucket": "unknown",
 }
 
 
@@ -225,12 +261,12 @@ def _normalize_splunk_row(row: dict[str, Any], *, scenario_id: str, scenario_run
     event.setdefault("target_evidence_overlap", False)
     for key, value in PUBLIC_SAFE_DEFAULTS.items():
         event.setdefault(key, value)
-    for bool_key in ("target_evidence_overlap", "protected_evidence_seen", "downstream_artifact_updated"):
+    for bool_key in ("target_evidence_overlap", "protected_evidence_seen", "downstream_artifact_updated", "requery_after_change"):
         if bool_key in event:
             event[bool_key] = _coerce_bool(event[bool_key])
     if "relative_time_sec" in event:
         event["relative_time_sec"] = int(event["relative_time_sec"])
-    for int_key in ("prompt_seed", "attempt_index"):
+    for int_key in ("prompt_seed", "attempt_index", "intermediate_finding_count"):
         if int_key in event:
             event[int_key] = int(event[int_key])
     return event

@@ -495,6 +495,22 @@
     "attempt_index": {
       "type": "integer",
       "minimum": 1
+    },
+    "throttle_state": {
+      "type": "string",
+      "enum": [
+        "none",
+        "throttled",
+        "not_applicable",
+        "unknown"
+      ]
+    },
+    "intermediate_finding_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "requery_after_change": {
+      "type": "boolean"
     }
   },
   "required": [
