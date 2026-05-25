@@ -30,3 +30,8 @@ v0/data/private/
 v0/models/private/
 v0/reports/private/
 v0/splunk/private/
+# AI TamperGuard V1 private artifacts
+v1/data/private/
+v1/models/private/
+v1/reports/private/
+v1/splunk/private/

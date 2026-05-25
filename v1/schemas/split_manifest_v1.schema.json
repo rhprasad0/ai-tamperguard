@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dataset_build_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "leakage_report": {
+      "type": "object"
+    },
+    "relaxations": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "source_window_file": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "split_strategy": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "splits": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "dataset_build_id",
+    "seed",
+    "split_strategy",
+    "source_window_file",
+    "splits",
+    "relaxations",
+    "leakage_report"
+  ],
+  "title": "split_manifest_v1",
+  "type": "object"
+}

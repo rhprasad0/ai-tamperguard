@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dst_id": {
+      "pattern": "^object_[0-9]{6}$",
+      "type": "string"
+    },
+    "dst_type": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "edge_id": {
+      "pattern": "^edge_[0-9]{6}$",
+      "type": "string"
+    },
+    "edge_type": {
+      "enum": [
+        "searched",
+        "read",
+        "modified",
+        "disabled",
+        "enabled",
+        "created",
+        "deleted",
+        "wrote",
+        "probed"
+      ],
+      "type": "string"
+    },
+    "object_role": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "relative_time_sec": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "scenario_run_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "src_id": {
+      "pattern": "^actor_[0-9]{3}$",
+      "type": "string"
+    },
+    "src_type": {
+      "const": "actor",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "success",
+        "failure",
+        "denied",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "target_evidence_overlap": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "edge_id",
+    "scenario_run_id",
+    "relative_time_sec",
+    "src_type",
+    "src_id",
+    "edge_type",
+    "dst_type",
+    "dst_id",
+    "object_role",
+    "target_evidence_overlap",
+    "status"
+  ],
+  "title": "actor_object_edge_v1",
+  "type": "object"
+}

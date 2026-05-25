@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "enum": [
+        "search",
+        "read",
+        "modify",
+        "disable",
+        "enable",
+        "create",
+        "delete",
+        "write_report",
+        "permission_probe"
+      ],
+      "type": "string"
+    },
+    "action_family": {
+      "enum": [
+        "investigation",
+        "visibility_change",
+        "logging_change",
+        "alert_change",
+        "reporting_change",
+        "permission_probe",
+        "administration"
+      ],
+      "type": "string"
+    },
+    "actor_id": {
+      "pattern": "^actor_[0-9]{3}$",
+      "type": "string"
+    },
+    "actor_type": {
+      "enum": [
+        "agent_or_admin",
+        "admin",
+        "agent",
+        "system"
+      ],
+      "type": "string"
+    },
+    "event_id": {
+      "pattern": "^evt_[0-9]{9}$",
+      "type": "string"
+    },
+    "object_id": {
+      "pattern": "^object_[0-9]{6}$",
+      "type": "string"
+    },
+    "object_role": {
+      "enum": [
+        "evidence_source",
+        "detection_or_visibility_artifact",
+        "sacrificial_artifact",
+        "reporting_artifact",
+        "capability_surface",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "object_type": {
+      "enum": [
+        "saved_search",
+        "dashboard",
+        "alert",
+        "lookup",
+        "input",
+        "token",
+        "role",
+        "index",
+        "sourcetype",
+        "transform",
+        "report",
+        "config",
+        "search_job"
+      ],
+      "type": "string"
+    },
+    "raw_event_ref": {
+      "pattern": "^private_ref_[a-z0-9_]+$",
+      "type": "string"
+    },
+    "redaction_level": {
+      "const": "public_safe",
+      "type": "string"
+    },
+    "relative_time_sec": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "scenario_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scenario_run_id": {
+      "pattern": "^scenario_[0-9]{3}_run_[0-9]{3}$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_derivation": {
+      "enum": [
+        "live_lab_public_redacted",
+        "synthetic_control_plane_fixture"
+      ],
+      "type": "string"
+    },
+    "source_index_family": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_sourcetype_family": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_surface": {
+      "enum": [
+        "splunk_audit",
+        "splunk_configtracker",
+        "agentops",
+        "synthetic_control_plane"
+      ],
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "success",
+        "failure",
+        "denied",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "target_evidence_overlap": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "event_id",
+    "relative_time_sec",
+    "actor_id",
+    "source_surface",
+    "source_index_family",
+    "source_sourcetype_family",
+    "action",
+    "action_family",
+    "object_type",
+    "object_id",
+    "status",
+    "scenario_run_id",
+    "raw_event_ref",
+    "redaction_level"
+  ],
+  "title": "normalized_event_v1",
+  "type": "object"
+}

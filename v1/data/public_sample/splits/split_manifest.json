@@ -1,0 +1,41 @@
+{
+  "dataset_build_id": "v1-public-fixture-20260525",
+  "leakage_report": {
+    "actor_cross_split": [
+      "actor_001",
+      "actor_002"
+    ],
+    "object_cross_split": "recorded_not_blocking_fixture",
+    "paired_control_cross_split": "accepted_for_fixture_smoke_only",
+    "scenario_run_overlap": false
+  },
+  "relaxations": [
+    "fixture_smoke_only: actor/object leakage is recorded rather than blocked because the checked-in sample is intentionally tiny"
+  ],
+  "seed": 20260525,
+  "source_window_file": "data/public_sample/derived/windows_actor_15m.csv",
+  "split_strategy": "scenario_run_grouped_round_robin_fixture",
+  "splits": {
+    "test": {
+      "label_counts": {
+        "0": 1,
+        "1": 1
+      },
+      "row_count": 2
+    },
+    "train": {
+      "label_counts": {
+        "0": 2,
+        "1": 1
+      },
+      "row_count": 3
+    },
+    "validate": {
+      "label_counts": {
+        "0": 1,
+        "1": 1
+      },
+      "row_count": 2
+    }
+  }
+}

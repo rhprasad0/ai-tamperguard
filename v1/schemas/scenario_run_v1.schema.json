@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actor_id": {
+      "pattern": "^actor_[0-9]{3}$",
+      "type": "string"
+    },
+    "environment_id": {
+      "pattern": "^environment_[0-9]{3}$",
+      "type": "string"
+    },
+    "ground_truth_family": {
+      "enum": [
+        "benign_admin",
+        "benign_investigation",
+        "benign_visibility_change",
+        "benign_alert_tuning",
+        "suspicious_recon",
+        "permission_probe",
+        "evidence_laundering",
+        "alert_suppression",
+        "logging_degradation",
+        "input_or_token_tamper",
+        "role_or_capability_tamper",
+        "routing_or_transform_tamper",
+        "lookup_or_report_overwrite",
+        "report_alibi_generation",
+        "failed_tamper_attempt",
+        "successful_synthetic_tamper",
+        "background_unlabeled"
+      ],
+      "type": "string"
+    },
+    "outcome": {
+      "enum": [
+        "benign",
+        "attempted",
+        "blocked",
+        "failed",
+        "successful_synthetic",
+        "needs_review"
+      ],
+      "type": "string"
+    },
+    "paired_control_run_id": {
+      "pattern": "^scenario_[0-9]{3}_run_[0-9]{3}$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_eligibility": {
+      "enum": [
+        "fixture_smoke_only",
+        "release_candidate"
+      ],
+      "type": "string"
+    },
+    "reset_id": {
+      "pattern": "^reset_[0-9]{3}$",
+      "type": "string"
+    },
+    "run_end_relative_sec": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "run_start_relative_sec": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "scenario_id": {
+      "pattern": "^scenario_[0-9]{3}$",
+      "type": "string"
+    },
+    "scenario_run_id": {
+      "pattern": "^scenario_[0-9]{3}_run_[0-9]{3}$",
+      "type": "string"
+    },
+    "source_derivation": {
+      "enum": [
+        "live_lab_public_redacted",
+        "synthetic_control_plane_fixture"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "scenario_run_id",
+    "scenario_id",
+    "run_start_relative_sec",
+    "run_end_relative_sec",
+    "actor_id",
+    "environment_id",
+    "outcome",
+    "ground_truth_family",
+    "paired_control_run_id",
+    "reset_id",
+    "release_eligibility",
+    "source_derivation"
+  ],
+  "title": "scenario_run_v1",
+  "type": "object"
+}

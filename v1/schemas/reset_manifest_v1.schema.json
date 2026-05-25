@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "preserved_evidence_surfaces": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "public_summary": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "relative_time_sec": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "reset_id": {
+      "pattern": "^reset_[0-9]{3}$",
+      "type": "string"
+    },
+    "sacrificial_artifact_ids": {
+      "items": {
+        "pattern": "^object_[0-9]{6}$",
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "scenario_id": {
+      "pattern": "^scenario_[0-9]{3}$",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "success",
+        "failure",
+        "partial"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "reset_id",
+    "scenario_id",
+    "status",
+    "relative_time_sec",
+    "sacrificial_artifact_ids",
+    "preserved_evidence_surfaces",
+    "public_summary"
+  ],
+  "title": "reset_manifest_v1",
+  "type": "object"
+}
