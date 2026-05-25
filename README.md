@@ -72,6 +72,8 @@ v0 is now organized as a self-contained milestone under [`v0/`](v0/). It proves 
 
 Start with [`v0/README.md`](v0/README.md), then see [`v0/docs/v0-model-pipeline-spec.md`](v0/docs/v0-model-pipeline-spec.md).
 
+For finished-corpus planning, see [`docs/finished-dataset-requirements.md`](docs/finished-dataset-requirements.md) and the v1 scenario library in [`docs/scenario-design.md`](docs/scenario-design.md).
+
 ## Safety note
 
 This project is about defending observability systems from tampering. It should not be used to attack real Splunk deployments, bypass monitoring in third-party environments, or publish operational abuse recipes.
