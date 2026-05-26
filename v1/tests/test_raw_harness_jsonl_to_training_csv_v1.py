@@ -235,6 +235,39 @@ def test_can_build_labels_from_private_run_manifest(tmp_path: Path) -> None:
     assert {row["label_binary"] for row in rows} == {"0", "1"}
 
 
+def test_can_build_training_csv_from_opaque_run_ids(tmp_path: Path) -> None:
+    batch = tmp_path / "data" / "raw_exports" / "batch_001"
+    run_id = "run_0123456789abcdef"
+    _write_jsonl(
+        batch / run_id / "public_safe_events.jsonl",
+        [
+            _event(
+                event_id="evt_000010001",
+                scenario_run_id=run_id,
+                scenario_id="scenario_010",
+                relative_time_sec=60,
+                action="search",
+                action_family="investigation",
+                object_type="index",
+                object_id="object_000900",
+                protected_evidence_seen=True,
+                evidence_chain_stage="search",
+            )
+        ],
+    )
+    run_manifest = tmp_path / "data" / "run_manifests" / "batch_001" / "scenario_runs.jsonl"
+    _write_jsonl(run_manifest, [{"scenario_run_id": run_id, "ground_truth_family": "evidence_laundering"}])
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
+
+    result = _run(tmp_path, "--input", str(batch), "--run-manifest", str(run_manifest), "--output", str(output))
+
+    assert result.returncode == 0, result.stderr
+    rows = _read_csv(output)
+    assert len(rows) == 1
+    assert rows[0]["scenario_run_id"] == run_id
+    assert rows[0]["label_family"] == "evidence_laundering"
+
+
 def test_allow_unlabeled_emits_background_labels_with_warning(tmp_path: Path) -> None:
     batch, _answer_key = _write_training_fixture(tmp_path)
     output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"

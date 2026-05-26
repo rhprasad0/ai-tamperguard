@@ -126,6 +126,14 @@ def test_scenario_run_and_answer_key_accept_opaque_nondeterministic_ids():
     answer_row['scenario_run_id'] = 'run_0123456789abcdef'
     Draft202012Validator(answer_schema).validate(answer_row)
 
+    event_schema = load_schema('normalized_event_v1.schema.json')
+    event_row = first_jsonl(SAMPLE/'normalized/events.jsonl')
+    event_row['scenario_run_id'] = 'run_0123456789abcdef'
+    event_row['scenario_id'] = 'scenario_006'
+    event_row['prompt_family'] = 'model_training_validation'
+    event_row['prompt_variant_id'] = 'model_training_validation_v1_a'
+    Draft202012Validator(event_schema).validate(event_row)
+
 
 def test_manifest_label_source_vocab_rejects_label_binary_policy_values():
     answer_schema = load_schema('answer_key_v1.schema.json')

@@ -1,0 +1,23 @@
+{
+  "artifact_ids": [
+    "report_efa776db084c1fbb"
+  ],
+  "attempt_index": 2,
+  "batch_id": "small_k3_harness_live42_20260526T180921Z",
+  "event_count": 1,
+  "event_ids": [
+    "evt_000023001"
+  ],
+  "prompt_family": "model_training_validation",
+  "prompt_pack_version": "nondet-v1-20260526",
+  "prompt_seed": 459752080788428823,
+  "prompt_variant_id": "model_training_validation_v1_a",
+  "public_release_ready": false,
+  "reset_id": "reset_8acef9c47925825c",
+  "scenario_id": "scenario_023",
+  "scenario_run_id": "run_68bedf5ad8badffa",
+  "seed_anchor_epoch": 1779819078,
+  "status": "seeded_splunk_hec",
+  "target_index": "openclaw_tamper_lab",
+  "write_status": "written"
+}

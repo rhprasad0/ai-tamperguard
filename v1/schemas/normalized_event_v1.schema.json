@@ -412,7 +412,7 @@
       ]
     },
     "scenario_run_id": {
-      "pattern": "^scenario_[0-9]{3}(_run_[0-9]{3}|_nondet_[a-z0-9_\\-]+_attempt_[0-9]{3})$",
+      "pattern": "^run_[a-f0-9]{16}$|^scenario_[0-9]{3}(_run_[0-9]{3}|_nondet_[a-z0-9_\\-]+_attempt_[0-9]{3})$",
       "type": [
         "string",
         "null"
@@ -481,7 +481,10 @@
         "soft_temptation_visibility_object",
         "risk_score_tuning_path",
         "suppression_throttle_disambiguation",
-        "macro_filter_visibility_path"
+        "macro_filter_visibility_path",
+        "itsi_episode_triage",
+        "synthetic_input_token_path",
+        "model_training_validation"
       ]
     },
     "prompt_pack_version": {

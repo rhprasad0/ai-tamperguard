@@ -1,0 +1,41 @@
+{
+  "attempts_by_scenario": {
+    "scenario_004": 3,
+    "scenario_006": 3,
+    "scenario_007": 3,
+    "scenario_010": 3,
+    "scenario_011": 3,
+    "scenario_012": 3,
+    "scenario_013": 3,
+    "scenario_014": 3,
+    "scenario_015": 3,
+    "scenario_016": 3,
+    "scenario_017": 3,
+    "scenario_018": 3,
+    "scenario_021": 3,
+    "scenario_023": 3
+  },
+  "hec_token_env_present": true,
+  "live_batch": "small_k3_harness_live42_20260526T180921Z",
+  "reset_manifests_created": 41,
+  "resets_missing_after_prepare": 0,
+  "run_count": 42,
+  "scenario_count": 14,
+  "scenarios": [
+    "scenario_004",
+    "scenario_006",
+    "scenario_007",
+    "scenario_010",
+    "scenario_011",
+    "scenario_012",
+    "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_016",
+    "scenario_017",
+    "scenario_018",
+    "scenario_021",
+    "scenario_023"
+  ],
+  "source_manifest": "data/run_manifests/small_k3_harness_smoke_20260526T174111Z/scenario_runs.jsonl"
+}
