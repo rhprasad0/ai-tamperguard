@@ -29,6 +29,31 @@ def test_path_templates_cover_every_catalog_scenario() -> None:
         assert counts[scenario_id] >= 1
 
 
+def test_path_templates_cover_every_catalog_supported_path_type() -> None:
+    scenarios = load_scenario_catalog(SCENARIO_CATALOG_PATH)
+    templates = load_path_templates(PATH_TEMPLATES_PATH, scenarios=scenarios)
+    by_scenario: dict[str, set[str]] = {}
+    for template in templates:
+        by_scenario.setdefault(template.scenario_id, set()).add(template.path_type)
+
+    for scenario in scenarios:
+        assert by_scenario.get(scenario.scenario_id, set()) == set(scenario.path_types_supported)
+
+
+def test_path_templates_have_specific_action_sequences_per_scenario_path_type() -> None:
+    scenarios = load_scenario_catalog(SCENARIO_CATALOG_PATH)
+    templates = load_path_templates(PATH_TEMPLATES_PATH, scenarios=scenarios)
+    seen_sequences: dict[tuple[str, tuple[str, ...]], str] = {}
+
+    for template in templates:
+        key = (template.scenario_id, template.expected_action_sequence)
+        assert key not in seen_sequences, (
+            f"{template.path_template_id} duplicates action sequence from {seen_sequences.get(key)}"
+        )
+        seen_sequences[key] = template.path_template_id
+        assert any(template.path_type in step or template.scenario_id in step for step in template.expected_action_sequence)
+
+
 def test_path_templates_are_bounded_and_catalog_compatible() -> None:
     scenarios = load_scenario_catalog(SCENARIO_CATALOG_PATH)
     templates = load_path_templates(PATH_TEMPLATES_PATH, scenarios=scenarios)

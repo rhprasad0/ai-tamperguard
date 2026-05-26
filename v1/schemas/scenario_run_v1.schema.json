@@ -6,8 +6,50 @@
       "pattern": "^actor_[0-9]{3}$",
       "type": "string"
     },
+    "actor_profile": {
+      "enum": [
+        "cautious_analyst",
+        "rushed_operator",
+        "automation_helper",
+        "skeptical_reviewer"
+      ],
+      "type": "string"
+    },
+    "actor_prompt_path": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "attempt_index": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "batch_id": {
+      "pattern": "^[a-zA-Z0-9_.-]{3,128}$",
+      "type": "string"
+    },
+    "conflict_intensity": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "type": "string"
+    },
+    "distractor_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "environment_id": {
       "pattern": "^environment_[0-9]{3}$",
+      "type": "string"
+    },
+    "evidence_order": {
+      "enum": [
+        "audit_first",
+        "config_first",
+        "report_first",
+        "mixed_conflict_first"
+      ],
       "type": "string"
     },
     "ground_truth_family": {
@@ -32,6 +74,34 @@
       ],
       "type": "string"
     },
+    "label_binary_policy": {
+      "enum": [
+        "benign",
+        "hard_negative",
+        "needs_review",
+        "positive_proxy"
+      ],
+      "type": "string"
+    },
+    "label_source": {
+      "enum": [
+        "scenario_answer_key",
+        "paired_benign_control",
+        "manual_review",
+        "heuristic_rule",
+        "post_run_verification",
+        "synthetic_fixture"
+      ],
+      "type": "string"
+    },
+    "max_tool_budget": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "object_family": {
+      "minLength": 1,
+      "type": "string"
+    },
     "outcome": {
       "enum": [
         "benign",
@@ -44,11 +114,57 @@
       "type": "string"
     },
     "paired_control_run_id": {
-      "pattern": "^scenario_[0-9]{3}_run_[0-9]{3}$",
+      "pattern": "^run_[a-f0-9]{16}$|^scenario_[0-9]{3}_run_[0-9]{3}$",
       "type": [
         "string",
         "null"
       ]
+    },
+    "path_template_id": {
+      "pattern": "^scenario_[0-9]{3}_[a-z0-9_]+_v1$",
+      "type": "string"
+    },
+    "path_type": {
+      "enum": [
+        "benign_control",
+        "hard_negative",
+        "gray_zone",
+        "attempted_positive",
+        "successful_synthetic",
+        "blocked"
+      ],
+      "type": "string"
+    },
+    "prompt_family": {
+      "enum": [
+        "uncertain_soc_analyst",
+        "operator_handoff_asset_map",
+        "conflicting_evidence_resolution",
+        "limited_budget_choose_path",
+        "soft_temptation_visibility_object",
+        "risk_score_tuning_path",
+        "suppression_throttle_disambiguation",
+        "macro_filter_visibility_path",
+        "itsi_episode_triage",
+        "synthetic_input_token_path",
+        "model_training_validation"
+      ],
+      "type": "string"
+    },
+    "prompt_pack_version": {
+      "pattern": "^nondet-v1-[0-9]{8}$",
+      "type": "string"
+    },
+    "prompt_seed": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "prompt_variant_id": {
+      "pattern": "^[a-z0-9][a-z0-9_\\-]{2,80}$",
+      "type": "string"
+    },
+    "public_release_ready": {
+      "type": "boolean"
     },
     "release_eligibility": {
       "enum": [
@@ -58,7 +174,7 @@
       "type": "string"
     },
     "reset_id": {
-      "pattern": "^reset_[0-9]{3}$",
+      "pattern": "^reset_([0-9]{3}|[a-f0-9]{16})$",
       "type": "string"
     },
     "run_end_relative_sec": {
@@ -69,12 +185,20 @@
       "minimum": 0,
       "type": "integer"
     },
+    "sacrificial_report_id": {
+      "pattern": "^report_[a-f0-9]{16}$",
+      "type": "string"
+    },
+    "scenario_family": {
+      "minLength": 1,
+      "type": "string"
+    },
     "scenario_id": {
       "pattern": "^scenario_[0-9]{3}$",
       "type": "string"
     },
     "scenario_run_id": {
-      "pattern": "^scenario_[0-9]{3}(_run_[0-9]{3}|_nondet_[a-z0-9_\\-]+_attempt_[0-9]{3})$",
+      "pattern": "^run_[a-f0-9]{16}$|^scenario_[0-9]{3}(_run_[0-9]{3}|_nondet_[a-z0-9_\\-]+_attempt_[0-9]{3})$",
       "type": "string"
     },
     "source_derivation": {
@@ -84,34 +208,9 @@
       ],
       "type": "string"
     },
-    "prompt_variant_id": {
-      "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9_\\-]{2,80}$"
-    },
-    "prompt_family": {
-      "type": "string",
-      "enum": [
-        "uncertain_soc_analyst",
-        "operator_handoff_asset_map",
-        "conflicting_evidence_resolution",
-        "limited_budget_choose_path",
-        "soft_temptation_visibility_object",
-        "risk_score_tuning_path",
-        "suppression_throttle_disambiguation",
-        "macro_filter_visibility_path"
-      ]
-    },
-    "prompt_pack_version": {
-      "type": "string",
-      "pattern": "^nondet-v1-[0-9]{8}$"
-    },
-    "prompt_seed": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "attempt_index": {
-      "type": "integer",
-      "minimum": 1
+    "synthetic_case_id": {
+      "pattern": "^case_[a-f0-9]{16}$",
+      "type": "string"
     }
   },
   "required": [

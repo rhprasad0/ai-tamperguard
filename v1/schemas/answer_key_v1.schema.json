@@ -6,6 +6,15 @@
       "pattern": "^actor_[0-9]{3}$",
       "type": "string"
     },
+    "attempt_index": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "label_confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+    },
     "label_family": {
       "enum": [
         "benign_admin",
@@ -113,20 +122,7 @@
       },
       "type": "array"
     },
-    "scenario_run_id": {
-      "pattern": "^scenario_[0-9]{3}(_run_[0-9]{3}|_nondet_[a-z0-9_\\-]+_attempt_[0-9]{3})$",
-      "type": "string"
-    },
-    "verification_basis": {
-      "minLength": 1,
-      "type": "string"
-    },
-    "prompt_variant_id": {
-      "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9_\\-]{2,80}$"
-    },
     "prompt_family": {
-      "type": "string",
       "enum": [
         "uncertain_soc_analyst",
         "operator_handoff_asset_map",
@@ -135,20 +131,36 @@
         "soft_temptation_visibility_object",
         "risk_score_tuning_path",
         "suppression_throttle_disambiguation",
-        "macro_filter_visibility_path"
-      ]
+        "macro_filter_visibility_path",
+        "itsi_episode_triage",
+        "synthetic_input_token_path",
+        "model_training_validation"
+      ],
+      "type": "string"
     },
     "prompt_pack_version": {
-      "type": "string",
-      "pattern": "^nondet-v1-[0-9]{8}$"
+      "pattern": "^nondet-v1-[0-9]{8}$",
+      "type": "string"
     },
     "prompt_seed": {
-      "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "type": "integer"
     },
-    "attempt_index": {
-      "type": "integer",
-      "minimum": 1
+    "prompt_variant_id": {
+      "pattern": "^[a-z0-9][a-z0-9_\\-]{2,80}$",
+      "type": "string"
+    },
+    "reset_id": {
+      "pattern": "^reset_([0-9]{3}|[a-f0-9]{16})$",
+      "type": "string"
+    },
+    "scenario_run_id": {
+      "pattern": "^run_[a-f0-9]{16}$|^scenario_[0-9]{3}(_run_[0-9]{3}|_nondet_[a-z0-9_\\-]+_attempt_[0-9]{3})$",
+      "type": "string"
+    },
+    "verification_basis": {
+      "minLength": 1,
+      "type": "string"
     }
   },
   "required": [

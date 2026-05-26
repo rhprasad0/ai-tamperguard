@@ -22,6 +22,10 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_audit_config_change_seen_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_broad_to_narrow_count": {
       "minimum": 0,
       "type": "integer"
@@ -54,6 +58,10 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_disk_change_gap_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_distinct_object_type_count": {
       "minimum": 0,
       "type": "integer"
@@ -63,6 +71,10 @@
       "type": "integer"
     },
     "feature_downstream_contradiction_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_downstream_mismatch_after_visibility_change_flag": {
       "minimum": 0,
       "type": "integer"
     },
@@ -86,6 +98,14 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_evidence_to_macro_filter_sequence_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_evidence_to_risk_tuning_sequence_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_global_visibility_object_write_count": {
       "minimum": 0,
       "type": "integer"
@@ -102,11 +122,31 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_intermediate_finding_review_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_large_change_count": {
       "minimum": 0,
       "type": "integer"
     },
+    "feature_lookup_filter_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_macro_filter_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_modify_then_requery_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_notable_hidden_after_creation_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_notable_not_created_count": {
       "minimum": 0,
       "type": "integer"
     },
@@ -126,6 +166,10 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_protected_evidence_agreement_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_protected_evidence_seen_count": {
       "minimum": 0,
       "type": "integer"
@@ -135,6 +179,18 @@
       "type": "integer"
     },
     "feature_report_write_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_requery_after_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_risk_context_review_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_risk_score_tuning_count": {
       "minimum": 0,
       "type": "integer"
     },
@@ -162,6 +218,22 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_suppression_after_creation_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_suppression_or_throttle_present": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_suppression_vs_throttle_disambiguated_flag": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_throttle_before_creation_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_visibility_decrease_count": {
       "minimum": 0,
       "type": "integer"
@@ -180,6 +252,11 @@
         1
       ],
       "type": "integer"
+    },
+    "label_confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
     },
     "label_family": {
       "enum": [
@@ -215,6 +292,22 @@
       ],
       "type": "string"
     },
+    "outcome": {
+      "enum": [
+        "benign",
+        "attempted",
+        "blocked",
+        "failed",
+        "successful_synthetic",
+        "needs_review",
+        "background_unlabeled"
+      ],
+      "type": "string"
+    },
+    "reset_id": {
+      "pattern": "^reset_([0-9]{3}|[a-f0-9]{16})$",
+      "type": "string"
+    },
     "scenario_run_id": {
       "type": "string"
     },
@@ -234,77 +327,13 @@
       "minimum": 0,
       "type": "integer"
     },
-    "feature_risk_context_review_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_intermediate_finding_review_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_suppression_after_creation_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_throttle_before_creation_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_suppression_or_throttle_present": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_notable_hidden_after_creation_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_notable_not_created_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_risk_score_tuning_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_macro_filter_change_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_lookup_filter_change_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_requery_after_change_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_audit_config_change_seen_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_disk_change_gap_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_evidence_to_risk_tuning_sequence_flag": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_evidence_to_macro_filter_sequence_flag": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_suppression_vs_throttle_disambiguated_flag": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_protected_evidence_agreement_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "feature_downstream_mismatch_after_visibility_change_flag": {
-      "type": "integer",
-      "minimum": 0
+    "window_type": {
+      "enum": [
+        "actor_300s",
+        "actor_15m",
+        "actor_3600s"
+      ],
+      "type": "string"
     }
   },
   "required": [
@@ -317,7 +346,11 @@
     "label_binary",
     "label_family",
     "label_source",
-    "split_id"
+    "split_id",
+    "reset_id",
+    "window_type",
+    "label_confidence",
+    "outcome"
   ],
   "title": "behavior_window_v1",
   "type": "object"

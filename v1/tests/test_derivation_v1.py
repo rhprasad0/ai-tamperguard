@@ -20,6 +20,47 @@ def test_windows_include_positive_and_negative_labels():
     assert all(any(key.startswith('feature_') for key in row) for row in rows)
 
 
+def test_published_windows_use_explicit_allowlist_and_exclude_harness_metadata():
+    rows = derive_windows(read_jsonl(SAMPLE/'normalized/events.jsonl'), read_jsonl(SAMPLE/'scenarios/answer_key_public_redacted.jsonl'), size_sec=900)
+    fixed_allowed = {
+        'window_id',
+        'scenario_run_id',
+        'reset_id',
+        'actor_id',
+        'window_type',
+        'window_start_relative_sec',
+        'window_end_relative_sec',
+        'label_binary',
+        'label_family',
+        'label_source',
+        'label_confidence',
+        'outcome',
+        'split_id',
+    }
+    forbidden = {
+        'synthetic_case_id',
+        'sacrificial_report_id',
+        'path_template_id',
+        'path_type',
+        'ground_truth_family',
+        'prompt_variant_id',
+        'attempt_index',
+        'actor_profile',
+        'evidence_order',
+        'conflict_intensity',
+        'distractor_count',
+        'object_family',
+        'batch_id',
+        'prompt_seed',
+    }
+
+    for row in rows:
+        assert forbidden.isdisjoint(row)
+        assert fixed_allowed <= set(row)
+        assert all(key in fixed_allowed or key.startswith('feature_') for key in row)
+        assert all(isinstance(value, (int, float, bool)) for key, value in row.items() if key.startswith('feature_'))
+
+
 def test_enriched_soc_features_are_derived_from_event_context():
     events = [
         {

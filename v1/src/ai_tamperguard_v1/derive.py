@@ -39,7 +39,9 @@ def derive_windows(events: list[dict[str, Any]], answer_key: list[dict[str, Any]
         row = {
             "window_id": f"window_{size_sec}_{index:06d}",
             "scenario_run_id": run_id,
+            "reset_id": answer.get("reset_id", "reset_000"),
             "actor_id": actor,
+            "window_type": "actor_15m" if size_sec == 900 else f"actor_{size_sec}s",
             "window_start_relative_sec": bucket * size_sec,
             "window_end_relative_sec": (bucket + 1) * size_sec,
             "feature_event_count": len(bucket_events),
@@ -105,6 +107,8 @@ def derive_windows(events: list[dict[str, Any]], answer_key: list[dict[str, Any]
             "label_binary": label,
             "label_family": family,
             "label_source": answer.get("label_source", "background_unlabeled"),
+            "label_confidence": float(answer.get("label_confidence", 1.0 if answer else 0.0)),
+            "outcome": answer.get("outcome", "background_unlabeled"),
             "split_id": "unassigned",
         }
         rows.append(row)

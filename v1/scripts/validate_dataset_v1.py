@@ -55,6 +55,8 @@ def validate_windows(schema_dir: Path, path: Path) -> list[str]:
         for k,v in row.items():
             if k.startswith('feature_') or k in {'window_start_relative_sec','window_end_relative_sec','label_binary'}:
                 converted[k]=int(v)
+            elif k in {'label_confidence'}:
+                converted[k]=float(v)
             else:
                 converted[k]=v
         labels.add(converted['label_binary'])
@@ -132,7 +134,8 @@ def main() -> int:
         errors += validate_jsonl(schema_dir,'answer_key',sample/'scenarios/answer_key_public_redacted.jsonl')
         errors += validate_jsonl(schema_dir,'episodes',sample/'derived/episodes.jsonl')
         errors += validate_jsonl(schema_dir,'edges',sample/'derived/actor_object_edges.jsonl')
-        errors += validate_windows(schema_dir, sample/'derived/windows_actor_15m.csv')
+        for window_name in ['windows_actor_5m.csv', 'windows_actor_15m.csv', 'windows_actor_60m.csv']:
+            errors += validate_windows(schema_dir, sample/'derived'/window_name)
         errors += validate_relationships(sample)
         errors += validate_splits(schema_dir, sample)
         safety=scan_paths([str(sample),'docs','schemas','scenarios'])

@@ -112,17 +112,50 @@ def test_normalized_event_accepts_splunk_attack_pattern_macro_filter_metadata():
     Draft202012Validator(schema).validate(row)
 
 
-def test_scenario_run_and_answer_key_accept_nondeterministic_prompt_pack_ids():
+def test_scenario_run_and_answer_key_accept_opaque_nondeterministic_ids():
     run_schema = load_schema('scenario_run_v1.schema.json')
     run_row = first_jsonl(SAMPLE/'scenarios/scenario_runs.jsonl')
-    run_row['scenario_run_id'] = 'scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001'
+    run_row['scenario_run_id'] = 'run_0123456789abcdef'
     run_row['scenario_id'] = 'scenario_006'
+    run_row['reset_id'] = 'reset_0123456789abcdef'
+    run_row['paired_control_run_id'] = None
     Draft202012Validator(run_schema).validate(run_row)
 
     answer_schema = load_schema('answer_key_v1.schema.json')
     answer_row = first_jsonl(SAMPLE/'scenarios/answer_key_public_redacted.jsonl')
-    answer_row['scenario_run_id'] = 'scenario_006_nondet_operator_handoff_asset_map_v1_a_attempt_001'
+    answer_row['scenario_run_id'] = 'run_0123456789abcdef'
     Draft202012Validator(answer_schema).validate(answer_row)
+
+
+def test_manifest_label_source_vocab_rejects_label_binary_policy_values():
+    answer_schema = load_schema('answer_key_v1.schema.json')
+    answer_row = first_jsonl(SAMPLE/'scenarios/answer_key_public_redacted.jsonl')
+    for bad_source in {'benign', 'positive_proxy', 'needs_review', 'hard_negative'}:
+        answer_row['label_source'] = bad_source
+        with pytest.raises(ValidationError):
+            Draft202012Validator(answer_schema).validate(answer_row)
+
+
+def test_behavior_window_schema_rejects_non_numeric_feature_values():
+    schema = load_schema('behavior_window_v1.schema.json')
+    row = first_jsonl(SAMPLE/'derived/windows_actor_15m.csv') if False else {
+        'window_id': 'window_900_000001',
+        'scenario_run_id': 'run_0123456789abcdef',
+        'reset_id': 'reset_0123456789abcdef',
+        'actor_id': 'actor_001',
+        'window_type': 'actor_15m',
+        'window_start_relative_sec': 0,
+        'window_end_relative_sec': 900,
+        'feature_event_count': 'five',
+        'label_binary': 0,
+        'label_family': 'benign_investigation',
+        'label_source': 'scenario_answer_key',
+        'label_confidence': 0.8,
+        'outcome': 'benign',
+        'split_id': 'unassigned',
+    }
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(row)
 
 
 def test_normalized_event_rejects_private_raw_metadata_fields():
