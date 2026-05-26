@@ -238,3 +238,12 @@ def test_scenario_catalog_ids_are_unique_and_schema_valid():
     validator = Draft202012Validator(schema)
     for row in rows:
         validator.validate(row)
+
+
+def test_canonical_scenario_catalog_schema_accepts_expanded_v1_rows():
+    schema = load_schema('scenario_catalog_v1.schema.json')
+    rows = all_jsonl(Path(__file__).resolve().parents[1] / 'scenarios/scenario_catalog_v1.jsonl')
+    assert len(rows) == 28
+    validator = Draft202012Validator(schema)
+    for row in rows:
+        validator.validate(row)

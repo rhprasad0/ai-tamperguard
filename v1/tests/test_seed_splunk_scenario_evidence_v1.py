@@ -136,6 +136,27 @@ def test_seed_propagates_prompt_metadata_for_scenario_006(tmp_path: Path) -> Non
     assert manifest["event_count"] >= 5
 
 
+def test_seed_accepts_path_type_and_outcome_for_path_aware_events(tmp_path: Path) -> None:
+    cfg, inventory = _files(tmp_path, scenario="scenario_010", reset_id="reset_010_001")
+    output = tmp_path / "data" / "seed_manifests" / "batch_001" / "scenario_010.json"
+    result = _run(
+        tmp_path,
+        cfg,
+        inventory,
+        scenario="scenario_010",
+        scenario_run_id="scenario_010_run_001",
+        reset_id="reset_010_001",
+        output=output,
+        extra_args=["--path-type", "benign_control", "--outcome", "benign"],
+    )
+
+    assert result.returncode == 0, result.stderr
+    manifest = json.loads(output.read_text(encoding="utf-8"))
+    assert manifest["path_type"] == "benign_control"
+    assert manifest["outcome"] == "benign"
+    assert manifest["event_count"] >= 2
+
+
 def test_seed_accepts_opaque_batch_run_id_when_explicit_scenario_and_reset_match(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path, scenario="scenario_010", reset_id="reset_010_001")
     output = tmp_path / "data" / "seed_manifests" / "batch_001" / "run_14d6d7ddddeaf764.json"

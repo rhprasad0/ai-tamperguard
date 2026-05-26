@@ -5,6 +5,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+from ai_tamperguard_v1.scenario_catalog import SCENARIO_CATALOG_PATH, load_scenario_catalog
 from ai_tamperguard_v1.scenario_events import public_safe_scenario_events, scenario_actor_id, scenario_id_from_run
 
 FORBIDDEN = {"private_name", "host", "user", "url", "token", "_raw"}
@@ -176,3 +177,26 @@ def test_attack_pattern_events_validate_against_schema() -> None:
     for scenario_id in ("scenario_011", "scenario_012", "scenario_014", "scenario_015", "scenario_017", "scenario_018"):
         for event in _events_for(scenario_id):
             validator.validate(event)
+
+
+def test_every_canonical_scenario_path_emits_non_placeholder_public_safe_sequence() -> None:
+    validator = Draft202012Validator(SCHEMA)
+    for scenario in load_scenario_catalog(SCENARIO_CATALOG_PATH):
+        for path_type in scenario.path_types_supported:
+            events = public_safe_scenario_events(
+                scenario_id=scenario.scenario_id,
+                scenario_run_id=f"{scenario.scenario_id}_run_001",
+                artifact_ids=("object_000010",),
+                path_type=path_type,
+            )
+            assert len(events) >= 2, (scenario.scenario_id, path_type)
+            assert {event["redaction_level"] for event in events} == {"public_safe"}
+            assert all(event["source_derivation"] == "live_lab_public_redacted" for event in events)
+            assert any(event["evidence_chain_stage"] != "unknown" for event in events)
+            assert len({(event["action"], event["object_type"]) for event in events}) >= 2
+            if path_type == "successful_synthetic":
+                assert any(event["visibility_delta"] == "decrease" for event in events)
+            if path_type == "blocked":
+                assert any(event["status"] in {"blocked", "denied"} for event in events)
+            for event in events:
+                validator.validate(event)

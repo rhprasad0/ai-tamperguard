@@ -35,7 +35,7 @@ def _mutual_information(left: list[str], right: list[str]) -> float:
     )
 
 
-def _run_generator(tmp_path: Path) -> list[dict[str, Any]]:
+def _run_generator(tmp_path: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     batch_id = "pytest_label_recovery_probe"
     result = subprocess.run(
         [
@@ -63,12 +63,15 @@ def _run_generator(tmp_path: Path) -> list[dict[str, Any]]:
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    manifest = tmp_path / "data" / "run_manifests" / batch_id / "scenario_runs.jsonl"
-    return [json.loads(line) for line in manifest.read_text(encoding="utf-8").splitlines()]
+    manifest_dir = tmp_path / "data" / "run_manifests" / batch_id
+    manifest = manifest_dir / "scenario_runs.jsonl"
+    coverage = json.loads((manifest_dir / "coverage_summary.json").read_text(encoding="utf-8"))
+    return [json.loads(line) for line in manifest.read_text(encoding="utf-8").splitlines()], coverage
 
 
 def test_variation_metadata_cannot_recover_label_by_itself(tmp_path: Path) -> None:
-    rows = _run_generator(tmp_path)
+    rows, coverage = _run_generator(tmp_path)
+    assert coverage["leakage_check"] == "pass"
     labels = ["1" if row["label_binary_policy"] in POSITIVE_POLICIES else "0" for row in rows]
     label_entropy = _entropy(labels)
     metadata_axes = [
@@ -103,3 +106,23 @@ def test_variation_metadata_cannot_recover_label_by_itself(tmp_path: Path) -> No
             actual = "1" if row["label_binary_policy"] in POSITIVE_POLICIES else "0"
             correct += int(predicted == actual)
         assert (correct / len(test)) <= global_accuracy + 0.02, axis
+
+
+def test_variation_metadata_cannot_recover_path_type_by_itself(tmp_path: Path) -> None:
+    rows, coverage = _run_generator(tmp_path)
+    assert coverage["leakage_check"] == "pass"
+    path_types = [str(row["path_type"]) for row in rows]
+    scenario_ids = [str(row["scenario_id"]) for row in rows]
+    metadata_axes = [
+        "actor_profile",
+        "evidence_order",
+        "conflict_intensity",
+        "distractor_count",
+        "object_family",
+    ]
+
+    for target_values in (path_types, scenario_ids):
+        target_entropy = _entropy(target_values)
+        for axis in metadata_axes:
+            axis_values = [str(row[axis]) for row in rows]
+            assert _mutual_information(target_values, axis_values) < 0.1 * target_entropy, axis

@@ -11,6 +11,7 @@ from ai_tamperguard_v1.prompt_pack import (
     load_prompt_pack,
     prompt_variant_by_id,
 )
+from ai_tamperguard_v1.scenario_catalog import SCENARIO_CATALOG_PATH, load_scenario_catalog
 
 STARTER_FAMILIES = {
     "uncertain_soc_analyst",
@@ -21,6 +22,9 @@ STARTER_FAMILIES = {
     "risk_score_tuning_path",
     "suppression_throttle_disambiguation",
     "macro_filter_visibility_path",
+    "itsi_episode_triage",
+    "synthetic_input_token_path",
+    "model_training_validation",
 }
 
 FORBIDDEN_TEMPLATE_PATTERNS = {
@@ -127,9 +131,28 @@ def test_prompt_pack_covers_attack_pattern_scenarios() -> None:
 
 
 def test_prompt_pack_covers_every_catalog_scenario() -> None:
-    from ai_tamperguard_v1.scenario_catalog import SCENARIO_CATALOG_PATH, load_scenario_catalog, scenario_ids
-
     variants = load_prompt_pack(PROMPT_PACK_PATH)
     covered = {scenario_id for variant in variants for scenario_id in variant.allowed_scenario_ids}
 
-    assert scenario_ids(load_scenario_catalog(SCENARIO_CATALOG_PATH)) <= covered
+    assert {scenario.scenario_id for scenario in load_scenario_catalog(SCENARIO_CATALOG_PATH)} <= covered
+
+
+def test_prompt_pack_meets_catalog_minimum_prompt_family_counts() -> None:
+    variants = load_prompt_pack(PROMPT_PACK_PATH)
+    by_scenario: dict[str, set[str]] = {}
+    for variant in variants:
+        for scenario_id in variant.allowed_scenario_ids:
+            by_scenario.setdefault(scenario_id, set()).add(variant.prompt_family)
+
+    for scenario in load_scenario_catalog(SCENARIO_CATALOG_PATH):
+        families = by_scenario.get(scenario.scenario_id, set())
+        assert len(families) >= scenario.minimum_prompt_families, (scenario.scenario_id, families)
+
+
+def test_prompt_pack_reuses_families_across_labels_to_reduce_prompt_proxy_risk() -> None:
+    variants = load_prompt_pack(PROMPT_PACK_PATH)
+    scenarios_by_id = {scenario.scenario_id: scenario for scenario in load_scenario_catalog(SCENARIO_CATALOG_PATH)}
+
+    for variant in variants:
+        families = {scenarios_by_id[scenario_id].family for scenario_id in variant.allowed_scenario_ids}
+        assert len(families) >= 2 or len(variant.allowed_scenario_ids) >= 2, variant.prompt_variant_id

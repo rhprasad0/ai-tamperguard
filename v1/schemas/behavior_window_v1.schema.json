@@ -134,7 +134,19 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_lookup_interpretation_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_macro_filter_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_model_artifact_touch_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_model_validation_report_count": {
       "minimum": 0,
       "type": "integer"
     },
@@ -194,6 +206,14 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_playbook_action_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_response_plan_update_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_saved_search_modify_count": {
       "minimum": 0,
       "type": "integer"
@@ -230,7 +250,19 @@
       "minimum": 0,
       "type": "integer"
     },
+    "feature_synthetic_input_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_transform_route_change_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
     "feature_throttle_before_creation_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "feature_unsafe_spl_corrected_flag": {
       "minimum": 0,
       "type": "integer"
     },

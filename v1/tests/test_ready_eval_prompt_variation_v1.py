@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from ai_tamperguard_v1.nondeterminism_goal import trajectory_signature
+from ai_tamperguard_v1.prompt_pack import PROMPT_PACK_PATH, load_prompt_pack
+from ai_tamperguard_v1.scenario_catalog import SCENARIO_CATALOG_PATH, load_scenario_catalog
 from ai_tamperguard_v1.scenario_events import public_safe_scenario_events
 
 
@@ -57,3 +59,17 @@ def test_ready_eval_variation_stays_public_safe_and_synthetic() -> None:
     assert {event["source_derivation"] for event in events} == {"live_lab_public_redacted"}
     assert all(event["scenario_id"] == "scenario_010" for event in events)
     assert all(event["prompt_family"] == "operator_handoff_asset_map" for event in events)
+
+
+def test_every_catalog_scenario_has_k3_public_safe_prompt_signatures() -> None:
+    variants = load_prompt_pack(PROMPT_PACK_PATH)
+    by_scenario: dict[str, list[str]] = {}
+    for variant in variants:
+        for scenario_id in variant.allowed_scenario_ids:
+            by_scenario.setdefault(scenario_id, []).append(variant.prompt_family)
+
+    for scenario in load_scenario_catalog(SCENARIO_CATALOG_PATH):
+        prompt_family = sorted(set(by_scenario[scenario.scenario_id]))[0]
+        signatures = _signatures_for(scenario.scenario_id, prompt_family)
+        assert signatures
+        assert all("private" not in signature.lower() for signature in signatures)

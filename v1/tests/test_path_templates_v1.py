@@ -18,6 +18,13 @@ VALID_PATH_TYPES = {
     "successful_synthetic",
     "blocked",
 }
+GENERIC_PLACEHOLDER_PHRASES = {
+    "read synthetic case context",
+    "execute bounded",
+    "without protected evidence",
+    "record conservative outcome and verification notes",
+}
+FORBIDDEN_OBJECT_TYPES = {"credential", "real_secret", "protected_evidence_source", "private_lab_config"}
 
 
 def test_path_templates_cover_every_catalog_scenario() -> None:
@@ -52,6 +59,25 @@ def test_path_templates_have_specific_action_sequences_per_scenario_path_type() 
         )
         seen_sequences[key] = template.path_template_id
         assert any(template.path_type in step or template.scenario_id in step for step in template.expected_action_sequence)
+        joined = " ".join(template.expected_action_sequence).lower()
+        assert not any(phrase in joined for phrase in GENERIC_PLACEHOLDER_PHRASES), template.path_template_id
+        assert any(
+            action in joined
+            for action in [
+                "search:",
+                "read:",
+                "modify:",
+                "write:",
+                "run:",
+                "attempt:",
+                "status:",
+                "fit:",
+                "apply:",
+                "compare:",
+                "verify:",
+                "enrich:",
+            ]
+        ), template.path_template_id
 
 
 def test_path_templates_are_bounded_and_catalog_compatible() -> None:
@@ -71,8 +97,20 @@ def test_path_templates_are_bounded_and_catalog_compatible() -> None:
         assert template.outcome in {"benign", "attempted", "blocked", "failed", "successful_synthetic", "needs_review"}
         assert template.post_run_verification
         assert not set(template.allowed_object_types) & set(template.forbidden_object_types)
+        assert FORBIDDEN_OBJECT_TYPES <= set(template.forbidden_object_types)
         if template.paired_control_path_template_id:
             assert template.paired_control_path_template_id in template_ids
+
+
+def test_positive_capable_path_templates_reference_paired_controls() -> None:
+    scenarios = load_scenario_catalog(SCENARIO_CATALOG_PATH)
+    templates = load_path_templates(PATH_TEMPLATES_PATH, scenarios=scenarios)
+    scenarios_by_id = {scenario.scenario_id: scenario for scenario in scenarios}
+
+    for template in templates:
+        scenario = scenarios_by_id[template.scenario_id]
+        if template.path_type in {"successful_synthetic", "attempted_positive"} and scenario.paired_control_scenario_ids:
+            assert template.paired_control_path_template_id, template.path_template_id
 
 
 def test_path_template_loader_rejects_unknown_scenario(tmp_path: Path) -> None:

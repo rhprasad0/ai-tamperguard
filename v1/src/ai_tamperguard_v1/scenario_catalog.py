@@ -8,8 +8,10 @@ from typing import Any
 
 V1_ROOT = Path(__file__).resolve().parents[2]
 SCENARIO_CATALOG_PATH = V1_ROOT / "scenarios" / "scenario_catalog_v1.jsonl"
+SCENARIO_ALIASES_PATH = V1_ROOT / "scenarios" / "scenario_aliases_v1.jsonl"
 
 _SCENARIO_ID = re.compile(r"^scenario_\d{3}$")
+_SCENARIO_SLUG = re.compile(r"^[a-z0-9][a-z0-9_]{2,100}$")
 _ALLOWED_STATUSES = {"required_v1", "optional_v1", "future", "doc_only", "implemented"}
 
 
@@ -20,6 +22,7 @@ class ScenarioCatalogValidationError(ValueError):
 @dataclass(frozen=True)
 class ScenarioDefinition:
     scenario_id: str
+    scenario_slug: str
     name: str
     family: str
     canonical_status: str
@@ -45,6 +48,7 @@ class ScenarioDefinition:
             raise ScenarioCatalogValidationError(f"line {line_number}: missing fields: {sorted(missing)}")
         scenario = cls(
             scenario_id=_expect_str(row, "scenario_id", line_number),
+            scenario_slug=_expect_str(row, "scenario_slug", line_number),
             name=_expect_str(row, "name", line_number),
             family=_expect_str(row, "family", line_number),
             canonical_status=_expect_str(row, "canonical_status", line_number),
@@ -71,6 +75,7 @@ def load_scenario_catalog(path: Path | str = SCENARIO_CATALOG_PATH) -> list[Scen
     resolved = Path(path)
     scenarios: list[ScenarioDefinition] = []
     seen: set[str] = set()
+    seen_slugs: set[str] = set()
     with resolved.open(encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, 1):
             if not line.strip() or line.lstrip().startswith("#"):
@@ -81,10 +86,18 @@ def load_scenario_catalog(path: Path | str = SCENARIO_CATALOG_PATH) -> list[Scen
                 raise ScenarioCatalogValidationError(f"line {line_number}: invalid JSON: {exc.msg}") from exc
             if not isinstance(row, dict):
                 raise ScenarioCatalogValidationError(f"line {line_number}: expected object row")
+            raw_scenario_id = row.get("scenario_id")
+            if isinstance(raw_scenario_id, str) and raw_scenario_id in seen:
+                raise ScenarioCatalogValidationError(f"duplicate scenario_id: {raw_scenario_id}")
+            if "scenario_slug" not in row and isinstance(row.get("name"), str):
+                row = {**row, "scenario_slug": re.sub(r"[^a-z0-9]+", "_", row["name"].lower()).strip("_")}
             scenario = ScenarioDefinition.from_row(row, line_number=line_number)
             if scenario.scenario_id in seen:
                 raise ScenarioCatalogValidationError(f"duplicate scenario_id: {scenario.scenario_id}")
+            if scenario.scenario_slug in seen_slugs:
+                raise ScenarioCatalogValidationError(f"duplicate scenario_slug: {scenario.scenario_slug}")
             seen.add(scenario.scenario_id)
+            seen_slugs.add(scenario.scenario_slug)
             scenarios.append(scenario)
     if not scenarios:
         raise ScenarioCatalogValidationError("scenario catalog is empty")
@@ -96,6 +109,72 @@ def load_scenario_catalog(path: Path | str = SCENARIO_CATALOG_PATH) -> list[Scen
                 f"{scenario.scenario_id}: unknown paired_control_scenario_ids: {sorted(missing_pairs)}"
             )
     return scenarios
+
+
+@dataclass(frozen=True)
+class ScenarioAlias:
+    design_legacy_heading: str
+    canonical_scenario_id: str
+    scenario_slug: str
+    alias_reason: str
+
+    @classmethod
+    def from_row(cls, row: dict[str, Any], *, line_number: int) -> "ScenarioAlias":
+        missing = {"design_legacy_heading", "canonical_scenario_id", "scenario_slug", "alias_reason"} - set(row)
+        if missing:
+            raise ScenarioCatalogValidationError(f"line {line_number}: missing alias fields: {sorted(missing)}")
+        alias = cls(
+            design_legacy_heading=_expect_str(row, "design_legacy_heading", line_number),
+            canonical_scenario_id=_expect_str(row, "canonical_scenario_id", line_number),
+            scenario_slug=_expect_str(row, "scenario_slug", line_number),
+            alias_reason=_expect_str(row, "alias_reason", line_number),
+        )
+        if not _SCENARIO_ID.fullmatch(alias.canonical_scenario_id):
+            raise ScenarioCatalogValidationError(
+                f"line {line_number}: invalid canonical_scenario_id: {alias.canonical_scenario_id}"
+            )
+        if not _SCENARIO_SLUG.fullmatch(alias.scenario_slug):
+            raise ScenarioCatalogValidationError(f"line {line_number}: invalid scenario_slug: {alias.scenario_slug}")
+        return alias
+
+
+def load_scenario_aliases(
+    path: Path | str = SCENARIO_ALIASES_PATH,
+    *,
+    scenarios: list[ScenarioDefinition] | None = None,
+) -> list[ScenarioAlias]:
+    resolved = Path(path)
+    aliases: list[ScenarioAlias] = []
+    seen_headings: set[str] = set()
+    with resolved.open(encoding="utf-8") as handle:
+        for line_number, line in enumerate(handle, 1):
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ScenarioCatalogValidationError(f"line {line_number}: invalid JSON: {exc.msg}") from exc
+            if not isinstance(row, dict):
+                raise ScenarioCatalogValidationError(f"line {line_number}: expected alias object row")
+            alias = ScenarioAlias.from_row(row, line_number=line_number)
+            if alias.design_legacy_heading in seen_headings:
+                raise ScenarioCatalogValidationError(f"duplicate design_legacy_heading: {alias.design_legacy_heading}")
+            seen_headings.add(alias.design_legacy_heading)
+            aliases.append(alias)
+    if not aliases:
+        raise ScenarioCatalogValidationError("scenario alias map is empty")
+    catalog = scenarios if scenarios is not None else load_scenario_catalog(SCENARIO_CATALOG_PATH)
+    slugs_by_id = {scenario.scenario_id: scenario.scenario_slug for scenario in catalog}
+    for alias in aliases:
+        if alias.canonical_scenario_id not in slugs_by_id:
+            raise ScenarioCatalogValidationError(
+                f"{alias.design_legacy_heading}: unknown canonical_scenario_id: {alias.canonical_scenario_id}"
+            )
+        if slugs_by_id[alias.canonical_scenario_id] != alias.scenario_slug:
+            raise ScenarioCatalogValidationError(
+                f"{alias.design_legacy_heading}: scenario_slug does not match catalog row"
+            )
+    return aliases
 
 
 def scenario_ids(scenarios: list[ScenarioDefinition]) -> set[str]:
@@ -112,6 +191,7 @@ def scenario_by_id(path: Path | str, scenario_id: str) -> ScenarioDefinition:
 def _required_fields() -> set[str]:
     return {
         "scenario_id",
+        "scenario_slug",
         "name",
         "family",
         "canonical_status",
@@ -135,6 +215,8 @@ def _validate_scenario(scenario: ScenarioDefinition, *, line_number: int) -> Non
     prefix = f"line {line_number}: "
     if not _SCENARIO_ID.fullmatch(scenario.scenario_id):
         raise ScenarioCatalogValidationError(f"{prefix}invalid scenario_id: {scenario.scenario_id}")
+    if not _SCENARIO_SLUG.fullmatch(scenario.scenario_slug):
+        raise ScenarioCatalogValidationError(f"{prefix}invalid scenario_slug: {scenario.scenario_slug}")
     if scenario.canonical_status not in _ALLOWED_STATUSES:
         raise ScenarioCatalogValidationError(f"{prefix}unknown canonical_status: {scenario.canonical_status}")
     if scenario.minimum_prompt_families < 1:

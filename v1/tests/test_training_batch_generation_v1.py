@@ -19,16 +19,23 @@ SCRIPT = V1_ROOT / "scripts" / "generate_training_batch_v1.py"
 SCENARIO_CATALOG = V1_ROOT / "scenarios" / "scenario_catalog_v1.jsonl"
 PATH_TEMPLATES = V1_ROOT / "scenarios" / "path_templates_v1.jsonl"
 PROMPT_PACK = V1_ROOT / "scenarios" / "nondeterministic_prompt_pack_v1.jsonl"
+ALLOCATION_CONFIG = V1_ROOT / "config" / "v1_5k_all_scenarios.yaml"
 
 OPAQUE_RUN_ID = re.compile(r"^run_[a-f0-9]{16}$")
 OPAQUE_CASE_ID = re.compile(r"^case_[a-f0-9]{16}$")
 OPAQUE_REPORT_ID = re.compile(r"^report_[a-f0-9]{16}$")
 
 
-def _run_generator(tmp_path: Path, *, batch_id: str, target_runs: int = 84, seed: int = 260526) -> tuple[subprocess.CompletedProcess[str], Path]:
+def _run_generator(
+    tmp_path: Path,
+    *,
+    batch_id: str,
+    target_runs: int | None = 84,
+    seed: int = 260526,
+    allocation_config: Path | None = None,
+) -> tuple[subprocess.CompletedProcess[str], Path]:
     output_dir = Path("data") / "run_manifests" / batch_id
-    result = subprocess.run(
-        [
+    cmd = [
             sys.executable,
             str(SCRIPT),
             "--scenario-catalog",
@@ -39,14 +46,18 @@ def _run_generator(tmp_path: Path, *, batch_id: str, target_runs: int = 84, seed
             str(PROMPT_PACK),
             "--batch-id",
             batch_id,
-            "--target-runs",
-            str(target_runs),
             "--seed",
             str(seed),
             "--no-reset-required",
             "--output-dir",
             output_dir.as_posix(),
-        ],
+    ]
+    if target_runs is not None:
+        cmd.extend(["--target-runs", str(target_runs)])
+    if allocation_config is not None:
+        cmd.extend(["--allocation-config", str(allocation_config)])
+    result = subprocess.run(
+        cmd,
         cwd=tmp_path,
         text=True,
         capture_output=True,
@@ -101,7 +112,7 @@ def test_generate_training_batch_writes_all_scenario_dry_run_manifest(tmp_path: 
     assert "target_windows_max" not in coverage
     assert coverage["actor_prompt_count"] == target_runs
     assert coverage["all_catalog_scenarios_covered"] is True
-    assert coverage["scenario_count"] == 14
+    assert coverage["scenario_count"] == 28
     assert coverage["scenario_run_count"] == target_runs
     assert len(rows) == target_runs
     assert {row["scenario_id"] for row in rows} == set(coverage["scenario_ids"])
@@ -188,7 +199,7 @@ def test_scenario_run_ids_are_batch_bound(tmp_path: Path) -> None:
 
 
 def test_variation_axes_are_diverse_per_scenario_and_low_information(tmp_path: Path) -> None:
-    target_runs = 280
+    target_runs = 560
     result, output_dir = _run_generator(tmp_path, batch_id="pytest_variation_independence", target_runs=target_runs, seed=88)
     assert result.returncode == 0, result.stderr
     rows = _read_rows(output_dir)
@@ -269,3 +280,36 @@ def test_generator_rejects_removed_target_window_args(tmp_path: Path) -> None:
 
     assert result.returncode != 0
     assert "unrecognized arguments" in result.stderr
+
+
+def test_5k_all_scenarios_allocation_config_hits_bucket_counts(tmp_path: Path) -> None:
+    batch_id = "pytest_all_scenarios_5k"
+    result, output_dir = _run_generator(
+        tmp_path,
+        batch_id=batch_id,
+        target_runs=None,
+        seed=260526,
+        allocation_config=ALLOCATION_CONFIG,
+    )
+
+    assert result.returncode == 0, result.stderr
+    rows = _read_rows(output_dir)
+    coverage = json.loads((output_dir / "coverage_summary.json").read_text(encoding="utf-8"))
+
+    assert len(rows) == 5000
+    assert coverage["scenario_count"] == 28
+    assert coverage["all_catalog_scenarios_covered"] is True
+    assert coverage["allocation_config_path"].endswith("v1_5k_all_scenarios.yaml")
+    assert coverage["allocation_total"] == 5000
+    assert coverage["allocation_bucket_counts"] == {
+        "successful_synthetic": 950,
+        "attempted_positive": 625,
+        "blocked": 400,
+        "gray_zone": 425,
+        "paired_benign_controls": 1050,
+        "hard_negatives": 950,
+        "background_benign_admin": 600,
+    }
+    assert set(coverage["covered_scenario_ids"]) == {f"scenario_{idx:03d}" for idx in range(1, 29)}
+    assert sum(coverage["allocation_bucket_counts"].values()) == coverage["scenario_run_count"]
+    assert coverage["leakage_check"] == "pass"

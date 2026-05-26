@@ -134,7 +134,8 @@
         "macro_filter_visibility_path",
         "itsi_episode_triage",
         "synthetic_input_token_path",
-        "model_training_validation"
+        "model_training_validation",
+        "scenario_variation_matrix"
       ],
       "type": "string"
     },

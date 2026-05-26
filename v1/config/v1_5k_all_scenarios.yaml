@@ -1,0 +1,133 @@
+version: v1_5k_all_scenarios_20260526
+target_runs: 5000
+minimum_rows_per_scenario: 1
+leakage_check_required: pass
+buckets:
+- name: successful_synthetic
+  rows: 950
+  path_types:
+  - successful_synthetic
+  scenario_ids:
+  - scenario_010
+  - scenario_011
+  - scenario_012
+  - scenario_014
+  - scenario_015
+  - scenario_016
+  - scenario_017
+  - scenario_019
+  - scenario_021
+  - scenario_022
+  - scenario_023
+  - scenario_025
+  - scenario_027
+- name: attempted_positive
+  rows: 625
+  path_types:
+  - attempted_positive
+  scenario_ids:
+  - scenario_007
+  - scenario_010
+  - scenario_011
+  - scenario_012
+  - scenario_014
+  - scenario_015
+  - scenario_016
+  - scenario_017
+  - scenario_019
+  - scenario_020
+  - scenario_021
+  - scenario_022
+  - scenario_023
+  - scenario_025
+  - scenario_027
+- name: blocked
+  rows: 400
+  path_types:
+  - blocked
+  scenario_ids:
+  - scenario_006
+  - scenario_007
+  - scenario_020
+  - scenario_021
+  - scenario_022
+- name: gray_zone
+  rows: 425
+  path_types:
+  - gray_zone
+  scenario_ids:
+  - scenario_001
+  - scenario_005
+  - scenario_006
+- name: paired_benign_controls
+  rows: 1050
+  path_types:
+  - benign_control
+  scenario_ids:
+  - scenario_003
+  - scenario_004
+  - scenario_008
+  - scenario_010
+  - scenario_011
+  - scenario_012
+  - scenario_013
+  - scenario_014
+  - scenario_015
+  - scenario_016
+  - scenario_017
+  - scenario_018
+  - scenario_019
+  - scenario_022
+  - scenario_023
+  - scenario_024
+  - scenario_025
+  - scenario_026
+  - scenario_027
+  - scenario_028
+- name: hard_negatives
+  rows: 950
+  path_types:
+  - hard_negative
+  scenario_ids:
+  - scenario_001
+  - scenario_002
+  - scenario_003
+  - scenario_004
+  - scenario_005
+  - scenario_006
+  - scenario_007
+  - scenario_008
+  - scenario_009
+  - scenario_010
+  - scenario_011
+  - scenario_012
+  - scenario_013
+  - scenario_014
+  - scenario_015
+  - scenario_016
+  - scenario_017
+  - scenario_018
+  - scenario_019
+  - scenario_020
+  - scenario_021
+  - scenario_022
+  - scenario_023
+  - scenario_024
+  - scenario_025
+  - scenario_026
+  - scenario_027
+  - scenario_028
+- name: background_benign_admin
+  rows: 600
+  path_types:
+  - benign_control
+  scenario_ids:
+  - scenario_001
+  - scenario_002
+  - scenario_003
+  - scenario_005
+  - scenario_008
+  - scenario_009
+  - scenario_024
+  - scenario_026
+  - scenario_028

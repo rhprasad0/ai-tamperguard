@@ -31,6 +31,8 @@ def main() -> int:
     parser.add_argument("--prompt-pack-version")
     parser.add_argument("--prompt-seed", type=int)
     parser.add_argument("--attempt-index", type=int)
+    parser.add_argument("--path-type")
+    parser.add_argument("--outcome")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -73,6 +75,8 @@ def main() -> int:
         prompt_pack_version=args.prompt_pack_version,
         prompt_seed=args.prompt_seed,
         attempt_index=args.attempt_index,
+        path_type=args.path_type,
+        outcome=args.outcome,
     )
     seeded_events = [
         dict(
@@ -115,6 +119,10 @@ def main() -> int:
         manifest["prompt_seed"] = args.prompt_seed
     if args.attempt_index is not None:
         manifest["attempt_index"] = args.attempt_index
+    if args.path_type is not None:
+        manifest["path_type"] = args.path_type
+    if args.outcome is not None:
+        manifest["outcome"] = args.outcome
     out_manifest.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0
 

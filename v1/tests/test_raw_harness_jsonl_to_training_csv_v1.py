@@ -268,6 +268,73 @@ def test_can_build_training_csv_from_opaque_run_ids(tmp_path: Path) -> None:
     assert rows[0]["label_family"] == "evidence_laundering"
 
 
+def test_training_csv_boundary_strips_manifest_and_source_audit_columns(tmp_path: Path) -> None:
+    batch, _answer_key = _write_training_fixture(tmp_path)
+    run_manifest = tmp_path / "data" / "run_manifests" / "batch_001" / "scenario_runs.jsonl"
+    _write_jsonl(
+        run_manifest,
+        [
+            {
+                "scenario_run_id": "scenario_010_run_001",
+                "ground_truth_family": "evidence_laundering",
+                "path_type": "successful_synthetic",
+                "prompt_variant_id": "operator_handoff_asset_map_v1_a",
+                "actor_prompt_path": "data/run_manifests/batch_001/actor_prompts/run.txt",
+                "synthetic_case_id": "case_0123456789abcdef",
+            },
+            {
+                "scenario_run_id": "scenario_004_run_001",
+                "ground_truth_family": "benign_investigation",
+                "path_type": "benign_control",
+                "prompt_variant_id": "uncertain_soc_analyst_v1_a",
+                "actor_prompt_path": "data/run_manifests/batch_001/actor_prompts/run2.txt",
+                "synthetic_case_id": "case_fedcba9876543210",
+            },
+        ],
+    )
+    output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
+
+    result = _run(
+        tmp_path,
+        "--input",
+        str(batch),
+        "--run-manifest",
+        str(run_manifest),
+        "--output",
+        str(output),
+        "--add-source-batch-column",
+    )
+
+    assert result.returncode == 0, result.stderr
+    rows = _read_csv(output)
+    forbidden = {
+        "scenario_id",
+        "path_type",
+        "prompt_variant_id",
+        "actor_prompt_path",
+        "synthetic_case_id",
+        "source_batch_id",
+        "source_input_path_count",
+    }
+    assert rows
+    assert forbidden.isdisjoint(rows[0])
+    assert all(key.startswith("feature_") or key in {
+        "window_id",
+        "scenario_run_id",
+        "reset_id",
+        "actor_id",
+        "window_type",
+        "window_start_relative_sec",
+        "window_end_relative_sec",
+        "label_binary",
+        "label_family",
+        "label_source",
+        "label_confidence",
+        "outcome",
+        "split_id",
+    } for key in rows[0])
+
+
 def test_allow_unlabeled_emits_background_labels_with_warning(tmp_path: Path) -> None:
     batch, _answer_key = _write_training_fixture(tmp_path)
     output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"

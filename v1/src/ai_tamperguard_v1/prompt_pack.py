@@ -24,6 +24,7 @@ STARTER_PROMPT_FAMILIES = {
     "itsi_episode_triage",
     "synthetic_input_token_path",
     "model_training_validation",
+    "scenario_variation_matrix",
 }
 
 

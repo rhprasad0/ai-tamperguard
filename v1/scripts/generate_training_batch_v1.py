@@ -12,6 +12,8 @@ from pathlib import Path
 from pathlib import Path as _Path
 from typing import Any
 
+import yaml
+
 sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 
 from ai_tamperguard_v1.leakage_metrics import entropy, mutual_information  # noqa: E402
@@ -41,7 +43,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--path-templates", required=True, type=Path)
     parser.add_argument("--prompt-pack", required=True, type=Path)
     parser.add_argument("--batch-id", required=True)
-    parser.add_argument("--target-runs", required=True, type=int)
+    parser.add_argument("--target-runs", type=int)
+    parser.add_argument("--allocation-config", type=Path)
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--no-reset-required", action="store_true")
@@ -57,6 +60,7 @@ def main() -> int:
         prompt_pack=args.prompt_pack,
         batch_id=args.batch_id,
         target_runs=args.target_runs,
+        allocation_config=args.allocation_config,
         seed=args.seed,
         output_dir=args.output_dir,
         no_reset_required=args.no_reset_required,
@@ -72,14 +76,22 @@ def generate_training_batch(
     path_templates: Path,
     prompt_pack: Path,
     batch_id: str,
-    target_runs: int,
+    target_runs: int | None,
+    allocation_config: Path | None = None,
     seed: int,
     output_dir: Path,
     no_reset_required: bool = False,
     force: bool = False,
 ) -> dict[str, Any]:
+    allocation = _load_allocation_config(allocation_config) if allocation_config is not None else None
+    if target_runs is None:
+        if allocation is None:
+            raise SystemExit("either --target-runs or --allocation-config is required")
+        target_runs = int(allocation["target_runs"])
     if target_runs < 1:
         raise SystemExit("--target-runs must be >= 1")
+    if allocation is not None and target_runs != int(allocation["target_runs"]):
+        raise SystemExit("--target-runs must match allocation_config target_runs")
     if not no_reset_required:
         raise SystemExit("dry-run generation requires --no-reset-required until reset manifests are wired in")
     normalized_output = _normalize_relative_output_dir(output_dir)
@@ -102,14 +114,15 @@ def generate_training_batch(
 
     if target_runs < len(scenarios):
         raise SystemExit("--target-runs must be at least the canonical scenario count for all-scenario coverage")
+    run_plan = _build_allocation_run_plan(allocation, scenarios, templates_by_scenario_type, target_runs=target_runs)
 
     rows: list[dict[str, Any]] = []
     attempt_counts: Counter[str] = Counter()
     selected_template_counts: Counter[tuple[str, str]] = Counter()
     scenarios_by_id = {scenario.scenario_id: scenario for scenario in scenarios}
 
-    for run_index in range(1, target_runs + 1):
-        scenario = scenarios[(run_index - 1) % len(scenarios)]
+    for run_index, plan_item in enumerate(run_plan, 1):
+        scenario = scenarios_by_id[plan_item["scenario_id"]]
         attempt_counts[scenario.scenario_id] += 1
         attempt_index = attempt_counts[scenario.scenario_id]
         run_seed = _seed_for(batch_id=batch_id, seed=seed, scenario_id=scenario.scenario_id, attempt_index=attempt_index)
@@ -125,6 +138,7 @@ def generate_training_batch(
             attempt_index=attempt_index,
             selected_template_counts=selected_template_counts,
             rng=rng,
+            forced_path_type=plan_item.get("path_type"),
         )
         object_family = _balanced_choice(GLOBAL_OBJECT_FAMILIES, attempt_index=attempt_index, rng=rng)
         actor_profile = _balanced_choice(ACTOR_PROFILES, attempt_index=attempt_index, rng=rng)
@@ -178,6 +192,7 @@ def generate_training_batch(
                 "batch_id": batch_id,
                 "path_template_id": path_template.path_template_id,
                 "path_type": path_template.path_type,
+                "allocation_bucket": plan_item.get("allocation_bucket") or "round_robin",
                 "ground_truth_family": path_template.label_family,
                 "outcome": path_template.outcome,
                 "label_binary_policy": path_template.label_binary_policy,
@@ -219,11 +234,77 @@ def generate_training_batch(
         target_runs=target_runs,
         scenario_ids=scenario_ids,
         scenario_count=len(scenarios),
+        allocation_config_path=allocation_config,
+        allocation=allocation,
     )
     coverage["scenario_runs_path"] = scenario_runs_path.as_posix()
     coverage["actor_prompt_dir"] = prompt_dir.as_posix()
     (normalized_output / "coverage_summary.json").write_text(json.dumps(coverage, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return coverage
+
+
+def _load_allocation_config(path: Path) -> dict[str, Any]:
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise SystemExit("allocation config must be a mapping")
+    buckets = data.get("buckets")
+    if not isinstance(buckets, list) or not buckets:
+        raise SystemExit("allocation config requires non-empty buckets")
+    target_runs = data.get("target_runs")
+    if not isinstance(target_runs, int) or target_runs < 1:
+        raise SystemExit("allocation config target_runs must be a positive integer")
+    bucket_total = 0
+    for bucket in buckets:
+        if not isinstance(bucket, dict):
+            raise SystemExit("allocation bucket must be a mapping")
+        if not isinstance(bucket.get("name"), str):
+            raise SystemExit("allocation bucket requires name")
+        rows = bucket.get("rows")
+        if not isinstance(rows, int) or rows < 1:
+            raise SystemExit(f"allocation bucket {bucket.get('name')} rows must be positive")
+        if not bucket.get("scenario_ids") or not bucket.get("path_types"):
+            raise SystemExit(f"allocation bucket {bucket.get('name')} requires scenario_ids and path_types")
+        bucket_total += rows
+    if bucket_total != target_runs:
+        raise SystemExit("allocation bucket rows must sum to target_runs")
+    return data
+
+
+def _build_allocation_run_plan(
+    allocation: dict[str, Any] | None,
+    scenarios: list[Any],
+    templates_by_scenario_type: dict[str, dict[str, list[Any]]],
+    *,
+    target_runs: int,
+) -> list[dict[str, str | None]]:
+    scenario_ids = [scenario.scenario_id for scenario in scenarios]
+    known = set(scenario_ids)
+    if allocation is None:
+        return [
+            {"scenario_id": scenario_ids[(idx - 1) % len(scenario_ids)], "path_type": None, "allocation_bucket": None}
+            for idx in range(1, target_runs + 1)
+        ]
+    plan: list[dict[str, str | None]] = []
+    for bucket in allocation["buckets"]:
+        bucket_name = str(bucket["name"])
+        bucket_scenarios = [str(sid) for sid in bucket["scenario_ids"]]
+        bucket_path_types = [str(path_type) for path_type in bucket["path_types"]]
+        unknown = set(bucket_scenarios) - known
+        if unknown:
+            raise SystemExit(f"allocation bucket {bucket_name} references unknown scenario_ids: {sorted(unknown)}")
+        candidates: list[tuple[str, str]] = []
+        for scenario_id in bucket_scenarios:
+            for path_type in bucket_path_types:
+                if templates_by_scenario_type[scenario_id].get(path_type):
+                    candidates.append((scenario_id, path_type))
+        if not candidates:
+            raise SystemExit(f"allocation bucket {bucket_name} has no scenario/path templates")
+        for idx in range(int(bucket["rows"])):
+            scenario_id, path_type = candidates[idx % len(candidates)]
+            plan.append({"scenario_id": scenario_id, "path_type": path_type, "allocation_bucket": bucket_name})
+    if len(plan) != target_runs:
+        raise SystemExit("allocation run plan length mismatch")
+    return plan
 
 
 def _actor_id(attempt_index: int) -> str:
@@ -237,8 +318,9 @@ def _select_path_template(
     attempt_index: int,
     selected_template_counts: Counter[tuple[str, str]],
     rng: random.Random,
+    forced_path_type: str | None = None,
 ) -> Any:
-    path_type = supported_path_types[(attempt_index - 1) % len(supported_path_types)]
+    path_type = forced_path_type or supported_path_types[(attempt_index - 1) % len(supported_path_types)]
     candidates = templates_by_type[path_type]
     min_count = min(selected_template_counts[(path_type, candidate.path_template_id)] for candidate in candidates)
     least_used = [candidate for candidate in candidates if selected_template_counts[(path_type, candidate.path_template_id)] == min_count]
@@ -304,6 +386,8 @@ def _coverage_summary(
     target_runs: int,
     scenario_ids: list[str],
     scenario_count: int,
+    allocation_config_path: Path | None = None,
+    allocation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     axes = ("actor_profile", "evidence_order", "conflict_intensity", "distractor_count", "object_family")
     per_scenario_axis_counts: dict[str, dict[str, dict[str, int]]] = {}
@@ -328,7 +412,7 @@ def _coverage_summary(
             leakage_pass = leakage_pass and passed
             mi_checks[axis] = {"mi": mi, "budget": budget, "passed": passed}
         leakage_check = "pass" if leakage_pass else "fail"
-    return {
+    summary = {
         "batch_id": batch_id,
         "mode": "dry-run",
         "target_runs": target_runs,
@@ -346,6 +430,11 @@ def _coverage_summary(
         "leakage_check": leakage_check,
         "public_release_ready": False,
     }
+    if allocation is not None:
+        summary["allocation_config_path"] = str(allocation_config_path) if allocation_config_path is not None else None
+        summary["allocation_total"] = allocation["target_runs"]
+        summary["allocation_bucket_counts"] = dict(Counter(str(row.get("allocation_bucket")) for row in rows))
+    return summary
 
 
 def _first_variant_for_scenario(prompt_pack: Path, scenario_id: str) -> PromptVariant:

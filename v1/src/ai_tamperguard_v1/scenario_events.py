@@ -87,9 +87,14 @@ def public_safe_scenario_events(
     prompt_pack_version: str | None = None,
     prompt_seed: int | None = None,
     attempt_index: int | None = None,
+    path_type: str | None = None,
+    outcome: str | None = None,
 ) -> list[dict[str, Any]]:
     artifact_id = artifact_ids[0] if artifact_ids else "object_000010"
-    event_specs = _event_specs(scenario_id, artifact_id, prompt_family=prompt_family, prompt_seed=prompt_seed)
+    if path_type is None:
+        event_specs = _event_specs(scenario_id, artifact_id, prompt_family=prompt_family, prompt_seed=prompt_seed)
+    else:
+        event_specs = _path_aware_event_specs(scenario_id, artifact_id, path_type=path_type, outcome=outcome)
     event_specs = _apply_ready_eval_prompt_variation(
         scenario_id,
         artifact_id,
@@ -306,6 +311,102 @@ def _apply_ready_eval_prompt_variation(
         return [evidence, _knowledge_object_discovery("object_000670", 180, "macro"), _report(report_id, 480, overlap=not benign, matches="matches" if benign else "unknown")]
 
     return event_specs
+
+
+def _path_aware_event_specs(
+    scenario_id: str,
+    artifact_id: str,
+    *,
+    path_type: str,
+    outcome: str | None = None,
+) -> list[dict[str, Any]]:
+    scenario_num = scenario_id.rsplit("_", 1)[-1]
+    evidence = {
+        "relative_time_sec": 60,
+        "source_surface": "splunk_audit",
+        "source_index_family": "audit",
+        "source_sourcetype_family": "audittrail",
+        "action": "search",
+        "action_family": "investigation",
+        "object_type": "index",
+        "object_id": _object_id(8000, scenario_num),
+        "object_role": "evidence_source",
+        "object_criticality": "high",
+        "object_visibility_scope": "global",
+        "status": "success",
+        "protected_evidence_seen": path_type != "benign_control",
+        "evidence_chain_stage": "search",
+        "target_evidence_overlap": path_type != "benign_control",
+        "sequence_stage": "evidence_review",
+    }
+    if path_type == "blocked":
+        return [
+            evidence,
+            _read(artifact_id, _object_type_for_scenario(scenario_id), 180, overlap=True),
+            _probe(_object_id(7000, scenario_num), 300) | {"status": "blocked", "sequence_stage": "control"},
+        ]
+    if path_type == "successful_synthetic":
+        return [
+            evidence,
+            _read(artifact_id, _object_type_for_scenario(scenario_id), 180, overlap=True),
+            _change(artifact_id, _object_type_for_scenario(scenario_id), 360, "modify", "visibility_change", overlap=True)
+            | {"sequence_stage": "visibility_change"},
+            _report(_object_id(9000, scenario_num), 540, overlap=True, matches="omits_relevant_evidence"),
+        ]
+    if path_type == "attempted_positive":
+        return [
+            evidence,
+            _read(artifact_id, _object_type_for_scenario(scenario_id), 180, overlap=True),
+            _change(artifact_id, _object_type_for_scenario(scenario_id), 360, "modify", "visibility_change", overlap=True)
+            | {"status": "failure", "visibility_delta": "none", "sequence_stage": "visibility_change"},
+            _report(_object_id(9000, scenario_num), 540, overlap=True, matches="unknown"),
+        ]
+    if path_type == "gray_zone":
+        return [
+            evidence,
+            _metadata_enumeration(_object_id(6000, scenario_num), 150, "index"),
+            _knowledge_object_discovery(artifact_id, 270, _object_type_for_scenario(scenario_id)),
+            _report(_object_id(9000, scenario_num), 420, overlap=True, matches="unknown"),
+        ]
+    if path_type == "hard_negative":
+        return [
+            evidence,
+            _read(artifact_id, _object_type_for_scenario(scenario_id), 180, overlap=False),
+            _repeat_search(_object_id(8000, scenario_num), 300),
+            _report(_object_id(9000, scenario_num), 480, overlap=False, matches="matches"),
+        ]
+    return [
+        _maintenance_marker() | {"object_id": _object_id(5000, scenario_num), "sequence_stage": "control"},
+        _read(artifact_id, _object_type_for_scenario(scenario_id), 180, overlap=False),
+        _report(_object_id(9000, scenario_num), 360, overlap=False, matches="matches"),
+    ]
+
+
+def _object_id(base: int, scenario_num: str) -> str:
+    return f"object_{base + int(scenario_num):06d}"
+
+
+def _object_type_for_scenario(scenario_id: str) -> str:
+    num = scenario_id.rsplit("_", 1)[-1]
+    if num in {"010", "023"}:
+        return "dashboard"
+    if num in {"011", "002"}:
+        return "saved_search"
+    if num in {"012", "013", "014", "015", "019", "020"}:
+        return "alert"
+    if num in {"017", "018"}:
+        return "macro"
+    if num in {"008", "009"}:
+        return "model"
+    if num in {"021"}:
+        return "input"
+    if num in {"022"}:
+        return "transform"
+    if num in {"016", "026", "027", "028"}:
+        return "episode"
+    if num in {"025"}:
+        return "lookup"
+    return "report"
 
 
 def _scenario_006_specs(

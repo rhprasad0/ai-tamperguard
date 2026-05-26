@@ -12,9 +12,16 @@
         "create",
         "delete",
         "write_report",
+        "write_note",
         "permission_probe",
         "enumerate_metadata",
-        "discover"
+        "discover",
+        "fit_model",
+        "apply_model",
+        "run_playbook",
+        "run_action",
+        "respond_prompt",
+        "verify"
       ],
       "type": "string"
     },
@@ -28,7 +35,12 @@
         "permission_probe",
         "administration",
         "metadata_enumeration",
-        "knowledge_object_discovery"
+        "knowledge_object_discovery",
+        "model_training",
+        "model_scoring",
+        "automation",
+        "prompt_response",
+        "verification"
       ],
       "type": "string"
     },
@@ -40,6 +52,11 @@
         "edit_dashboards",
         "edit_alerts",
         "manage_tokens",
+        "manage_inputs",
+        "manage_models",
+        "manage_playbooks",
+        "edit_lookups",
+        "edit_transforms",
         "unknown",
         "search_and_read"
       ],
@@ -136,6 +153,8 @@
         "throttled",
         "disabled",
         "report_only",
+        "validated",
+        "failed_validation",
         "unknown"
       ],
       "type": "string"
@@ -164,6 +183,9 @@
         "change_visibility_object",
         "write_report",
         "verify",
+        "model_train",
+        "model_apply",
+        "automation_review",
         "unknown",
         "metadata_enumeration",
         "knowledge_object_discovery",
@@ -287,6 +309,12 @@
         "dashboards",
         "correlation_searches",
         "risk_scoring",
+        "inputs",
+        "transforms",
+        "models",
+        "itsi_kpi",
+        "soar_playbook",
+        "response_plans",
         "not_applicable",
         "unknown"
       ],
@@ -366,10 +394,19 @@
         "saved_search",
         "dashboard",
         "alert",
+        "notable_event",
+        "episode",
+        "playbook",
+        "action",
+        "prompt",
+        "response_plan",
         "lookup",
         "macro",
         "input",
         "token",
+        "model",
+        "experiment",
+        "route",
         "role",
         "index",
         "sourcetype",
@@ -484,7 +521,8 @@
         "macro_filter_visibility_path",
         "itsi_episode_triage",
         "synthetic_input_token_path",
-        "model_training_validation"
+        "model_training_validation",
+        "scenario_variation_matrix"
       ]
     },
     "prompt_pack_version": {

@@ -22,6 +22,16 @@
       "minLength": 1,
       "type": "string"
     },
+    "canonical_status": {
+      "enum": [
+        "required_v1",
+        "optional_v1",
+        "future",
+        "doc_only",
+        "implemented"
+      ],
+      "type": "string"
+    },
     "family": {
       "enum": [
         "benign_admin",
@@ -48,6 +58,10 @@
       "minLength": 1,
       "type": "string"
     },
+    "minimum_prompt_families": {
+      "minimum": 1,
+      "type": "integer"
+    },
     "name": {
       "minLength": 1,
       "type": "string"
@@ -58,6 +72,28 @@
         "string",
         "null"
       ]
+    },
+    "paired_control_scenario_ids": {
+      "items": {
+        "pattern": "^scenario_[0-9]{3}$",
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "path_types_supported": {
+      "items": {
+        "enum": [
+          "benign_control",
+          "hard_negative",
+          "gray_zone",
+          "attempted_positive",
+          "successful_synthetic",
+          "blocked"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
     },
     "positive_condition": {
       "minLength": 1,
@@ -82,6 +118,20 @@
       "pattern": "^scenario_[0-9]{3}$",
       "type": "string"
     },
+    "scenario_slug": {
+      "pattern": "^[a-z0-9][a-z0-9_]{2,100}$",
+      "type": "string"
+    },
+    "source_subset_status": {
+      "enum": [
+        "required_v1",
+        "optional_v1",
+        "future",
+        "doc_only",
+        "implemented"
+      ],
+      "type": "string"
+    },
     "subset_status": {
       "enum": [
         "required_v1",
@@ -89,14 +139,28 @@
         "future"
       ],
       "type": "string"
+    },
+    "variation_axes_supported": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "verification_requirements": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
     }
   },
   "required": [
     "scenario_id",
     "name",
     "family",
-    "subset_status",
-    "paired_control_scenario_id",
     "allowed_surfaces",
     "allowed_object_types",
     "reset_requirements",

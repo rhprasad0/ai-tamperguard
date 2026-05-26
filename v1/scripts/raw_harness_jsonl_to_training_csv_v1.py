@@ -62,6 +62,7 @@ def main() -> int:
         validate_rows("behavior_window_v1.schema.json", rows)
         if args.add_source_batch_column:
             rows = add_source_audit_columns(rows, source_by_run, len(event_files))
+        rows = published_training_rows(rows)
         fieldnames = output_fieldnames(rows)
         write_csv_rows(output, rows, fieldnames=fieldnames)
     except UserInputError as exc:
@@ -247,6 +248,19 @@ def output_fieldnames(rows: list[dict[str, Any]]) -> list[str]:
             if key not in known and key not in extras:
                 extras.append(key)
     return [key for key in known if any(key in row for row in rows)] + extras
+
+
+def published_training_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Apply the public training boundary: IDs/labels plus feature_* only.
+
+    Run-manifest provenance such as scenario_id/path_type/prompt IDs, source audit
+    columns, and actor prompt paths stays in private manifests, not published CSVs.
+    """
+    allowed = set(ID_COLUMNS + LABEL_COLUMNS)
+    return [
+        {key: value for key, value in row.items() if key in allowed or key.startswith("feature_")}
+        for row in rows
+    ]
 
 
 if __name__ == "__main__":
