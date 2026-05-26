@@ -107,10 +107,29 @@ def test_prompt_pack_covers_attack_pattern_scenarios() -> None:
     assert {"scenario_012", "scenario_014"} <= set(by_family["suppression_throttle_disambiguation"].allowed_scenario_ids)
     assert "scenario_015" in by_family["risk_score_tuning_path"].allowed_scenario_ids
     assert {"scenario_017", "scenario_018"} <= set(by_family["macro_filter_visibility_path"].allowed_scenario_ids)
+    assert "scenario_016" in by_family["itsi_episode_triage"].allowed_scenario_ids
+    assert "scenario_021" in by_family["synthetic_input_token_path"].allowed_scenario_ids
+    assert "scenario_023" in by_family["model_training_validation"].allowed_scenario_ids
 
-    for family in ["suppression_throttle_disambiguation", "risk_score_tuning_path", "macro_filter_visibility_path"]:
+    for family in [
+        "suppression_throttle_disambiguation",
+        "risk_score_tuning_path",
+        "macro_filter_visibility_path",
+        "itsi_episode_triage",
+        "synthetic_input_token_path",
+        "model_training_validation",
+    ]:
         variant = by_family[family]
-        assert variant.safety_boundary in {"synthetic_lab_read_or_report_only", "synthetic_lab_report_write_only"}
+        assert variant.safety_boundary in {"synthetic_lab_read_or_report_only", "synthetic_lab_report_write_only", "synthetic_lab_sacrificial_only"}
         assert "synthetic" in variant.template.lower()
         assert "live systems" not in variant.template.lower()
-        assert any(event_family in variant.expected_public_event_families for event_family in ["repeat_search", "read_visibility_object", "knowledge_object_discovery"])
+        assert any(event_family in variant.expected_public_event_families for event_family in ["repeat_search", "read_visibility_object", "knowledge_object_discovery", "write_report", "synthetic_control_change"])
+
+
+def test_prompt_pack_covers_every_catalog_scenario() -> None:
+    from ai_tamperguard_v1.scenario_catalog import SCENARIO_CATALOG_PATH, load_scenario_catalog, scenario_ids
+
+    variants = load_prompt_pack(PROMPT_PACK_PATH)
+    covered = {scenario_id for variant in variants for scenario_id in variant.allowed_scenario_ids}
+
+    assert scenario_ids(load_scenario_catalog(SCENARIO_CATALOG_PATH)) <= covered

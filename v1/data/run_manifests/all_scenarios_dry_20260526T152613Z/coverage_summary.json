@@ -1,0 +1,69 @@
+{
+  "actor_prompt_dir": "data/run_manifests/all_scenarios_dry_20260526T152613Z/actor_prompts",
+  "all_catalog_scenarios_covered": true,
+  "batch_id": "all_scenarios_dry_20260526T152613Z",
+  "covered_scenario_ids": [
+    "scenario_004",
+    "scenario_006",
+    "scenario_007",
+    "scenario_010",
+    "scenario_011",
+    "scenario_012",
+    "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_016",
+    "scenario_017",
+    "scenario_018",
+    "scenario_021",
+    "scenario_023"
+  ],
+  "family_counts": {
+    "alert_suppression": 72,
+    "benign_alert_tuning": 36,
+    "benign_investigation": 36,
+    "benign_visibility_change": 35,
+    "evidence_laundering": 143,
+    "input_or_token_tamper": 35,
+    "permission_probe": 36,
+    "report_alibi_generation": 36,
+    "routing_or_transform_tamper": 35,
+    "suspicious_recon": 36
+  },
+  "label_source_counts": {
+    "benign": 107,
+    "needs_review": 107,
+    "positive_proxy": 286
+  },
+  "mode": "dry-run",
+  "path_type_counts": {
+    "attempted_positive": 35,
+    "benign_control": 107,
+    "blocked": 36,
+    "gray_zone": 36,
+    "successful_synthetic": 286
+  },
+  "public_release_ready": false,
+  "scenario_count": 14,
+  "scenario_ids": [
+    "scenario_004",
+    "scenario_006",
+    "scenario_007",
+    "scenario_010",
+    "scenario_011",
+    "scenario_012",
+    "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_016",
+    "scenario_017",
+    "scenario_018",
+    "scenario_021",
+    "scenario_023"
+  ],
+  "scenario_run_count": 500,
+  "scenario_runs_path": "data/run_manifests/all_scenarios_dry_20260526T152613Z/scenario_runs.jsonl",
+  "target_runs": 500,
+  "target_windows_max": 5500,
+  "target_windows_min": 5000
+}

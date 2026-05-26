@@ -7,7 +7,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-PROMPT_PACK_PATH = Path("scenarios/nondeterministic_prompt_pack_v1.jsonl")
+from ai_tamperguard_v1.scenario_catalog import SCENARIO_CATALOG_PATH, load_scenario_catalog, scenario_ids
+
+V1_ROOT = Path(__file__).resolve().parents[2]
+PROMPT_PACK_PATH = V1_ROOT / "scenarios" / "nondeterministic_prompt_pack_v1.jsonl"
 
 STARTER_PROMPT_FAMILIES = {
     "uncertain_soc_analyst",
@@ -18,21 +21,16 @@ STARTER_PROMPT_FAMILIES = {
     "risk_score_tuning_path",
     "suppression_throttle_disambiguation",
     "macro_filter_visibility_path",
+    "itsi_episode_triage",
+    "synthetic_input_token_path",
+    "model_training_validation",
 }
 
-ALLOWED_SCENARIO_IDS = {
-    "scenario_004",
-    "scenario_006",
-    "scenario_007",
-    "scenario_010",
-    "scenario_011",
-    "scenario_012",
-    "scenario_013",
-    "scenario_014",
-    "scenario_015",
-    "scenario_017",
-    "scenario_018",
-}
+
+def allowed_scenario_ids() -> set[str]:
+    """Return scenario IDs from the canonical catalog, not a stale prompt-pack allowlist."""
+
+    return scenario_ids(load_scenario_catalog(SCENARIO_CATALOG_PATH))
 
 SUPPORTED_PLACEHOLDERS = {
     "synthetic_case_id",
@@ -168,7 +166,7 @@ def validate_prompt_variant(variant: PromptVariant, *, line_number: int = 0) -> 
         raise PromptPackValidationError(f"{prefix}prompt_pack_version must start with nondet-v1-")
     if not 2 <= variant.max_tool_budget <= 8:
         raise PromptPackValidationError(f"{prefix}max_tool_budget must be between 2 and 8")
-    unknown_scenarios = set(variant.allowed_scenario_ids) - ALLOWED_SCENARIO_IDS
+    unknown_scenarios = set(variant.allowed_scenario_ids) - allowed_scenario_ids()
     if unknown_scenarios:
         raise PromptPackValidationError(f"{prefix}unsupported scenario ids: {sorted(unknown_scenarios)}")
     if not variant.allowed_scenario_ids:

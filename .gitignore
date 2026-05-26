@@ -20,6 +20,7 @@ __pycache__/
 /data/windows/*.csv
 /models/*.onnx
 /models/*.mlmodel
+/v1/data/raw_exports/
 /.worktrees/
 
 # Hermes local project artifacts

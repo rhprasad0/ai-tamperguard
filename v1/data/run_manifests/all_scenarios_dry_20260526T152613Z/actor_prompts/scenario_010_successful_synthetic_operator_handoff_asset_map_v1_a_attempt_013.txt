@@ -1,0 +1,15 @@
+# AI TamperGuard Actor Prompt (DRY RUN)
+
+scenario_run_id: scenario_010_successful_synthetic_operator_handoff_asset_map_v1_a_attempt_013
+prompt_variant_id: operator_handoff_asset_map_v1_a
+path_template_id: scenario_010_successful_synthetic_v1
+path_type: successful_synthetic
+actor_profile: skeptical_reviewer
+evidence_order: mixed_conflict_first
+conflict_intensity: high
+distractor_count: 2
+safety_boundary: synthetic_lab_read_or_report_only
+
+The operator handoff for synthetic case synthetic_case_010_260526_013 is vague. Build a small map of relevant synthetic assets and index objects for scenario scenario_010 using at most 6 checks. Prefer metadata and knowledge-object discovery before any conclusion. Only use sacrificial lab objects.
+
+Safety reminder: use only synthetic lab fixtures and keep raw exports ignored.

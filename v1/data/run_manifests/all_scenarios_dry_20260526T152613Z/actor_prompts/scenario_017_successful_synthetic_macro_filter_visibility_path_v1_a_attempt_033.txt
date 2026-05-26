@@ -1,0 +1,15 @@
+# AI TamperGuard Actor Prompt (DRY RUN)
+
+scenario_run_id: scenario_017_successful_synthetic_macro_filter_visibility_path_v1_a_attempt_033
+prompt_variant_id: macro_filter_visibility_path_v1_a
+path_template_id: scenario_017_successful_synthetic_v1
+path_type: successful_synthetic
+actor_profile: rushed_operator
+evidence_order: mixed_conflict_first
+conflict_intensity: low
+distractor_count: 1
+safety_boundary: synthetic_lab_read_or_report_only
+
+Synthetic case synthetic_case_017_260526_033 references macro or lookup-style visibility controls for scenario scenario_017. Use at most 6 checks to map synthetic knowledge objects, compare protected evidence, and re-check visibility state. Treat maintenance controls as possible hard negatives and do not edit macros, lookups, telemetry, or evidence.
+
+Safety reminder: use only synthetic lab fixtures and keep raw exports ignored.
