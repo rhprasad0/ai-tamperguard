@@ -1,0 +1,521 @@
+{
+  "actor_prompt_count": 42,
+  "actor_prompt_dir": "data/run_manifests/small_k3_harness_smoke_20260526T174111Z/actor_prompts",
+  "all_catalog_scenarios_covered": true,
+  "batch_id": "small_k3_harness_smoke_20260526T174111Z",
+  "covered_scenario_ids": [
+    "scenario_004",
+    "scenario_006",
+    "scenario_007",
+    "scenario_010",
+    "scenario_011",
+    "scenario_012",
+    "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_016",
+    "scenario_017",
+    "scenario_018",
+    "scenario_021",
+    "scenario_023"
+  ],
+  "family_counts": {
+    "alert_suppression": 6,
+    "benign_alert_tuning": 3,
+    "benign_investigation": 3,
+    "benign_visibility_change": 3,
+    "evidence_laundering": 12,
+    "input_or_token_tamper": 3,
+    "permission_probe": 3,
+    "report_alibi_generation": 3,
+    "routing_or_transform_tamper": 3,
+    "suspicious_recon": 3
+  },
+  "label_source_counts": {
+    "manual_review": 11,
+    "paired_benign_control": 6,
+    "scenario_answer_key": 25
+  },
+  "leakage_check": "insufficient_sample",
+  "mode": "dry-run",
+  "mutual_information_checks": {},
+  "path_type_counts": {
+    "attempted_positive": 10,
+    "benign_control": 6,
+    "blocked": 3,
+    "gray_zone": 1,
+    "hard_negative": 13,
+    "successful_synthetic": 9
+  },
+  "per_scenario_axis_counts": {
+    "scenario_004": {
+      "actor_profile": {
+        "automation_helper": 1,
+        "rushed_operator": 1,
+        "skeptical_reviewer": 1
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "medium": 2
+      },
+      "distractor_count": {
+        "0": 1,
+        "1": 1,
+        "3": 1
+      },
+      "evidence_order": {
+        "config_first": 1,
+        "mixed_conflict_first": 1,
+        "report_first": 1
+      },
+      "object_family": {
+        "control_plane_fixture": 1,
+        "search_artifact": 1,
+        "visibility_object": 1
+      },
+      "path_type": {
+        "benign_control": 2,
+        "hard_negative": 1
+      },
+      "prompt_variant_id": {
+        "conflicting_evidence_resolution_v1_a": 2,
+        "uncertain_soc_analyst_v1_a": 1
+      }
+    },
+    "scenario_006": {
+      "actor_profile": {
+        "cautious_analyst": 1,
+        "rushed_operator": 2
+      },
+      "conflict_intensity": {
+        "high": 2,
+        "low": 1
+      },
+      "distractor_count": {
+        "0": 1,
+        "1": 1,
+        "3": 1
+      },
+      "evidence_order": {
+        "audit_first": 1,
+        "config_first": 1,
+        "report_first": 1
+      },
+      "object_family": {
+        "report_artifact": 1,
+        "search_artifact": 1,
+        "visibility_object": 1
+      },
+      "path_type": {
+        "blocked": 1,
+        "gray_zone": 1,
+        "hard_negative": 1
+      },
+      "prompt_variant_id": {
+        "limited_budget_choose_path_v1_a": 1,
+        "operator_handoff_asset_map_v1_a": 1,
+        "uncertain_soc_analyst_v1_a": 1
+      }
+    },
+    "scenario_007": {
+      "actor_profile": {
+        "automation_helper": 1,
+        "cautious_analyst": 1,
+        "rushed_operator": 1
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "medium": 2
+      },
+      "distractor_count": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "evidence_order": {
+        "audit_first": 1,
+        "config_first": 1,
+        "report_first": 1
+      },
+      "object_family": {
+        "control_plane_fixture": 1,
+        "search_artifact": 1,
+        "visibility_object": 1
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "blocked": 1,
+        "hard_negative": 1
+      },
+      "prompt_variant_id": {
+        "limited_budget_choose_path_v1_a": 1,
+        "uncertain_soc_analyst_v1_a": 2
+      }
+    },
+    "scenario_010": {
+      "actor_profile": {
+        "automation_helper": 1,
+        "rushed_operator": 1,
+        "skeptical_reviewer": 1
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "low": 2
+      },
+      "distractor_count": {
+        "0": 2,
+        "1": 1
+      },
+      "evidence_order": {
+        "audit_first": 2,
+        "mixed_conflict_first": 1
+      },
+      "object_family": {
+        "control_plane_fixture": 1,
+        "visibility_object": 2
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "operator_handoff_asset_map_v1_a": 1,
+        "soft_temptation_visibility_object_v1_a": 2
+      }
+    },
+    "scenario_011": {
+      "actor_profile": {
+        "rushed_operator": 1,
+        "skeptical_reviewer": 2
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "low": 1,
+        "medium": 1
+      },
+      "distractor_count": {
+        "2": 1,
+        "3": 2
+      },
+      "evidence_order": {
+        "config_first": 1,
+        "mixed_conflict_first": 1,
+        "report_first": 1
+      },
+      "object_family": {
+        "search_artifact": 2,
+        "visibility_object": 1
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "conflicting_evidence_resolution_v1_a": 3
+      }
+    },
+    "scenario_012": {
+      "actor_profile": {
+        "skeptical_reviewer": 3
+      },
+      "conflict_intensity": {
+        "medium": 3
+      },
+      "distractor_count": {
+        "0": 1,
+        "1": 1,
+        "2": 1
+      },
+      "evidence_order": {
+        "audit_first": 1,
+        "config_first": 1,
+        "report_first": 1
+      },
+      "object_family": {
+        "report_artifact": 1,
+        "visibility_object": 2
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "operator_handoff_asset_map_v1_a": 1,
+        "suppression_throttle_disambiguation_v1_a": 2
+      }
+    },
+    "scenario_013": {
+      "actor_profile": {
+        "automation_helper": 2,
+        "rushed_operator": 1
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "low": 1,
+        "medium": 1
+      },
+      "distractor_count": {
+        "2": 1,
+        "3": 2
+      },
+      "evidence_order": {
+        "audit_first": 1,
+        "report_first": 2
+      },
+      "object_family": {
+        "report_artifact": 2,
+        "search_artifact": 1
+      },
+      "path_type": {
+        "benign_control": 2,
+        "hard_negative": 1
+      },
+      "prompt_variant_id": {
+        "soft_temptation_visibility_object_v1_a": 3
+      }
+    },
+    "scenario_014": {
+      "actor_profile": {
+        "cautious_analyst": 1,
+        "rushed_operator": 2
+      },
+      "conflict_intensity": {
+        "low": 1,
+        "medium": 2
+      },
+      "distractor_count": {
+        "0": 1,
+        "1": 1,
+        "2": 1
+      },
+      "evidence_order": {
+        "audit_first": 2,
+        "report_first": 1
+      },
+      "object_family": {
+        "control_plane_fixture": 1,
+        "report_artifact": 1,
+        "visibility_object": 1
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "suppression_throttle_disambiguation_v1_a": 3
+      }
+    },
+    "scenario_015": {
+      "actor_profile": {
+        "automation_helper": 1,
+        "cautious_analyst": 1,
+        "rushed_operator": 1
+      },
+      "conflict_intensity": {
+        "low": 1,
+        "medium": 2
+      },
+      "distractor_count": {
+        "0": 1,
+        "1": 1,
+        "2": 1
+      },
+      "evidence_order": {
+        "mixed_conflict_first": 3
+      },
+      "object_family": {
+        "control_plane_fixture": 1,
+        "search_artifact": 2
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "risk_score_tuning_path_v1_a": 3
+      }
+    },
+    "scenario_016": {
+      "actor_profile": {
+        "cautious_analyst": 1,
+        "rushed_operator": 1,
+        "skeptical_reviewer": 1
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "low": 1,
+        "medium": 1
+      },
+      "distractor_count": {
+        "1": 1,
+        "2": 2
+      },
+      "evidence_order": {
+        "config_first": 1,
+        "mixed_conflict_first": 1,
+        "report_first": 1
+      },
+      "object_family": {
+        "report_artifact": 2,
+        "search_artifact": 1
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "itsi_episode_triage_v1_a": 3
+      }
+    },
+    "scenario_017": {
+      "actor_profile": {
+        "cautious_analyst": 2,
+        "skeptical_reviewer": 1
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "low": 1,
+        "medium": 1
+      },
+      "distractor_count": {
+        "2": 1,
+        "3": 2
+      },
+      "evidence_order": {
+        "audit_first": 1,
+        "mixed_conflict_first": 2
+      },
+      "object_family": {
+        "report_artifact": 2,
+        "search_artifact": 1
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "macro_filter_visibility_path_v1_a": 3
+      }
+    },
+    "scenario_018": {
+      "actor_profile": {
+        "automation_helper": 1,
+        "cautious_analyst": 1,
+        "skeptical_reviewer": 1
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "medium": 2
+      },
+      "distractor_count": {
+        "1": 2,
+        "3": 1
+      },
+      "evidence_order": {
+        "audit_first": 2,
+        "config_first": 1
+      },
+      "object_family": {
+        "report_artifact": 2,
+        "search_artifact": 1
+      },
+      "path_type": {
+        "benign_control": 2,
+        "hard_negative": 1
+      },
+      "prompt_variant_id": {
+        "macro_filter_visibility_path_v1_a": 3
+      }
+    },
+    "scenario_021": {
+      "actor_profile": {
+        "automation_helper": 1,
+        "cautious_analyst": 1,
+        "rushed_operator": 1
+      },
+      "conflict_intensity": {
+        "high": 2,
+        "low": 1
+      },
+      "distractor_count": {
+        "2": 2,
+        "3": 1
+      },
+      "evidence_order": {
+        "config_first": 1,
+        "mixed_conflict_first": 1,
+        "report_first": 1
+      },
+      "object_family": {
+        "control_plane_fixture": 1,
+        "search_artifact": 2
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "blocked": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "synthetic_input_token_path_v1_a": 3
+      }
+    },
+    "scenario_023": {
+      "actor_profile": {
+        "automation_helper": 3
+      },
+      "conflict_intensity": {
+        "high": 1,
+        "medium": 2
+      },
+      "distractor_count": {
+        "1": 1,
+        "3": 2
+      },
+      "evidence_order": {
+        "config_first": 1,
+        "report_first": 2
+      },
+      "object_family": {
+        "control_plane_fixture": 1,
+        "report_artifact": 1,
+        "search_artifact": 1
+      },
+      "path_type": {
+        "attempted_positive": 1,
+        "hard_negative": 1,
+        "successful_synthetic": 1
+      },
+      "prompt_variant_id": {
+        "model_training_validation_v1_a": 3
+      }
+    }
+  },
+  "public_release_ready": false,
+  "scenario_count": 14,
+  "scenario_ids": [
+    "scenario_004",
+    "scenario_006",
+    "scenario_007",
+    "scenario_010",
+    "scenario_011",
+    "scenario_012",
+    "scenario_013",
+    "scenario_014",
+    "scenario_015",
+    "scenario_016",
+    "scenario_017",
+    "scenario_018",
+    "scenario_021",
+    "scenario_023"
+  ],
+  "scenario_run_count": 42,
+  "scenario_runs_path": "data/run_manifests/small_k3_harness_smoke_20260526T174111Z/scenario_runs.jsonl",
+  "target_runs": 42
+}

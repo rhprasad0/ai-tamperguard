@@ -84,6 +84,35 @@ def test_capture_writes_private_public_safe_event_rows_from_reset_manifest(tmp_p
     assert any(event["visibility_delta"] == "decrease" for event in events)
 
 
+def test_capture_accepts_opaque_batch_run_id_when_reset_identifies_scenario(tmp_path: Path) -> None:
+    cfg, _reset = _private_files(tmp_path, scenario="scenario_010", reset_id="reset_010_001")
+    output_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "run_14d6d7ddddeaf764"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).resolve().parents[1] / "scripts" / "capture_splunk_run_v1.py"),
+            "--config",
+            str(cfg),
+            "--scenario-run-id",
+            "run_14d6d7ddddeaf764",
+            "--reset-id",
+            "reset_010_001",
+            "--output-dir",
+            str(output_dir),
+        ],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    manifest = json.loads((output_dir / "capture_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["scenario_id"] == "scenario_010"
+    assert manifest["scenario_run_id"] == "run_14d6d7ddddeaf764"
+
+
 def test_capture_rejects_mismatched_scenario_run_and_reset(tmp_path: Path) -> None:
     cfg, _reset = _private_files(tmp_path, scenario="scenario_004", reset_id="reset_004_001")
     output_dir = tmp_path / "data" / "raw_exports" / "batch_001" / "scenario_010_run_001"

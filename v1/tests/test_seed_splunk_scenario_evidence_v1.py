@@ -136,6 +136,25 @@ def test_seed_propagates_prompt_metadata_for_scenario_006(tmp_path: Path) -> Non
     assert manifest["event_count"] >= 5
 
 
+def test_seed_accepts_opaque_batch_run_id_when_explicit_scenario_and_reset_match(tmp_path: Path) -> None:
+    cfg, inventory = _files(tmp_path, scenario="scenario_010", reset_id="reset_010_001")
+    output = tmp_path / "data" / "seed_manifests" / "batch_001" / "run_14d6d7ddddeaf764.json"
+    result = _run(
+        tmp_path,
+        cfg,
+        inventory,
+        scenario="scenario_010",
+        scenario_run_id="run_14d6d7ddddeaf764",
+        reset_id="reset_010_001",
+        output=output,
+    )
+    assert result.returncode == 0, result.stderr
+    manifest = json.loads(output.read_text(encoding="utf-8"))
+    assert manifest["scenario_id"] == "scenario_010"
+    assert manifest["scenario_run_id"] == "run_14d6d7ddddeaf764"
+    assert manifest["event_count"] == 4
+
+
 def test_seed_rejects_scenario_run_mismatch(tmp_path: Path) -> None:
     cfg, inventory = _files(tmp_path)
     output = tmp_path / "data" / "seed_manifests" / "batch_001" / "x.json"

@@ -34,7 +34,8 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    if scenario_id_from_run(args.scenario_run_id) != args.scenario:
+    inferred_scenario = scenario_id_from_run(args.scenario_run_id)
+    if inferred_scenario.startswith("scenario_") and inferred_scenario != args.scenario:
         print("scenario and scenario_run_id mismatch", file=sys.stderr)
         return 2
     out_manifest = _Path(args.output_manifest)

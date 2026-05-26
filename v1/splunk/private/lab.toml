@@ -3,7 +3,7 @@
 
 authorized_lab_marker = "ai_tamperguard_v1_authorized_local_lab"
 target_namespace = "ai_tamperguard_v1"
-capture_destination = "data/private/raw_exports"
+capture_destination = "data/raw_exports"
 allowed_indexes = ["_audit", "_configtracker", "openclaw_tamper_lab", "agentops"]
 protected_indexes = ["_audit", "_configtracker", "agentops"]
 synthetic_evidence_index = "openclaw_tamper_lab"

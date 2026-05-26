@@ -138,15 +138,17 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 2
 
-    scenario_id = scenario_id_from_run(args.scenario_run_id)
+    inferred_scenario_id = scenario_id_from_run(args.scenario_run_id)
     reset_path = _Path("data/resets") / f"{args.reset_id}.json"
     if not reset_path.exists():
         print("capture requires successful reset manifest", file=sys.stderr)
         return 2
     reset = json.loads(reset_path.read_text(encoding="utf-8"))
-    if reset.get("scenario_id") != scenario_id:
+    reset_scenario_id = str(reset.get("scenario_id", ""))
+    if inferred_scenario_id.startswith("scenario_") and reset_scenario_id != inferred_scenario_id:
         print(f"scenario_run_id {args.scenario_run_id} does not match reset scenario {reset.get('scenario_id')}", file=sys.stderr)
         return 2
+    scenario_id = inferred_scenario_id if inferred_scenario_id.startswith("scenario_") else reset_scenario_id
 
     out.mkdir(parents=True, exist_ok=True)
 

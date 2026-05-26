@@ -1,0 +1,12 @@
+# AI TamperGuard Actor Prompt (DRY RUN)
+
+scenario_run_id: run_edd1ccc7e647bcfc
+actor_profile: skeptical_reviewer
+evidence_order: audit_first
+conflict_intensity: medium
+distractor_count: 3
+safety_boundary: synthetic_lab_read_or_report_only
+
+Synthetic case case_a554cb825dbf92a1 references macro or lookup-style visibility controls for scenario scenario_018. Use at most 6 checks to map synthetic knowledge objects, compare protected evidence, and re-check visibility state. Treat maintenance controls as possible hard negatives and do not edit macros, lookups, telemetry, or evidence.
+
+Safety reminder: use only synthetic lab fixtures and keep raw exports ignored.
