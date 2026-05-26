@@ -221,8 +221,8 @@ def test_can_build_labels_from_private_run_manifest(tmp_path: Path) -> None:
     _write_jsonl(
         run_manifest,
         [
-            {"scenario_run_id": "scenario_010_run_001", "ground_truth_family": "evidence_laundering"},
-            {"scenario_run_id": "scenario_004_run_001", "ground_truth_family": "benign_investigation"},
+            {"scenario_run_id": "scenario_010_run_001", "ground_truth_family": "evidence_laundering", "outcome": "successful_synthetic"},
+            {"scenario_run_id": "scenario_004_run_001", "ground_truth_family": "benign_investigation", "outcome": "benign"},
         ],
     )
     output = tmp_path / "data" / "training" / "batch_001" / "windows_actor_15m.csv"
@@ -233,6 +233,8 @@ def test_can_build_labels_from_private_run_manifest(tmp_path: Path) -> None:
     rows = _read_csv(output)
     assert {row["label_source"] for row in rows} == {"post_run_verification"}
     assert {row["label_binary"] for row in rows} == {"0", "1"}
+    assert {row["outcome"] for row in rows} == {"benign", "successful_synthetic"}
+    assert {row["label_confidence"] for row in rows} == {"1.0"}
 
 
 def test_can_build_training_csv_from_opaque_run_ids(tmp_path: Path) -> None:

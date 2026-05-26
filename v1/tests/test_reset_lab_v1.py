@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -34,6 +35,24 @@ def _write_private_config_and_inventory(root: Path) -> tuple[Path, Path]:
         encoding="utf-8",
     )
     return cfg, inventory
+
+
+def test_reset_allowlist_covers_all_catalog_scenarios() -> None:
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "reset_lab_v1.py"
+    spec = importlib.util.spec_from_file_location("reset_lab_v1", script_path)
+    assert spec is not None
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    allowed = module.ALLOWED_SCENARIOS
+    catalog_path = Path(__file__).resolve().parents[1] / "scenarios" / "scenario_catalog_v1.jsonl"
+    catalog_scenarios = {
+        json.loads(line)["scenario_id"]
+        for line in catalog_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+
+    assert allowed == catalog_scenarios
 
 
 def test_reset_allows_attack_pattern_scenario_ids(tmp_path: Path) -> None:

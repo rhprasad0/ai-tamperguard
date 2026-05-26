@@ -14,7 +14,7 @@ from ai_tamperguard_v1.schema import load_schema, validate_rows  # noqa: E402
 
 EVENT_FILE_NAME = "public_safe_events.jsonl"
 ID_COLUMNS = ["window_id", "scenario_run_id", "actor_id", "window_start_relative_sec", "window_end_relative_sec"]
-LABEL_COLUMNS = ["label_binary", "label_family", "label_source", "split_id"]
+LABEL_COLUMNS = ["label_binary", "label_family", "label_source", "label_confidence", "outcome", "split_id"]
 
 
 class UserInputError(Exception):
@@ -169,7 +169,10 @@ def load_labels(
             {
                 "scenario_run_id": row["scenario_run_id"],
                 "label_family": row.get("ground_truth_family", "background_unlabeled"),
-                "label_source": "post_run_verification",
+                "label_source": row.get("label_source", "post_run_verification"),
+                "label_confidence": row.get("label_confidence", 1.0),
+                "outcome": row.get("outcome", "background_unlabeled"),
+                "reset_id": row.get("reset_id", "reset_000"),
             }
             for row in run_rows
             if row.get("scenario_run_id")

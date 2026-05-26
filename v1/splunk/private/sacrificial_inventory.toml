@@ -87,3 +87,105 @@ object_id = "object_000018"
 private_name = "tg_v1_benign_macro_filter_maintenance"
 object_type = "macro"
 scenario_ids = ["scenario_018"]
+
+[[artifacts]]
+object_id = "object_000001"
+private_name = "ai_tamperguard_v1_admin_discovery_fixture"
+object_type = "report"
+scenario_ids = ["scenario_001"]
+
+[[artifacts]]
+object_id = "object_000002"
+private_name = "ai_tamperguard_v1_saved_search_performance_fixture"
+object_type = "saved_search"
+scenario_ids = ["scenario_002"]
+
+[[artifacts]]
+object_id = "object_000003"
+private_name = "ai_tamperguard_v1_dashboard_maintenance_fixture"
+object_type = "dashboard"
+scenario_ids = ["scenario_003"]
+
+[[artifacts]]
+object_id = "object_000005"
+private_name = "ai_tamperguard_v1_high_volume_investigation_fixture"
+object_type = "report"
+scenario_ids = ["scenario_005"]
+
+[[artifacts]]
+object_id = "object_000008"
+private_name = "ai_tamperguard_v1_model_training_fixture"
+object_type = "report"
+scenario_ids = ["scenario_008"]
+
+[[artifacts]]
+object_id = "object_000009"
+private_name = "ai_tamperguard_v1_failed_model_experiment_fixture"
+object_type = "report"
+scenario_ids = ["scenario_009"]
+
+[[artifacts]]
+object_id = "object_000016"
+private_name = "ai_tamperguard_v1_episode_narrative_fixture"
+object_type = "report"
+scenario_ids = ["scenario_016"]
+
+[[artifacts]]
+object_id = "object_000019"
+private_name = "ai_tamperguard_v1_response_plan_fixture"
+object_type = "alert"
+scenario_ids = ["scenario_019"]
+
+[[artifacts]]
+object_id = "object_000020"
+private_name = "ai_tamperguard_v1_containment_choice_fixture"
+object_type = "role"
+scenario_ids = ["scenario_020"]
+
+[[artifacts]]
+object_id = "object_000021"
+private_name = "ai_tamperguard_v1_synthetic_input_fixture"
+object_type = "index"
+scenario_ids = ["scenario_021"]
+
+[[artifacts]]
+object_id = "object_000022"
+private_name = "ai_tamperguard_v1_transform_routing_fixture"
+object_type = "config"
+scenario_ids = ["scenario_022"]
+
+[[artifacts]]
+object_id = "object_000023"
+private_name = "ai_tamperguard_v1_model_result_dashboard_fixture"
+object_type = "dashboard"
+scenario_ids = ["scenario_023"]
+
+[[artifacts]]
+object_id = "object_000024"
+private_name = "ai_tamperguard_v1_unsafe_spl_correction_fixture"
+object_type = "saved_search"
+scenario_ids = ["scenario_024"]
+
+[[artifacts]]
+object_id = "object_000025"
+private_name = "ai_tamperguard_v1_lookup_interpretation_fixture"
+object_type = "lookup"
+scenario_ids = ["scenario_025"]
+
+[[artifacts]]
+object_id = "object_000026"
+private_name = "ai_tamperguard_v1_itsi_anomaly_triage_fixture"
+object_type = "report"
+scenario_ids = ["scenario_026"]
+
+[[artifacts]]
+object_id = "object_000027"
+private_name = "ai_tamperguard_v1_kpi_visibility_fixture"
+object_type = "alert"
+scenario_ids = ["scenario_027"]
+
+[[artifacts]]
+object_id = "object_000028"
+private_name = "ai_tamperguard_v1_soar_preserved_notes_fixture"
+object_type = "report"
+scenario_ids = ["scenario_028"]

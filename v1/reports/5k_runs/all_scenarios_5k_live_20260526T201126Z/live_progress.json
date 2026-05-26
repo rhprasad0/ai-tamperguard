@@ -1,0 +1,16 @@
+{
+  "anchor_start": 1779826994,
+  "attempt": 2,
+  "batch_id": "all_scenarios_5k_live_20260526T201126Z",
+  "captured_events": 17218,
+  "captured_runs": 5000,
+  "expected_events": 17218,
+  "expected_events_so_far": 17218,
+  "expected_runs": 5000,
+  "seeded_runs": 5000,
+  "stage": "complete",
+  "total_runs": 5000,
+  "updated_epoch": 1779827999,
+  "verified_events": 17218,
+  "verified_runs": 5000
+}
