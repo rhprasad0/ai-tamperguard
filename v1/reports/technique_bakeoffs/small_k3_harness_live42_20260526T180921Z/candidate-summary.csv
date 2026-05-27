@@ -1,0 +1,7 @@
+name,technique,profile,status,deployability_class,leakage_verdict,score
+logistic_regression/default_balanced,logistic_regression,default_balanced,leakage_suspect,direct_spl,leakage_suspect,0.85
+logistic_regression/stronger_regularization,logistic_regression,stronger_regularization,leakage_suspect,direct_spl,leakage_suspect,0.8474999999999999
+linear_sgd/log_loss_balanced,linear_sgd,log_loss_balanced,leakage_suspect,linear_local_only,leakage_suspect,0.5375
+linear_sgd/hinge_balanced,linear_sgd,hinge_balanced,leakage_suspect,offline_only,leakage_suspect,0.645
+decision_tree/stump,decision_tree,stump,leakage_suspect,generated_spl_planned,leakage_suspect,0.7875
+decision_tree/shallow,decision_tree,shallow,leakage_suspect,offline_only,leakage_suspect,0.7625

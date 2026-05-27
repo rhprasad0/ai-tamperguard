@@ -1,0 +1,635 @@
+{
+  "candidates": [
+    {
+      "deployability_class": "direct_spl",
+      "leakage_verdict": "leakage_suspect",
+      "metrics": {
+        "test": {
+          "average_precision": 0.4705387205387205,
+          "balanced_accuracy": 0.45,
+          "confusion_matrix": [
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "f1": 0.5,
+          "precision": 0.5,
+          "probability_std": 0.12882720650637802,
+          "recall": 0.5,
+          "roc_auc": 0.3333333333333333,
+          "unique_score_count": 7
+        },
+        "train": {
+          "average_precision": 0.6113155624568668,
+          "balanced_accuracy": 0.7029411764705882,
+          "confusion_matrix": [
+            [
+              12,
+              5
+            ],
+            [
+              3,
+              7
+            ]
+          ],
+          "f1": 0.6363636363636364,
+          "precision": 0.5833333333333334,
+          "probability_std": 0.14444401958156855,
+          "recall": 0.7,
+          "roc_auc": 0.7705882352941177,
+          "unique_score_count": 13
+        },
+        "validation": {
+          "average_precision": 1.0,
+          "balanced_accuracy": 1.0,
+          "confusion_matrix": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "f1": 1.0,
+          "precision": 1.0,
+          "probability_std": 0.2550426754890695,
+          "recall": 1.0,
+          "roc_auc": 1.0,
+          "unique_score_count": 3
+        }
+      },
+      "name": "logistic_regression/default_balanced",
+      "negative_control": {
+        "negative_control_validation_ap": 1.0,
+        "negative_control_validation_ap_drop": 0.0
+      },
+      "notes": [
+        "negative control AP drop below required threshold",
+        "exported linear artifact matched estimator probabilities locally"
+      ],
+      "profile": "default_balanced",
+      "score": 0.85,
+      "status": "leakage_suspect",
+      "technique": "logistic_regression"
+    },
+    {
+      "deployability_class": "direct_spl",
+      "leakage_verdict": "leakage_suspect",
+      "metrics": {
+        "test": {
+          "average_precision": 0.4705387205387205,
+          "balanced_accuracy": 0.4666666666666667,
+          "confusion_matrix": [
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ],
+          "f1": 0.4,
+          "precision": 0.5,
+          "probability_std": 0.07512813948788817,
+          "recall": 0.3333333333333333,
+          "roc_auc": 0.3333333333333333,
+          "unique_score_count": 7
+        },
+        "train": {
+          "average_precision": 0.6088046675546674,
+          "balanced_accuracy": 0.6323529411764706,
+          "confusion_matrix": [
+            [
+              13,
+              4
+            ],
+            [
+              5,
+              5
+            ]
+          ],
+          "f1": 0.5263157894736842,
+          "precision": 0.5555555555555556,
+          "probability_std": 0.07862745862742065,
+          "recall": 0.5,
+          "roc_auc": 0.7705882352941176,
+          "unique_score_count": 13
+        },
+        "validation": {
+          "average_precision": 1.0,
+          "balanced_accuracy": 1.0,
+          "confusion_matrix": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "f1": 1.0,
+          "precision": 1.0,
+          "probability_std": 0.13924899148526737,
+          "recall": 1.0,
+          "roc_auc": 1.0,
+          "unique_score_count": 3
+        }
+      },
+      "name": "logistic_regression/stronger_regularization",
+      "negative_control": {
+        "negative_control_validation_ap": 1.0,
+        "negative_control_validation_ap_drop": 0.0
+      },
+      "notes": [
+        "negative control AP drop below required threshold",
+        "exported linear artifact matched estimator probabilities locally"
+      ],
+      "profile": "stronger_regularization",
+      "score": 0.8474999999999999,
+      "status": "leakage_suspect",
+      "technique": "logistic_regression"
+    },
+    {
+      "deployability_class": "linear_local_only",
+      "leakage_verdict": "leakage_suspect",
+      "metrics": {
+        "test": {
+          "average_precision": 0.5454545454545454,
+          "balanced_accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ]
+          ],
+          "f1": 0.7058823529411765,
+          "precision": 0.5454545454545454,
+          "probability_std": 0.0,
+          "recall": 1.0,
+          "roc_auc": 0.5,
+          "unique_score_count": 1
+        },
+        "train": {
+          "average_precision": 0.4166666666666667,
+          "balanced_accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              0,
+              17
+            ],
+            [
+              0,
+              10
+            ]
+          ],
+          "f1": 0.5405405405405406,
+          "precision": 0.37037037037037035,
+          "probability_std": 9.011899124637898e-15,
+          "recall": 1.0,
+          "roc_auc": 0.5882352941176471,
+          "unique_score_count": 3
+        },
+        "validation": {
+          "average_precision": 0.6666666666666666,
+          "balanced_accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "f1": 0.6666666666666666,
+          "precision": 0.5,
+          "probability_std": 1.1102230246251565e-16,
+          "recall": 1.0,
+          "roc_auc": 0.75,
+          "unique_score_count": 2
+        }
+      },
+      "name": "linear_sgd/log_loss_balanced",
+      "negative_control": {
+        "negative_control_validation_ap": 1.0,
+        "negative_control_validation_ap_drop": -0.33333333333333337
+      },
+      "notes": [
+        "constant predictor on validation",
+        "negative control AP drop below required threshold"
+      ],
+      "profile": "log_loss_balanced",
+      "score": 0.5375,
+      "status": "leakage_suspect",
+      "technique": "linear_sgd"
+    },
+    {
+      "deployability_class": "offline_only",
+      "leakage_verdict": "leakage_suspect",
+      "metrics": {
+        "test": {
+          "average_precision": 0.4705387205387205,
+          "balanced_accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              5,
+              0
+            ],
+            [
+              6,
+              0
+            ]
+          ],
+          "f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "roc_auc": 0.3333333333333333,
+          "unique_score_count": 7
+        },
+        "train": {
+          "average_precision": 0.6283928571428572,
+          "balanced_accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              17,
+              0
+            ],
+            [
+              10,
+              0
+            ]
+          ],
+          "f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "roc_auc": 0.7764705882352941,
+          "unique_score_count": 13
+        },
+        "validation": {
+          "average_precision": 1.0,
+          "balanced_accuracy": 0.5,
+          "confusion_matrix": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ],
+          "f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "roc_auc": 1.0,
+          "unique_score_count": 3
+        }
+      },
+      "name": "linear_sgd/hinge_balanced",
+      "negative_control": {
+        "negative_control_validation_ap": 1.0,
+        "negative_control_validation_ap_drop": 0.0
+      },
+      "notes": [
+        "constant predictor on validation",
+        "negative control AP drop below required threshold"
+      ],
+      "profile": "hinge_balanced",
+      "score": 0.645,
+      "status": "leakage_suspect",
+      "technique": "linear_sgd"
+    },
+    {
+      "deployability_class": "generated_spl_planned",
+      "leakage_verdict": "leakage_suspect",
+      "metrics": {
+        "test": {
+          "average_precision": 0.51010101010101,
+          "balanced_accuracy": 0.3833333333333333,
+          "confusion_matrix": [
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              1
+            ]
+          ],
+          "f1": 0.2222222222222222,
+          "precision": 0.3333333333333333,
+          "probability_std": 0.18239447363319883,
+          "recall": 0.16666666666666666,
+          "roc_auc": 0.38333333333333336,
+          "unique_score_count": 2
+        },
+        "train": {
+          "average_precision": 0.4842592592592592,
+          "balanced_accuracy": 0.6205882352941177,
+          "confusion_matrix": [
+            [
+              16,
+              1
+            ],
+            [
+              7,
+              3
+            ]
+          ],
+          "f1": 0.42857142857142855,
+          "precision": 0.75,
+          "probability_std": 0.14548857471927748,
+          "recall": 0.3,
+          "roc_auc": 0.6205882352941177,
+          "unique_score_count": 2
+        },
+        "validation": {
+          "average_precision": 1.0,
+          "balanced_accuracy": 1.0,
+          "confusion_matrix": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "f1": 1.0,
+          "precision": 1.0,
+          "probability_std": 0.20477113813972628,
+          "recall": 1.0,
+          "roc_auc": 1.0,
+          "unique_score_count": 2
+        }
+      },
+      "name": "decision_tree/stump",
+      "negative_control": {
+        "negative_control_validation_ap": 1.0,
+        "negative_control_validation_ap_drop": 0.0
+      },
+      "notes": [
+        "negative control AP drop below required threshold"
+      ],
+      "profile": "stump",
+      "score": 0.7875,
+      "status": "leakage_suspect",
+      "technique": "decision_tree"
+    },
+    {
+      "deployability_class": "offline_only",
+      "leakage_verdict": "leakage_suspect",
+      "metrics": {
+        "test": {
+          "average_precision": 0.43118686868686873,
+          "balanced_accuracy": 0.26666666666666666,
+          "confusion_matrix": [
+            [
+              1,
+              4
+            ],
+            [
+              4,
+              2
+            ]
+          ],
+          "f1": 0.3333333333333333,
+          "precision": 0.3333333333333333,
+          "probability_std": 0.28020828450218294,
+          "recall": 0.3333333333333333,
+          "roc_auc": 0.21666666666666662,
+          "unique_score_count": 5
+        },
+        "train": {
+          "average_precision": 0.6984405458089669,
+          "balanced_accuracy": 0.7205882352941176,
+          "confusion_matrix": [
+            [
+              16,
+              1
+            ],
+            [
+              5,
+              5
+            ]
+          ],
+          "f1": 0.625,
+          "precision": 0.8333333333333334,
+          "probability_std": 0.25313840701007995,
+          "recall": 0.5,
+          "roc_auc": 0.788235294117647,
+          "unique_score_count": 5
+        },
+        "validation": {
+          "average_precision": 1.0,
+          "balanced_accuracy": 1.0,
+          "confusion_matrix": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "f1": 1.0,
+          "precision": 1.0,
+          "probability_std": 0.3203316374599586,
+          "recall": 1.0,
+          "roc_auc": 1.0,
+          "unique_score_count": 2
+        }
+      },
+      "name": "decision_tree/shallow",
+      "negative_control": {
+        "negative_control_validation_ap": 1.0,
+        "negative_control_validation_ap_drop": 0.0
+      },
+      "notes": [
+        "negative control AP drop below required threshold"
+      ],
+      "profile": "shallow",
+      "score": 0.7625,
+      "status": "leakage_suspect",
+      "technique": "decision_tree"
+    }
+  ],
+  "dataset": {
+    "label_distribution": {
+      "0": 24,
+      "1": 18
+    },
+    "rows": 42,
+    "smoke_test_sized_fixture": true,
+    "source_batch_ids": [
+      "small_k3_harness_live42_20260526T180921Z"
+    ],
+    "source_csv": "data/training/small_k3_harness_live42_20260526T180921Z/windows_actor_15m.csv",
+    "source_csv_sha256": "f4e3a735742eb5af511868ce13658189730e0c99ea65ae1ccb2a4b38aa61d59b",
+    "split_distribution": {
+      "test": 11,
+      "train": 27,
+      "validation": 4
+    },
+    "split_strategy": "deterministic_hash"
+  },
+  "decision": "No candidate is promoted because leakage probes were suspect; metrics are diagnostics only.",
+  "feature_policy": {
+    "allowlist": [
+      "feature_action_switch_count",
+      "feature_distinct_object_type_count",
+      "feature_distinct_surface_count",
+      "feature_event_count",
+      "feature_search_count",
+      "feature_visibility_object_read_count"
+    ],
+    "allowlist_resolved": [
+      "feature_action_switch_count",
+      "feature_distinct_object_type_count",
+      "feature_distinct_surface_count",
+      "feature_event_count",
+      "feature_search_count",
+      "feature_visibility_object_read_count"
+    ],
+    "csv_feature_columns_unclassified": [],
+    "denylist_cross_split_population_applied": [
+      "feature_actor_action_rarity_bucket",
+      "feature_object_type_actor_rarity_bucket"
+    ],
+    "denylist_generator_signature_applied": [
+      "feature_actor_admin_context_flag",
+      "feature_alert_modify_count",
+      "feature_audit_config_change_seen_count",
+      "feature_broad_to_narrow_count",
+      "feature_capability_allowed_change_count",
+      "feature_capability_denied_count",
+      "feature_change_to_requery_min_gap_bucket",
+      "feature_config_change_count",
+      "feature_dashboard_modify_count",
+      "feature_detection_disable_count",
+      "feature_detection_throttle_or_narrow_count",
+      "feature_disk_change_gap_count",
+      "feature_downstream_contradiction_count",
+      "feature_downstream_mismatch_after_visibility_change_flag",
+      "feature_downstream_omission_count",
+      "feature_enabled_to_disabled_count",
+      "feature_evidence_target_overlap_count",
+      "feature_evidence_then_report_omission_flag",
+      "feature_evidence_to_macro_filter_sequence_flag",
+      "feature_evidence_to_risk_tuning_sequence_flag",
+      "feature_global_visibility_object_write_count",
+      "feature_high_criticality_object_touch_count",
+      "feature_high_criticality_object_write_count",
+      "feature_high_risk_combo_count",
+      "feature_intermediate_finding_review_count",
+      "feature_large_change_count",
+      "feature_lookup_filter_change_count",
+      "feature_macro_filter_change_count",
+      "feature_modify_then_requery_flag",
+      "feature_notable_hidden_after_creation_count",
+      "feature_notable_not_created_count",
+      "feature_permission_denied_count",
+      "feature_permission_probe_before_change_flag",
+      "feature_probe_denied_then_report_flag",
+      "feature_protected_evidence_agreement_count",
+      "feature_protected_evidence_seen_count",
+      "feature_read_modify_report_sequence_flag",
+      "feature_report_write_count",
+      "feature_requery_after_change_count",
+      "feature_risk_context_review_count",
+      "feature_risk_score_tuning_count",
+      "feature_saved_search_modify_count",
+      "feature_search_modify_report_sequence_flag",
+      "feature_search_then_modify_flag",
+      "feature_search_to_change_min_gap_bucket",
+      "feature_state_changed_after_evidence_access_flag",
+      "feature_suppression_after_creation_count",
+      "feature_suppression_or_throttle_present",
+      "feature_suppression_vs_throttle_disambiguated_flag",
+      "feature_throttle_before_creation_count",
+      "feature_visibility_decrease_count",
+      "feature_visibility_object_write_count"
+    ],
+    "leakage_probe_overrides": {},
+    "policy_path": "config/feature_policy_v1.yaml",
+    "policy_sha256": "f74b497a1016b5400052f0ea2827f1a3840e519b852cc7f7cb0bcfa4df069e90",
+    "selection_mode": "explicit_allowlist_only"
+  },
+  "gate_summary": [
+    {
+      "gate": "required_columns",
+      "notes": "10 required columns present",
+      "status": "passed"
+    },
+    {
+      "gate": "feature_policy",
+      "notes": "explicit allowlist resolved",
+      "status": "passed"
+    },
+    {
+      "gate": "splits",
+      "notes": "deterministic_hash by scenario_run_id",
+      "status": "passed"
+    },
+    {
+      "gate": "leakage_probes",
+      "notes": "leakage_suspect",
+      "status": "warning"
+    }
+  ],
+  "leakage_probes": {
+    "cross_split_correlation_probe_passed": true,
+    "negative_control_validation_ap": 1.0,
+    "negative_control_validation_ap_drop": 0.0,
+    "single_feature_auc_failures": [],
+    "single_feature_auc_max": 0.6911764705882353,
+    "single_feature_auc_per_feature": {
+      "feature_action_switch_count": 0.6058823529411764,
+      "feature_distinct_object_type_count": 0.6911764705882353,
+      "feature_distinct_surface_count": 0.6617647058823529,
+      "feature_event_count": 0.6411764705882352,
+      "feature_search_count": 0.5441176470588236,
+      "feature_visibility_object_read_count": 0.5529411764705882
+    },
+    "top_single_feature_auc": [
+      [
+        "feature_distinct_object_type_count",
+        0.6911764705882353
+      ],
+      [
+        "feature_distinct_surface_count",
+        0.6617647058823529
+      ],
+      [
+        "feature_event_count",
+        0.6411764705882352
+      ],
+      [
+        "feature_action_switch_count",
+        0.6058823529411764
+      ],
+      [
+        "feature_visibility_object_read_count",
+        0.5529411764705882
+      ]
+    ],
+    "verdict": "leakage_suspect"
+  },
+  "selected_candidate": null
+}
