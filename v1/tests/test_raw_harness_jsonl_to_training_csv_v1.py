@@ -162,8 +162,18 @@ def _write_training_fixture(tmp_path: Path) -> tuple[Path, Path]:
     _write_jsonl(
         answer_key,
         [
-            {"scenario_run_id": "scenario_010_run_001", "label_family": "evidence_laundering", "label_source": "scenario_answer_key"},
-            {"scenario_run_id": "scenario_004_run_001", "label_family": "benign_investigation", "label_source": "scenario_answer_key"},
+            {
+                "scenario_run_id": "scenario_010_run_001",
+                "label_family": "evidence_laundering",
+                "label_source": "scenario_answer_key",
+                "reset_id": "reset_010",
+            },
+            {
+                "scenario_run_id": "scenario_004_run_001",
+                "label_family": "benign_investigation",
+                "label_source": "scenario_answer_key",
+                "reset_id": "reset_004",
+            },
         ],
     )
     return batch, answer_key
@@ -178,13 +188,17 @@ def test_converts_raw_export_batch_to_training_csv(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     rows = _read_csv(output)
     assert len(rows) == 2
+    assert {row["window_type"] for row in rows} == {"actor_15m"}
+    assert {row["source_batch_id"] for row in rows} == {"batch_001"}
     by_run = {row["scenario_run_id"]: row for row in rows}
     positive = by_run["scenario_010_run_001"]
+    assert positive["reset_id"] == "reset_010"
     assert positive["label_binary"] == "1"
     assert positive["feature_visibility_decrease_count"] == "1"
     assert positive["feature_downstream_omission_count"] == "1"
     assert positive["feature_search_modify_report_sequence_flag"] == "1"
     control = by_run["scenario_004_run_001"]
+    assert control["reset_id"] == "reset_004"
     assert control["label_binary"] == "0"
     assert control["feature_visibility_decrease_count"] == "0"
 
@@ -315,10 +329,10 @@ def test_training_csv_boundary_strips_manifest_and_source_audit_columns(tmp_path
         "prompt_variant_id",
         "actor_prompt_path",
         "synthetic_case_id",
-        "source_batch_id",
         "source_input_path_count",
     }
     assert rows
+    assert rows[0]["source_batch_id"] == "batch_001"
     assert forbidden.isdisjoint(rows[0])
     assert all(key.startswith("feature_") or key in {
         "window_id",
@@ -334,6 +348,7 @@ def test_training_csv_boundary_strips_manifest_and_source_audit_columns(tmp_path
         "label_confidence",
         "outcome",
         "split_id",
+        "source_batch_id",
     } for key in rows[0])
 
 

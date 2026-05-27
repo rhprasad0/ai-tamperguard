@@ -13,8 +13,17 @@ from ai_tamperguard_v1.io import read_jsonl, write_csv_rows  # noqa: E402
 from ai_tamperguard_v1.schema import load_schema, validate_rows  # noqa: E402
 
 EVENT_FILE_NAME = "public_safe_events.jsonl"
-ID_COLUMNS = ["window_id", "scenario_run_id", "actor_id", "window_start_relative_sec", "window_end_relative_sec"]
+ID_COLUMNS = [
+    "window_id",
+    "scenario_run_id",
+    "reset_id",
+    "actor_id",
+    "window_type",
+    "window_start_relative_sec",
+    "window_end_relative_sec",
+]
 LABEL_COLUMNS = ["label_binary", "label_family", "label_source", "label_confidence", "outcome", "split_id"]
+AUDIT_COLUMNS = ["source_batch_id"]
 
 
 class UserInputError(Exception):
@@ -29,7 +38,7 @@ def main() -> int:
     parser.add_argument("--output", required=True, help="Output training CSV path.")
     parser.add_argument("--window-size-sec", type=int, default=900, help="Behavior window size in seconds. Default: 900.")
     parser.add_argument("--allow-unlabeled", action="store_true", help="Emit background_unlabeled labels for debug exports.")
-    parser.add_argument("--add-source-batch-column", action="store_true", help="Add source_batch_id/source_input_path_count audit columns.")
+    parser.add_argument("--add-source-batch-column", action="store_true", help="Deprecated no-op; source_batch_id is always emitted.")
     parser.add_argument("--allow-public-output", action="store_true", help="Allow output outside data/training for explicitly reviewed public fixtures.")
     parser.add_argument("--fail-on-empty", dest="fail_on_empty", action="store_true", default=True)
     parser.add_argument("--no-fail-on-empty", dest="fail_on_empty", action="store_false")
@@ -60,8 +69,7 @@ def main() -> int:
         if not rows and args.fail_on_empty:
             raise UserInputError("no derived behavior-window rows produced")
         validate_rows("behavior_window_v1.schema.json", rows)
-        if args.add_source_batch_column:
-            rows = add_source_audit_columns(rows, source_by_run, len(event_files))
+        rows = add_source_audit_columns(rows, source_by_run, len(event_files))
         rows = published_training_rows(rows)
         fieldnames = output_fieldnames(rows)
         write_csv_rows(output, rows, fieldnames=fieldnames)
@@ -244,7 +252,7 @@ def add_source_audit_columns(rows: list[dict[str, Any]], source_by_run: dict[str
 def output_fieldnames(rows: list[dict[str, Any]]) -> list[str]:
     schema_props = load_schema("behavior_window_v1.schema.json").get("properties", {})
     feature_columns = [key for key in schema_props if key.startswith("feature_")]
-    known = ID_COLUMNS + feature_columns + LABEL_COLUMNS
+    known = ID_COLUMNS + feature_columns + LABEL_COLUMNS + AUDIT_COLUMNS
     extras: list[str] = []
     for row in rows:
         for key in row:
@@ -256,10 +264,11 @@ def output_fieldnames(rows: list[dict[str, Any]]) -> list[str]:
 def published_training_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Apply the public training boundary: IDs/labels plus feature_* only.
 
-    Run-manifest provenance such as scenario_id/path_type/prompt IDs, source audit
-    columns, and actor prompt paths stays in private manifests, not published CSVs.
+    Run-manifest provenance such as scenario_id/path_type/prompt IDs, bulky source
+    audit columns, and actor prompt paths stays in private manifests, not published
+    CSVs. source_batch_id is retained as reviewed non-feature lineage metadata.
     """
-    allowed = set(ID_COLUMNS + LABEL_COLUMNS)
+    allowed = set(ID_COLUMNS + LABEL_COLUMNS + AUDIT_COLUMNS)
     return [
         {key: value for key, value in row.items() if key in allowed or key.startswith("feature_")}
         for row in rows

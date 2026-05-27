@@ -1,0 +1,230 @@
+{
+  "deployability_class": "direct_spl",
+  "feature_order": [
+    "feature_action_switch_count",
+    "feature_distinct_object_type_count",
+    "feature_distinct_surface_count",
+    "feature_event_count",
+    "feature_search_count",
+    "feature_visibility_object_read_count"
+  ],
+  "feature_policy": {
+    "allowlist": [
+      "feature_action_switch_count",
+      "feature_distinct_object_type_count",
+      "feature_distinct_surface_count",
+      "feature_event_count",
+      "feature_search_count",
+      "feature_visibility_object_read_count"
+    ],
+    "allowlist_resolved": [
+      "feature_action_switch_count",
+      "feature_distinct_object_type_count",
+      "feature_distinct_surface_count",
+      "feature_event_count",
+      "feature_search_count",
+      "feature_visibility_object_read_count"
+    ],
+    "csv_feature_columns_unclassified": [],
+    "denylist_cross_split_population_applied": [
+      "feature_actor_action_rarity_bucket",
+      "feature_object_type_actor_rarity_bucket"
+    ],
+    "denylist_generator_signature_applied": [
+      "feature_actor_admin_context_flag",
+      "feature_alert_modify_count",
+      "feature_audit_config_change_seen_count",
+      "feature_broad_to_narrow_count",
+      "feature_capability_allowed_change_count",
+      "feature_capability_denied_count",
+      "feature_change_to_requery_min_gap_bucket",
+      "feature_config_change_count",
+      "feature_dashboard_modify_count",
+      "feature_detection_disable_count",
+      "feature_detection_throttle_or_narrow_count",
+      "feature_disk_change_gap_count",
+      "feature_downstream_contradiction_count",
+      "feature_downstream_mismatch_after_visibility_change_flag",
+      "feature_downstream_omission_count",
+      "feature_enabled_to_disabled_count",
+      "feature_evidence_target_overlap_count",
+      "feature_evidence_then_report_omission_flag",
+      "feature_evidence_to_macro_filter_sequence_flag",
+      "feature_evidence_to_risk_tuning_sequence_flag",
+      "feature_global_visibility_object_write_count",
+      "feature_high_criticality_object_touch_count",
+      "feature_high_criticality_object_write_count",
+      "feature_high_risk_combo_count",
+      "feature_intermediate_finding_review_count",
+      "feature_large_change_count",
+      "feature_lookup_filter_change_count",
+      "feature_macro_filter_change_count",
+      "feature_modify_then_requery_flag",
+      "feature_notable_hidden_after_creation_count",
+      "feature_notable_not_created_count",
+      "feature_permission_denied_count",
+      "feature_permission_probe_before_change_flag",
+      "feature_probe_denied_then_report_flag",
+      "feature_protected_evidence_agreement_count",
+      "feature_protected_evidence_seen_count",
+      "feature_read_modify_report_sequence_flag",
+      "feature_report_write_count",
+      "feature_requery_after_change_count",
+      "feature_risk_context_review_count",
+      "feature_risk_score_tuning_count",
+      "feature_saved_search_modify_count",
+      "feature_search_modify_report_sequence_flag",
+      "feature_search_then_modify_flag",
+      "feature_search_to_change_min_gap_bucket",
+      "feature_state_changed_after_evidence_access_flag",
+      "feature_suppression_after_creation_count",
+      "feature_suppression_or_throttle_present",
+      "feature_suppression_vs_throttle_disambiguated_flag",
+      "feature_throttle_before_creation_count",
+      "feature_visibility_decrease_count",
+      "feature_visibility_object_write_count"
+    ],
+    "leakage_probe_overrides": {},
+    "policy_path": "config/feature_policy_v1.yaml",
+    "policy_sha256": "f74b497a1016b5400052f0ea2827f1a3840e519b852cc7f7cb0bcfa4df069e90",
+    "selection_mode": "explicit_allowlist_only"
+  },
+  "leakage_probes": {
+    "cross_split_correlation_probe_passed": true,
+    "negative_control_validation_ap": 0.23473500586835022,
+    "negative_control_validation_ap_drop": 0.41676403810959967,
+    "single_feature_auc_failures": [],
+    "single_feature_auc_max": 0.7508732157419897,
+    "single_feature_auc_per_feature": {
+      "feature_action_switch_count": 0.7508732157419897,
+      "feature_distinct_object_type_count": 0.7147404060246614,
+      "feature_distinct_surface_count": 0.613737169612719,
+      "feature_event_count": 0.6993541993285542,
+      "feature_search_count": 0.6485295953031849,
+      "feature_visibility_object_read_count": 0.65793023506301
+    },
+    "top_single_feature_auc": [
+      [
+        "feature_action_switch_count",
+        0.7508732157419897
+      ],
+      [
+        "feature_distinct_object_type_count",
+        0.7147404060246614
+      ],
+      [
+        "feature_event_count",
+        0.6993541993285542
+      ],
+      [
+        "feature_visibility_object_read_count",
+        0.65793023506301
+      ],
+      [
+        "feature_search_count",
+        0.6485295953031849
+      ]
+    ],
+    "verdict": "honest"
+  },
+  "metrics": {
+    "test": {
+      "average_precision": 0.6274629398977385,
+      "balanced_accuracy": 0.7868024980631507,
+      "confusion_matrix": [
+        [
+          585,
+          163
+        ],
+        [
+          59,
+          224
+        ]
+      ],
+      "f1": 0.6686567164179105,
+      "precision": 0.5788113695090439,
+      "probability_std": 0.28596417517828393,
+      "recall": 0.7915194346289752,
+      "roc_auc": 0.8140199542714611,
+      "unique_score_count": 25
+    },
+    "train": {
+      "average_precision": 0.6048898876865504,
+      "balanced_accuracy": 0.7666626204393747,
+      "confusion_matrix": [
+        [
+          1693,
+          476
+        ],
+        [
+          200,
+          609
+        ]
+      ],
+      "f1": 0.6430834213305174,
+      "precision": 0.5612903225806452,
+      "probability_std": 0.2765057975681198,
+      "recall": 0.7527812113720643,
+      "roc_auc": 0.8071197643386043,
+      "unique_score_count": 26
+    },
+    "validation": {
+      "average_precision": 0.6514990439779499,
+      "balanced_accuracy": 0.7825008697380846,
+      "confusion_matrix": [
+        [
+          550,
+          156
+        ],
+        [
+          61,
+          224
+        ]
+      ],
+      "f1": 0.6736842105263158,
+      "precision": 0.5894736842105263,
+      "probability_std": 0.2837290132984643,
+      "recall": 0.7859649122807018,
+      "roc_auc": 0.8269643655881914,
+      "unique_score_count": 27
+    }
+  },
+  "model_type": "logistic_regression_sklearn",
+  "non_claims": [
+    "weak proxy labels, not malicious ground truth",
+    "offline model comparison, not production detection quality",
+    "not a public benchmark result",
+    "local bakeoff metrics do not prove Splunk-side success",
+    "feature set restricted to explicit allowlist; prefix-based selection forbidden"
+  ],
+  "parameters": {
+    "coefficients": [
+      1.9443622718913536,
+      0.9954648385405293,
+      -0.5097905610950929,
+      -1.036999353508308,
+      0.3686187777400205,
+      0.7186512093013647
+    ],
+    "intercept": -2.8691597003116462
+  },
+  "profile": "default_balanced",
+  "schema_version": "model_artifact_v1_bakeoff",
+  "score_fields": {
+    "prediction": "prediction_local",
+    "probability": "probability_local",
+    "score": "score_local"
+  },
+  "technique": "logistic_regression",
+  "threshold": 0.5,
+  "training_metadata": {
+    "python_version": "3.14.2",
+    "random_seed": 260527,
+    "sklearn_version": "1.8.0",
+    "source_csv_sha256": "96d70cf9f8e1448d963331a898a5168711f8687bfbfc072aa771a03aebc159ca",
+    "test_row_count": 1031,
+    "train_row_count": 2978,
+    "training_git_sha": "1c95fb0f73f28adf224ac7b61006c1025e53ff3b",
+    "validation_row_count": 991
+  }
+}
