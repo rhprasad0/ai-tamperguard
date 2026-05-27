@@ -78,6 +78,37 @@ uv run --directory v1 python scripts/raw_harness_jsonl_to_training_csv_v1.py \
 
 Published training windows should not expose answer-key-shaped metadata such as `scenario_id`, `path_type`, prompt IDs, or template IDs; keep only allowed IDs, label fields, and numeric/boolean `feature_*` columns.
 
+### 5. Run the external AutoResearch / technique bakeoff
+
+Use this **after** a behavior-window training CSV exists. This is an offline-only research harness inspired by Karpathy's AutoResearch pattern: fixed data + fixed evaluator + bounded model recipes. The LLM/agent may propose or run bounded candidate recipes, but the evaluator owns promotion.
+
+```bash
+BATCH_ID="<batch_id>"
+uv run --directory v1 python scripts/run_external_technique_bakeoff_v1.py \
+  --features "data/training/$BATCH_ID/windows_actor_15m.csv" \
+  --feature-policy config/feature_policy_v1.yaml \
+  --output-dir "reports/technique_bakeoffs/$BATCH_ID" \
+  --split-strategy deterministic_hash \
+  --seed 260527
+```
+
+For tiny smoke fixtures only, add `--allow-small-fixture`. Do not use that flag as evidence of model quality.
+
+Expected outputs:
+
+- `reports/technique_bakeoffs/<batch_id>/bakeoff-report.md`
+- `reports/technique_bakeoffs/<batch_id>/bakeoff-results.json`
+- `reports/technique_bakeoffs/<batch_id>/candidate-summary.csv`
+- `reports/technique_bakeoffs/<batch_id>/selected-model-artifact.json` only when a candidate is promotable/exported
+
+Bakeoff guardrails:
+
+- Keep feature selection explicit via `config/feature_policy_v1.yaml`; do not train on all `feature_*` columns by prefix.
+- Treat `denylist_generator_signature` and `denylist_cross_split_population` as hard review boundaries unless the user asks to revise the policy.
+- No candidate should be promoted if split, leakage, constant-predictor, artifact-export, or local artifact-scoring gates fail.
+- Local bakeoff metrics are diagnostics over weak proxy labels; they are not production detection quality and do not prove Splunk-side success.
+- Direct-SPL deployability is only a preview until a separate local-vs-Splunk equivalence check exists.
+
 ## Live harness pattern
 
 Only use this section after explicit user approval for a live run.
