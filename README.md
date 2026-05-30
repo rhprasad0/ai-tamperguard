@@ -1,12 +1,16 @@
 # AI TamperGuard
 
-AI TamperGuard is an experimental defensive dataset and detection prototype for identifying when AI agents or automated operators try to weaken monitoring, auditability, or alerting controls inside an authorized Splunk lab.
+AI TamperGuard is an archived experimental defensive dataset and detection prototype for identifying when AI agents or automated operators try to weaken monitoring, auditability, or alerting controls inside an authorized Splunk lab.
 
-The goal is to create a Splunk-native benchmark for **monitoring-control-plane tampering**: not just raw logs, but labeled behavior windows that can be used to train, evaluate, and demo tamper detection with Splunk AI Toolkit / MLTK.
+**Final status:** this project stops at the v1 evidence/data plumbing milestone. It produced a live-backed 5,000-row behavior-window corpus and a leakage-aware baseline-model bakeoff, but the custom model was **not deployed into Splunk**. The engineering judgment call was that simple SPL scoring is mechanically easy, while live feature normalization, train/serve parity, and trustworthy Splunk-side inference would require a separate deployment project.
+
+See [`docs/project-closeout.md`](docs/project-closeout.md) for the final wrap-up.
+
+The original goal was to create a Splunk-native benchmark for **monitoring-control-plane tampering**: not just raw logs, but labeled behavior windows that can be used to train, evaluate, and demo tamper detection with Splunk AI Toolkit / MLTK.
 
 ## What we are trying to build
 
-This project will produce a synthetic, public-safe dataset with:
+This project produced a synthetic, public-safe dataset trail with:
 
 - synthetic Splunk control-plane, audit, search, config, and alert-change events
 - benign admin activity and detection tuning examples
@@ -68,9 +72,15 @@ schemas/
 
 ## Status
 
-v0 is now organized as a self-contained milestone under [`v0/`](v0/). It proves the downstream training/deployment loop using authorized Splunk lab data: local feature extraction, deterministic splitting, local baseline training, SPL scoring artifact rendering, Splunk-side holdout scoring, local-vs-Splunk equivalence verification, and public-safety checks.
+**Archived at v1.** The v0 milestone proved the downstream training/deployment boundary as a smoke test. The v1 milestone then produced a live-backed 5,000-row behavior-window corpus and an AutoResearch-style technique bakeoff. The selected baseline was `logistic_regression/default_balanced`, but the model was not deployed into Splunk.
+
+The final engineering call is documented in [`docs/project-closeout.md`](docs/project-closeout.md): this repo is a successful evidence/data plumbing experiment, not a production detector and not a completed Splunk deployment.
+
+v0 remains organized as a self-contained milestone under [`v0/`](v0/). It proved the downstream training/deployment loop using authorized Splunk lab data: local feature extraction, deterministic splitting, local baseline training, SPL scoring artifact rendering, Splunk-side holdout scoring, local-vs-Splunk equivalence verification, and public-safety checks.
 
 Start with [`v0/README.md`](v0/README.md), then see [`v0/docs/v0-model-pipeline-spec.md`](v0/docs/v0-model-pipeline-spec.md).
+
+For the v1 closeout trail, see [`v1/README.md`](v1/README.md), [`docs/scenario-design.md`](docs/scenario-design.md), [`v1/reports/5k_runs/all_scenarios_5k_live_20260526T201126Z/final_validation.md`](v1/reports/5k_runs/all_scenarios_5k_live_20260526T201126Z/final_validation.md), and [`v1/reports/technique_bakeoffs/all_scenarios_5k_live_20260526T201126Z_fixed_csv_autoresearch_probe/bakeoff-report.md`](v1/reports/technique_bakeoffs/all_scenarios_5k_live_20260526T201126Z_fixed_csv_autoresearch_probe/bakeoff-report.md).
 
 For finished-corpus planning, see [`docs/finished-dataset-requirements.md`](docs/finished-dataset-requirements.md) and the v1 scenario library in [`docs/scenario-design.md`](docs/scenario-design.md).
 

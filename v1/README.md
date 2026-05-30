@@ -2,6 +2,8 @@
 
 This workspace contains the V1 dataset pipeline scaffold for a scenario-grounded Splunk observability-tamper corpus.
 
+**Final v1 status:** archived as an evidence/data plumbing milestone. The project produced a live-backed 5,000-row behavior-window corpus and a bounded AutoResearch / technique bakeoff, but the selected custom model was not deployed into Splunk. See [`../docs/project-closeout.md`](../docs/project-closeout.md).
+
 ## Boundary
 
 - Public artifacts under `data/public_sample/` are redacted and use stable pseudonyms.
@@ -134,13 +136,15 @@ Run live readiness only after creating an ignored private lab config; write the 
 uv run --directory v1 python scripts/check_splunk_readiness_v1.py --config splunk/private/lab.toml --output reports/runs/splunk-readiness-local.md
 ```
 
-## First all-scenario training target
+## First all-scenario training result
 
-The next all-scenario expansion target is a **5,000 behavior-window** training batch with lots of variation across scenario, prompt family, actor profile, path type, object family, and outcome.
+The all-scenario expansion target completed as the live batch `all_scenarios_5k_live_20260526T201126Z`:
 
-Resolved defaults for the next implementation plan:
+- 5,000 live-backed behavior-window rows.
+- 17,218 Splunk read-back verified events.
+- 60 `feature_*` columns, with a six-feature explicit model allowlist for the final bakeoff.
+- Selected bakeoff candidate: `logistic_regression/default_balanced`.
 
-- replace `scenario_subset_v1.jsonl` with `scenario_catalog_v1.jsonl` as the authoritative scenario source;
-- track public-safe generated actor prompt bodies under `data/run_manifests/`;
-- use `input_or_token_tamper` as the first default scenario-family holdout;
-- validate row count, label balance, scenario/path coverage, split leakage, and public safety before using the CSV for model training.
+The selected model is a research artifact only. It was **not deployed into Splunk**; live normalization, feature parity, and Splunk-side scoring equivalence are intentionally left as a future project rather than claimed here.
+
+Final closeout: [`../docs/project-closeout.md`](../docs/project-closeout.md).
